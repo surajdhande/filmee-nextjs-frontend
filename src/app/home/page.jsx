@@ -1,14 +1,18 @@
-import React from 'react'
-import Home from '../page'
-import HomeHeroSection from '@/components/homeherosection'
-
-const HomePage = () => {
+import Navbar from "@/components/Navbar.jsx";
+import Hero from "@/components/Hero.jsx";
+import ChoosePath from "@/components/ChoosePath.jsx";
+import TrendingProjects from "@/components/TrendingProjects";
+import CTASection from "@/components/CTASection.jsx";
+import Footer from "@/components/Footer.jsx";
+export default function HomePage() {
   return (
-    <div className='text-[30px] '>
-      This is navigated home page home page
-      <HomeHeroSection/>
-    </div>
-  )
+    <>
+      <Navbar />
+      <Hero />
+      <ChoosePath />
+      <TrendingProjects />
+      <CTASection />
+      <Footer />
+    </>
+  );
 }
-
-export default HomePage
