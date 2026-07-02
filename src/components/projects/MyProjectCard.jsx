@@ -1,25 +1,51 @@
 "use client";
 
-import { Eye, MessageSquare, SquarePen } from "lucide-react";
+import {
+  ImageOff,
+  MessageSquare,
+  SquarePen,
+} from "lucide-react";
 
 export default function MyProjectCard({ project }) {
   const progress =
     project.funding_target > 0
       ? (project.funding_raised / project.funding_target) * 100
       : 0;
-
+  const projectStatusMap = {
+    DEVELOPMENT: "Development",
+    PRE_PRODUCTION: "Pre-Production",
+    PRODUCTION: "Production",
+    POST_PRODUCTION: "Post-Production",
+    RELEASED: "Released",
+  };
   return (
     <div className="rounded-3xl border border-[#2A2A2A] bg-[#171717] p-5 transition hover:border-[#E50914]/40">
 
       <div className="flex gap-6">
 
         {/* Project Image */}
+        {project.image ? (
+          <img
+            src={project.image}
+            alt={project.title}
+            className="h-[120px] w-[235px] rounded-2xl object-cover"
+          />
+        ) : (
+          <div className="flex h-[120px] w-[235px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#5A5A5A] bg-gradient-to-br from-[#232323] to-[#171717]">
+            <ImageOff
+              size={36}
+              className="text-gray-500"
+            />
 
-        <img
-          src={project.image}
-          alt={project.title}
-          className="h-[120px] w-[235px] rounded-2xl object-cover"
-        />
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+              PROJECT POSTER
+            </p>
+
+            <p className="mt-1 text-xs text-gray-500">
+              Coming Soon
+            </p>
+          </div>
+        )}
 
         {/* Right Side */}
 
@@ -31,7 +57,7 @@ export default function MyProjectCard({ project }) {
 
             <div>
 
-              <h2 className="text-[22px] font-bold text-white"s>
+              <h2 className="text-[22px] font-bold text-white">
                 {project.title}
               </h2>
 
@@ -42,7 +68,7 @@ export default function MyProjectCard({ project }) {
             </div>
 
             <span className="rounded-full bg-[#E50914] px-4 py-1 text-sm font-semibold text-white">
-              {project.project_status}
+              {projectStatusMap[project.project_status] || project.project_status}
             </span>
 
           </div>
@@ -57,7 +83,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-lg font-bold text-white">
-                ${project.funding_target.toLocaleString()}
+                ${Number(project.funding_target).toLocaleString()}
               </p>
             </div>
 
@@ -67,7 +93,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                ${project.funding_raised.toLocaleString()}
+                ${Number(project.funding_raised).toLocaleString()}
               </p>
             </div>
 
@@ -77,7 +103,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                {project.investors}
+                {project.investors ?? 0}
               </p>
             </div>
 
@@ -87,7 +113,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                {project.applications}
+                {project.applications ?? 0}
               </p>
             </div>
 

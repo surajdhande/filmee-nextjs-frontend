@@ -2,7 +2,7 @@
 
 import FormInput from "@/components/ui/FormInput";
 import DynamicListInput from "@/components/ui/DynamicListInput";
-
+import DatePicker from "@/components/ui/DatePicker";
 export default function StepTwo({
   projectData,
   setProjectData,
@@ -44,15 +44,17 @@ export default function StepTwo({
     return timeline.trim();
   };
 
-  const handleTimelineChange = (e) => {
-    const date = e.target.value;
+  const handleTimelineChange = (selectedDate) => {
+  if (!selectedDate) return;
 
-    setProjectData({
-      ...projectData,
-      production_completion_date: date,
-      production_timeline: calculateTimeline(date),
-    });
-  };
+  const formattedDate = selectedDate.toISOString().split("T")[0];
+
+  setProjectData({
+    ...projectData,
+    production_completion_date: formattedDate,
+    production_timeline: calculateTimeline(formattedDate),
+  });
+};
 
   return (
     <div className="rounded-2xl border border-[#303030] bg-[#151515] p-6">
@@ -76,17 +78,18 @@ export default function StepTwo({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
           <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-white">
-            Production Timeline
-            <span className="ml-1 text-[#E50914]">*</span>
-        </label>
 
-        <input
-            type="date"
-            value={projectData.production_completion_date || ""}
-            onChange={handleTimelineChange}
-            className="h-12 rounded-lg border border-[#303030] bg-[#1A1A1D] px-4 text-[15px] text-white outline-none focus:border-[#E50914]"
-        />
+
+        <DatePicker
+        label="Production Timeline"
+        required
+        value={
+          projectData.production_completion_date
+            ? new Date(projectData.production_completion_date)
+            : undefined
+        }
+        onChange={handleTimelineChange}
+      />
 
         {projectData.production_timeline && (
             <p className="text-sm text-[#B0B0B0]">
