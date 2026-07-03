@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import {
   ImageOff,
   MessageSquare,
@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 export default function MyProjectCard({ project }) {
+  const router = useRouter();
   const progress =
     project.funding_target > 0
       ? (project.funding_raised / project.funding_target) * 100
@@ -136,9 +137,16 @@ export default function MyProjectCard({ project }) {
 
           <div className="mt-6 flex gap-4">
 
-            <button className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110">
-              View Details
-            </button>
+            <button
+            onClick={() =>
+              router.push(
+                `/dashboard/filmmaker/projects/${project.project_id}`
+              )
+            }
+            className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110"
+          >
+            View Details
+          </button>
 
             <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
 

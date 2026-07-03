@@ -86,9 +86,15 @@ const DashboardHeader = ({
 
           </button>
 
-          <button className="text-sm font-semibold text-white transition hover:opacity-70">
-            LOGOUT
-          </button>
+          <button
+          onClick={() => {
+            localStorage.clear();
+            router.replace("/login");
+          }}
+          className="text-sm font-semibold text-white transition hover:text-red-500"
+        >
+          LOGOUT
+        </button>
 
           <div className="flex items-center gap-1 rounded-full bg-[#18C964] px-3 py-1.5">
 

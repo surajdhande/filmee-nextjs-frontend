@@ -35,3 +35,18 @@ export const getMyProjects = async () => {
 
   return response.data.projects;
 };
+
+export const getProjectById = async (projectId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.get(
+    `${API_BASE_URL}${projectId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data.project;
+};
