@@ -35,18 +35,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout>
-  <DashboardHeader username={user?.full_name || user?.name || "John Director"} />
+    <DashboardLayout
+      header={
+        <DashboardHeader username={user?.full_name || user?.name || "John Director"} />
+      }
+    >
+      <div className="p-8">
+        <StatsCardsSection />
 
-  <div className="p-8">
-    <StatsCardsSection />
+        <SubscriptionCard />
 
-    <SubscriptionCard />
-
-    <ChartsSection />
-    <ProjectsSection />
-    <RecentActivity />
-  </div>
-</DashboardLayout>
+        <ChartsSection />
+        <ProjectsSection />
+        <RecentActivity />
+      </div>
+    </DashboardLayout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo,useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,7 +12,8 @@ import {
   Lock,
   Clapperboard,
 } from "lucide-react";
-const SignupPage = () => {
+
+const SignupPageInner = () => {
 const router = useRouter();
 const searchParams = useSearchParams();
 const selectedRole = useMemo(
@@ -234,6 +235,12 @@ return ( <div
 </div>
 
 );
-}
+};
 
-export default SignupPage;
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black text-white">Loading...</div>}>
+      <SignupPageInner />
+    </Suspense>
+  );
+}

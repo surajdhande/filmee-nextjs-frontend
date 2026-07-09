@@ -54,7 +54,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/investors"
             className="transition duration-300 hover:text-red-500"
           >
             Investors

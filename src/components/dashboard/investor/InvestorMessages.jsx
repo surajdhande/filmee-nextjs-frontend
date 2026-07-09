@@ -1,0 +1,396 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Search,
+  MessageSquare,
+  Video,
+  Send,
+  Shield,
+  Filter,
+} from "lucide-react";
+import Image from "next/image";
+
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+
+const MOCK_CONVERSATIONS = [
+  {
+    id: 1,
+    name: "Mervin Filmmaker",
+    project: "Echoes of Tomorrow",
+    avatar: "M",
+    avatarColor: "#E50914",
+    unread: 2,
+    lastMessage: "Absolutely! I'm thrilled you're interested. Let me...",
+    time: "22h ago",
+    role: "Filmmaker",
+    isActive: true,
+    messages: [
+      {
+        id: 1,
+        sender: "me",
+        text: "Hello! I'm excited about this project. Can we discuss the investment details?",
+        time: "02:31 PM",
+      },
+      {
+        id: 2,
+        sender: "them",
+        text: "Absolutely! I'm thrilled you're interested. Let me know what specific aspects you'd like to know more about.",
+        time: "03:34 PM",
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: "Sofia Chen",
+    project: "Neon Nights",
+    avatar: "S",
+    avatarColor: "#7C3AED",
+    unread: 0,
+    lastMessage: "The budget breakdown looks great. Thanks!",
+    time: "2d ago",
+    role: "Filmmaker",
+    isActive: false,
+    messages: [
+      {
+        id: 1,
+        sender: "them",
+        text: "Hi! I saw you viewed our Neon Nights project page. Any questions?",
+        time: "10:00 AM",
+      },
+      {
+        id: 2,
+        sender: "me",
+        text: "Yes, can you share more about the budget allocation?",
+        time: "10:15 AM",
+      },
+      {
+        id: 3,
+        sender: "them",
+        text: "The budget breakdown looks great. Thanks!",
+        time: "10:45 AM",
+      },
+    ],
+  },
+];
+
+// ─── Filter Tabs ──────────────────────────────────────────────────────────────
+
+const FILTERS = ["ALL", "ACTIVE", "VIDEO"];
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function InvestorMessages() {
+  const router = useRouter();
+  const [conversations] = useState(MOCK_CONVERSATIONS);
+  const [activeFilter, setActiveFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedConv, setSelectedConv] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const bottomRef = useRef(null);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSelectConversation = (conv) => {
+    setSelectedConv(conv);
+    setMessages(conv.messages);
+  };
+
+  const handleSend = () => {
+    const text = newMessage.trim();
+    if (!text || !selectedConv) return;
+
+    const msg = {
+      id: messages.length + 1,
+      sender: "me",
+      text,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setMessages((prev) => [...prev, msg]);
+    setNewMessage("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const filteredConversations = conversations.filter((c) => {
+    const matchesSearch =
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.project.toLowerCase().includes(searchQuery.toLowerCase());
+    if (activeFilter === "ACTIVE") return matchesSearch && c.isActive;
+    if (activeFilter === "VIDEO") return matchesSearch; // extend later
+    return matchesSearch;
+  });
+
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+
+  return (
+    <div className="flex flex-col h-screen bg-[#0B0B0B] text-white overflow-hidden">
+      {/* Top nav bar */}
+      <header className="shrink-0 w-full border-b border-[#262626] bg-[#0E0E0E]">
+        <div className="flex items-center gap-3 px-6 py-4">
+          <button
+            onClick={() => router.push("/dashboard/investor")}
+            className="text-zinc-400 hover:text-white transition"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <Image
+            src="/logo.png"
+            alt="Filmee Logo"
+            width={30}
+            height={30}
+            className="rounded-lg object-contain"
+          />
+          <div>
+            <h1 className="text-[16px] font-bold leading-none text-white tracking-tight">
+              Messages
+            </h1>
+            <p className="mt-1 text-[11px] text-zinc-500">Secure communication platform</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Two-panel body */}
+      <div className="flex flex-1 overflow-hidden bg-[#0B0B0B]">
+        {/* ── LEFT PANEL: Conversation List ─────────────────────────────── */}
+        <div className="w-[380px] shrink-0 flex flex-col border-r border-[#222] bg-[#111]">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-6 pb-3">
+            <div>
+              <h2 className="text-[17px] font-bold text-white">Messages</h2>
+              <p className="text-[11px] text-zinc-500">
+                {filteredConversations.length} chat{filteredConversations.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+            {totalUnread > 0 && (
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
+                {totalUnread}
+              </span>
+            )}
+          </div>
+
+          {/* Search */}
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2">
+              <Search size={14} className="text-zinc-500 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-[13px] text-white placeholder-zinc-500 outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex items-center gap-2 px-4 pb-4">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-bold tracking-wider transition-all duration-200 ${
+                  activeFilter === f
+                    ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.4)]"
+                    : "border border-[#2A2A2A] text-zinc-400 hover:border-zinc-600 hover:text-white"
+                }`}
+              >
+                {f === "VIDEO" && <Video size={11} />}
+                {f === "ACTIVE" && (
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
+                  </span>
+                )}
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* Conversation List */}
+          <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-4">
+            {filteredConversations.length === 0 ? (
+              <p className="text-center text-zinc-600 text-sm mt-10">No conversations found.</p>
+            ) : (
+              filteredConversations.map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => handleSelectConversation(conv)}
+                  className={`w-full text-left flex items-start gap-3 rounded-xl p-3 transition-all duration-200 ${
+                    selectedConv?.id === conv.id
+                      ? "bg-[#1E1E1E] border border-[#2A2A2A]"
+                      : "hover:bg-[#1A1A1A]"
+                  }`}
+                >
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    <div
+                      className="h-10 w-10 rounded-full flex items-center justify-center text-[15px] font-bold text-white"
+                      style={{ backgroundColor: conv.avatarColor }}
+                    >
+                      {conv.avatar}
+                    </div>
+                    {conv.unread > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#E50914] text-[9px] font-bold text-white">
+                        {conv.unread}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-bold text-white truncate">
+                        {conv.name}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 shrink-0 ml-2">
+                        {conv.time}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{conv.project}</p>
+                    <p className="text-[12px] text-zinc-400 mt-1 truncate">{conv.lastMessage}</p>
+                    <span className="mt-1.5 inline-block rounded-sm border border-[#E50914]/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#E50914]">
+                      {conv.role}
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── RIGHT PANEL: Chat or Welcome ──────────────────────────────── */}
+        <div className="flex flex-1 flex-col">
+          {selectedConv ? (
+            <>
+              {/* Chat Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#222] bg-[#111]">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="h-9 w-9 rounded-full flex items-center justify-center text-[14px] font-bold text-white"
+                    style={{ backgroundColor: selectedConv.avatarColor }}
+                  >
+                    {selectedConv.avatar}
+                  </div>
+                  <div>
+                    <h3 className="text-[14px] font-bold text-white">{selectedConv.name}</h3>
+                    <p className="text-[11px] text-zinc-500">{selectedConv.project}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-[12px] font-bold text-zinc-300 hover:border-[#E50914]/50 hover:text-white transition">
+                    <Video size={13} className="text-[#E50914]" />
+                    VIDEO CALL
+                  </button>
+                  <span className="rounded-sm border border-[#E50914]/30 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#E50914]">
+                    Investor
+                  </span>
+                </div>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 bg-[#0B0B0B]">
+                {/* System message */}
+                <p className="text-center text-[12px] text-zinc-500">
+                  Chat room created. You can now communicate about the investment opportunity.
+                </p>
+
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className="max-w-[65%] space-y-1">
+                      <div
+                        className={`rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
+                          msg.sender === "me"
+                            ? "bg-[#E50914] text-white rounded-br-sm"
+                            : "bg-[#1E1E1E] text-zinc-200 border border-[#2A2A2A] rounded-bl-sm"
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                      <p
+                        className={`text-[10px] text-zinc-500 ${
+                          msg.sender === "me" ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {msg.time}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="px-6 py-4 border-t border-[#222] bg-[#111]">
+                <div className="flex items-center gap-3 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] px-4 py-3">
+                  <input
+                    type="text"
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-500 outline-none"
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!newMessage.trim()}
+                    className="h-9 w-9 flex items-center justify-center rounded-full bg-[#E50914] text-white disabled:opacity-40 hover:brightness-110 transition"
+                  >
+                    <Send size={15} />
+                  </button>
+                </div>
+                <p className="mt-2 text-[11px] text-zinc-600 text-center">
+                  Messages are automatically filtered to remove personal contact information.
+                </p>
+              </div>
+            </>
+          ) : (
+            /* Welcome / Empty State */
+            <div className="flex flex-1 items-center justify-center bg-[#0B0B0B]">
+              <div className="text-center rounded-2xl border border-[#2A2A2A] bg-[#111] px-10 py-10 max-w-sm w-full">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E50914]/10">
+                  <MessageSquare size={22} className="text-[#E50914]" />
+                </div>
+                <h3 className="text-[16px] font-bold text-white mb-2">
+                  Welcome to Secure Messaging
+                </h3>
+                <p className="text-[13px] text-zinc-500 mb-6 leading-relaxed">
+                  Select a conversation to start chatting. All messages are filtered for security
+                  and personal contact information is automatically removed.
+                </p>
+                <div className="space-y-2 text-[12px] text-zinc-500">
+                  <p className="flex items-center justify-center gap-2">
+                    <Shield size={12} className="text-[#E50914]" />
+                    End-to-end security
+                  </p>
+                  <p className="flex items-center justify-center gap-2">
+                    <Filter size={12} className="text-[#E50914]" />
+                    Content filtering
+                  </p>
+                  <p className="flex items-center justify-center gap-2">
+                    <Video size={12} className="text-[#E50914]" />
+                    Video call support
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -19,6 +18,9 @@ import {
   Folder,
   Settings,
   FileText,
+  Search,
+  ArrowLeftRight,
+  DollarSign,
 } from "lucide-react";
 
 const MENU_CONFIG = {
@@ -65,11 +67,13 @@ const MENU_CONFIG = {
   },
 ],
   INVESTOR: [
-    { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard/investor" },
-    { name: "Investments", icon: Briefcase, href: "/dashboard/investor/investments" },
-    { name: "Saved Projects", icon: Bookmark, href: "/dashboard/investor/saved" },
+    { name: "Overview", icon: BarChart3, href: "/dashboard/investor" },
+    { name: "Browse Projects", icon: Search, href: "/dashboard/investor/browse" },
+    { name: "My Offers", icon: ArrowLeftRight, href: "/dashboard/investor/offers", badgeCount: 1 },
+    { name: "My Portfolio", icon: DollarSign, href: "/dashboard/investor/portfolio" },
     { name: "Messages", icon: MessageSquare, href: "/dashboard/investor/messages" },
-    { name: "Settings", icon: Settings, href: "/dashboard/investor/settings" },
+    { name: "Analytics", icon: Film, href: "/dashboard/investor/analytics" },
+    { name: "Subscription", icon: Crown, href: "/dashboard/investor/subscription" },
   ],
   TALENT: [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard/talent" },
@@ -86,59 +90,50 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
   const menuItems = MENU_CONFIG[role] || [];
 
   return (
-    <div className="flex h-full flex-col bg-[#171717]">
-    {/* Logo & Welcome */}
-    <div className="px-7 pt-6">
-      <Link href="/" className="inline-block">
-        <Image
-        src="/logo.png"
-        alt="Filmee Logo"
-        width={118}
-        height={30}
-            priority
-            className="object-contain"
-        />
-        </Link>
+    <div className="flex h-full flex-col bg-[#171717] pt-6 px-2">
+      {/* Menu — all items grouped in a single card */}
+      <nav className="flex-1">
+        <div className="rounded-xl bg-[#1E1E1E] border border-[#2a2a2a] p-2 space-y-0.75">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
 
-
-    </div>
-
-    {/* Menu */}
-    <nav className="mt-10 flex-1 px-5">
-      <div className="space-y-1">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href;
-
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`group flex h-12 items-center gap-2.5 rounded-xl px-4 transition-all duration-300 ${
-                isActive
-                  ? "bg-[#F20D16] text-white shadow-[0_0_25px_rgba(242,13,22,0.45)]"
-                  : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
-              }`}
-            >
-              <item.icon
-                size={20}
-                strokeWidth={2}
-                className={`${
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`group flex h-7 items-center justify-between rounded-lg px-3 transition-all duration-200   ${
                   isActive
-                    ? "text-white"
-                    : "text-zinc-400 group-hover:text-white"
+                    ? " text-white bg-zinc-900 rounded-full px-1"
+                    : " "
                 }`}
-              />
+              >
+                <div className="flex items-center gap-2">
+                  <item.icon
+                    size={15}
+                    strokeWidth={2}
+                    className={`shrink-0 ${
+                      isActive
+                        ? "text-white"
+                        : "text-zinc-500 "
+                    }`}
+                  />
+                  <span className="text-[12px] font-bold whitespace-nowrap">
+                    {item.name}
+                  </span>
+                </div>
 
-              <span className="text-[15px] font-semibold whitespace-nowrap">
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
-  </div>
-);
+                {item.badgeCount !== undefined && (
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#E50914] text-[10px] font-bold text-white">
+                    {item.badgeCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
 };
 
 export default Sidebar;

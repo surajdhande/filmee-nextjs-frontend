@@ -63,15 +63,16 @@ export default function ProjectsPage() {
   ];
 
   return (
-    <DashboardLayout>
-
-    <DashboardHeader
-        username={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || "User"}
-        showOverviewTitle={false}
-        showAnalyticsButton={false}
-        showCreateButton={false}
-    />
-
+    <DashboardLayout
+      header={
+        <DashboardHeader
+          username={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || "User"}
+          showOverviewTitle={false}
+          showAnalyticsButton={false}
+          showCreateButton={false}
+        />
+      }
+    >
     <div className="mx-auto max-w-[1120px] px-8 py-6">
 
         <div className="mb-8 flex items-center justify-between">

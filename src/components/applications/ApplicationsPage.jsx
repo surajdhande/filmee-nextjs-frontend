@@ -38,14 +38,16 @@ export default function ApplicationsPage() {
   const applications = [];
 
   return (
-    <DashboardLayout>
-      <DashboardHeader
-        username={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim()}
-        showOverviewTitle={false}
-        showAnalyticsButton={false}
-        showCreateButton={false}
-      />
-
+    <DashboardLayout
+      header={
+        <DashboardHeader
+          username={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim()}
+          showOverviewTitle={false}
+          showAnalyticsButton={false}
+          showCreateButton={false}
+        />
+      }
+    >
       <div className="mx-auto max-w-[1080px] px-8 py-6">
 
         <div className="mb-8 flex items-start justify-between">
