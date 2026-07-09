@@ -58,9 +58,15 @@ const DashboardHeader = ({
             </span>
           </button>
 
-          <button className="text-xs font-semibold text-white transition hover:opacity-70 uppercase px-2">
-            LOGOUT
-          </button>
+          <button
+          onClick={() => {
+            localStorage.clear();
+            router.replace("/login");
+          }}
+          className="text-sm font-semibold text-white transition hover:text-red-500"
+        >
+          LOGOUT
+        </button>
 
           <div className="flex items-center gap-1 rounded-full bg-[#18C964] px-2.5 py-1">
             <Radio size={10} className="text-white" />

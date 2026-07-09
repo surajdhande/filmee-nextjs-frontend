@@ -1,25 +1,52 @@
 "use client";
-
-import { Eye, MessageSquare, SquarePen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  ImageOff,
+  MessageSquare,
+  SquarePen,
+} from "lucide-react";
 
 export default function MyProjectCard({ project }) {
+  const router = useRouter();
   const progress =
     project.funding_target > 0
       ? (project.funding_raised / project.funding_target) * 100
       : 0;
-
+  const projectStatusMap = {
+    DEVELOPMENT: "Development",
+    PRE_PRODUCTION: "Pre-Production",
+    PRODUCTION: "Production",
+    POST_PRODUCTION: "Post-Production",
+    RELEASED: "Released",
+  };
   return (
     <div className="rounded-3xl border border-[#2A2A2A] bg-[#171717] p-5 transition hover:border-[#E50914]/40">
 
       <div className="flex gap-6">
 
         {/* Project Image */}
+        {project.image ? (
+          <img
+            src={project.image}
+            alt={project.title}
+            className="h-[120px] w-[235px] rounded-2xl object-cover"
+          />
+        ) : (
+          <div className="flex h-[120px] w-[235px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#5A5A5A] bg-gradient-to-br from-[#232323] to-[#171717]">
+            <ImageOff
+              size={36}
+              className="text-gray-500"
+            />
 
-        <img
-          src={project.image}
-          alt={project.title}
-          className="h-[120px] w-[235px] rounded-2xl object-cover"
-        />
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+              PROJECT POSTER
+            </p>
+
+            <p className="mt-1 text-xs text-gray-500">
+              Coming Soon
+            </p>
+          </div>
+        )}
 
         {/* Right Side */}
 
@@ -31,7 +58,7 @@ export default function MyProjectCard({ project }) {
 
             <div>
 
-              <h2 className="text-[22px] font-bold text-white"s>
+              <h2 className="text-[22px] font-bold text-white">
                 {project.title}
               </h2>
 
@@ -42,7 +69,7 @@ export default function MyProjectCard({ project }) {
             </div>
 
             <span className="rounded-full bg-[#E50914] px-4 py-1 text-sm font-semibold text-white">
-              {project.project_status}
+              {projectStatusMap[project.project_status] || project.project_status}
             </span>
 
           </div>
@@ -57,7 +84,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-lg font-bold text-white">
-                ${project.funding_target.toLocaleString()}
+                ${Number(project.funding_target).toLocaleString()}
               </p>
             </div>
 
@@ -67,7 +94,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                ${project.funding_raised.toLocaleString()}
+                ${Number(project.funding_raised).toLocaleString()}
               </p>
             </div>
 
@@ -77,7 +104,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                {project.investors}
+                {project.investors ?? 0}
               </p>
             </div>
 
@@ -87,7 +114,7 @@ export default function MyProjectCard({ project }) {
               </p>
 
               <p className="text-xl font-bold text-white">
-                {project.applications}
+                {project.applications ?? 0}
               </p>
             </div>
 
@@ -110,9 +137,16 @@ export default function MyProjectCard({ project }) {
 
           <div className="mt-6 flex gap-4">
 
-            <button className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110">
-              View Details
-            </button>
+            <button
+            onClick={() =>
+              router.push(
+                `/dashboard/filmmaker/projects/${project.project_id}`
+              )
+            }
+            className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110"
+          >
+            View Details
+          </button>
 
             <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
 

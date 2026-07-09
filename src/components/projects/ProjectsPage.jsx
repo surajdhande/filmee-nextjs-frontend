@@ -6,23 +6,39 @@ import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ProjectsGrid from "./ProjectsGrid";
+import { getMyProjects } from "@/services/projectService";
 
 export default function ProjectsPage() {
   const router = useRouter();
 
     const [user, setUser] = useState(null);
+    const [projects, setProjects] = useState([]);
+
 
     useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+  const loadProjects = async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
-    if (!storedUser || !token) {
+      if (!storedUser || !token) {
         router.push("/login");
         return;
-    }
+      }
 
-    setUser(JSON.parse(storedUser));
-    }, [router]);
+      setUser(JSON.parse(storedUser));
+
+      const data = await getMyProjects();
+
+      setProjects(data);
+
+    } catch (error) {
+      console.error("Error loading projects:", error);
+    }
+  };
+
+  loadProjects();
+}, [router]);
 
     if (!user) {
     return (
@@ -32,35 +48,6 @@ export default function ProjectsPage() {
     );
     }
 
-  // Dummy data for now
-  const projects = [
-    {
-      project_id: 1,
-      image:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
-      project_status: "Funding",
-      title: "The Last Frame",
-      genre: "Thriller",
-      funding_raised: 150000,
-      funding_target: 250000,
-      investors: 12,
-      applications: 45,
-      views: 1250,
-    },
-    {
-      project_id: 2,
-      image:
-        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
-      project_status: "Pre-Production",
-      title: "Urban Shadows",
-      genre: "Drama",
-      funding_raised: 180000,
-      funding_target: 180000,
-      investors: 8,
-      applications: 32,
-      views: 890,
-    },
-  ];
 
   return (
     <DashboardLayout
