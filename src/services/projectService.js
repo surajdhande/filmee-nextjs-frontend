@@ -50,3 +50,23 @@ export const getProjectById = async (projectId) => {
 
   return response.data.project;
 };
+
+/**
+ * Fetch full project detail for an investor (no filmmaker restriction).
+ * Uses the new /api/v1/projects/<id>/detail endpoint.
+ * @param {number|string} projectId
+ */
+export const getProjectDetail = async (projectId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.get(
+    `${API_BASE_URL}${projectId}/detail`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data.project;
+};
