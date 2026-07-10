@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getProjectDetail } from "@/services/projectService";
+import { createInvestment } from "@/services/investorService";
 import {
   ArrowLeft,
   Share2,
@@ -24,74 +26,91 @@ import {
 import Image from "next/image";
 
 // ─────────────────────────────────────────────
-// MOCK DATA — replace with your API call result
+// Helper: map raw API project → UI film shape
 // ─────────────────────────────────────────────
-const MOCK_FILM = {
-  id: 1,
-  title: "The Last Frame",
-  tagline: "A photographer uncovers a dangerous conspiracy hidden in old film footage.",
-  genre: "Thriller",
-  location: "Los Angeles, CA",
-  timeline: "8 months",
-  stage: "Funding",
-  rating: 4.6,
-  status: "Funding",
+function mapProjectToFilm(p) {
+  const target = parseFloat(p.funding_target) || 0;
+  const raised = parseFloat(p.funding_raised) || 0;
+  const progress = target > 0 ? Math.round((raised / target) * 100) : 0;
+  const remaining = target - raised;
 
-  images: [
-    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=80",
-  ],
+  const directorName =
+    [p.filmmaker_first_name, p.filmmaker_last_name].filter(Boolean).join(" ") || "—";
 
-  fundingProgress: 60,
-  raised: 150000,
-  goal: 250000,
-  investors: 12,
-  views: 1251,
-  targetRoi: "25%",
-  remaining: 100000,
+  const heroImage =
+    p.lookbook_url ||
+    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80";
 
-  synopsis:
-    "A gripping thriller about a photographer who discovers a dark secret hidden in the frames of an old film. As he delves deeper, he realizes the images hold the key to a decades-old mystery that powerful forces want to keep buried.",
-  projectDetails: {
-    genre: "Thriller",
-    location: "Los Angeles, CA",
-    timeline: "8 months",
-    stage: "Funding",
-  },
-  documents: [
-    { label: "Pitch Deck", type: "download" },
-    { label: "Trailer Preview", type: "play" },
-    { label: "Business Plan", type: "download" },
-  ],
+  // Build documents list from known URL fields
+  const documents = [];
+  if (p.pitch_deck_url) documents.push({ label: "Pitch Deck", type: "download", url: p.pitch_deck_url });
+  if (p.lookbook_url) documents.push({ label: "Lookbook", type: "download", url: p.lookbook_url });
+  if (documents.length === 0) documents.push({ label: "No documents uploaded", type: "download" });
 
-  financials: {
-    totalBudget: "$250,000",
-    productionCost: "$140,000",
-    marketingBudget: "$45,000",
-    contingency: "$25,000",
-    postProduction: "$40,000",
-    revenueProjection: "$1,200,000",
-    breakEven: "$380,000",
-    projectedRoi: "25–40%",
-    distributionRevenue: "$750,000",
-    streamingDeals: "$300,000",
-    internationalSales: "$150,000",
-  },
+  return {
+    id: p.project_id,
+    title: p.title,
+    tagline: p.logline || "",
+    genre: p.genre || "—",
+    location: p.primary_location || "—",
+    timeline: p.production_timeline || "—",
+    stage: p.project_status?.replace(/_/g, " ") ?? "—",
+    status: p.project_status?.replace(/_/g, " ") ?? "—",
+    rating: null,
 
-  team: [
-    { name: "Marcus Cole", role: "Director", bio: "Award-winning director known for gripping narratives.", avatar: "https://i.pravatar.cc/80?img=11" },
-    { name: "Priya Sharma", role: "Producer", bio: "15+ years in independent film production.", avatar: "https://i.pravatar.cc/80?img=47" },
-    { name: "Leo Hartmann", role: "Lead Actor", bio: "Acclaimed performer with 3 major festival awards.", avatar: "https://i.pravatar.cc/80?img=61" },
-    { name: "Sofia Vega", role: "Cinematographer", bio: "Known for stunning visual storytelling.", avatar: "https://i.pravatar.cc/80?img=44" },
-  ],
+    images: [heroImage],
 
-  media: [
-    { type: "image", src: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80", caption: "Behind the Scenes" },
-    { type: "image", src: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=600&q=80", caption: "Set Photography" },
-    { type: "image", src: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80", caption: "Production Still" },
-    { type: "image", src: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80", caption: "Location Scouting" },
-  ],
-};
+    fundingProgress: progress,
+    raised,
+    goal: target,
+    investors: p.investor_count ?? 0,
+    views: 0,
+    targetRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
+    remaining,
+
+    synopsis: p.synopsis || "No synopsis provided.",
+    projectDetails: {
+      genre: p.genre || "—",
+      location: p.primary_location || "—",
+      timeline: p.production_timeline || "—",
+      stage: p.project_status?.replace(/_/g, " ") ?? "—",
+    },
+    documents,
+
+    financials: {
+      totalBudget: fmt(target),
+      productionCost: "—",
+      marketingBudget: "—",
+      contingency: "—",
+      postProduction: "—",
+      revenueProjection: "—",
+      breakEven: "—",
+      projectedRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
+      distributionRevenue: "—",
+      streamingDeals: "—",
+      internationalSales: "—",
+      _fundingBreakdown: p.funding_goals_breakdown || null,
+      _distributionStrategy: p.distribution_strategy || null,
+    },
+
+    team: [
+      {
+        name: directorName,
+        role: "Filmmaker",
+        bio: p.filmmaker_email || "",
+        avatar: `https://i.pravatar.cc/80?u=${p.filmmaker_id}`,
+      },
+    ],
+
+    media: [
+      {
+        type: "image",
+        src: heroImage,
+        caption: p.title,
+      },
+    ],
+  };
+}
 
 function fmt(n) {
   return `$${Number(n).toLocaleString()}`;
@@ -258,10 +277,24 @@ function ApplyToInvestModal({ film, onClose }) {
   const maxAmount = film.remaining;
   const charLimit = 500;
 
-  function handleSubmit(e) {
+  const [investing, setInvesting] = useState(false);
+  const [investError, setInvestError] = useState("");
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    // TODO: POST to /api/investments with { filmId: film.id, amount, message }
-    setSubmitted(true);
+    setInvesting(true);
+    setInvestError("");
+    try {
+      await createInvestment(film.id, parseFloat(amount));
+      setSubmitted(true);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        "Failed to submit investment. Please try again.";
+      setInvestError(msg);
+    } finally {
+      setInvesting(false);
+    }
   }
 
   // Trap click on backdrop
@@ -399,6 +432,11 @@ function ApplyToInvestModal({ film, onClose }) {
                 </div>
               </div>
 
+              {/* Invest error */}
+              {investError && (
+                <p className="text-red-400 text-xs text-center -mt-2">{investError}</p>
+              )}
+
               {/* Actions */}
               <div className="flex gap-3 pt-1">
                 <button
@@ -410,9 +448,10 @@ function ApplyToInvestModal({ film, onClose }) {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200"
+                  disabled={investing}
+                  className="flex-1 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Submit Application
+                  {investing ? "Submitting…" : "Submit Application"}
                 </button>
               </div>
             </form>
@@ -510,17 +549,17 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
     setUser(storedUser ? JSON.parse(storedUser) : { full_name: "Investor" });
   }, []);
 
-  // ── Data Fetch — replace mock with real API call ──
+  // ── Data Fetch — real API call ──
   useEffect(() => {
     if (initialFilm) return;
     async function loadFilm() {
       setLoading(true);
       try {
-        // ── REPLACE with: const res = await fetch(`http://127.0.0.1:5000/films/${filmId}`); ──
-        await new Promise((r) => setTimeout(r, 400));
-        setFilm(MOCK_FILM);
+        const raw = await getProjectDetail(filmId);
+        setFilm(mapProjectToFilm(raw));
       } catch (err) {
         console.error("Failed to load film:", err);
+        setFilm(null);
       } finally {
         setLoading(false);
       }
@@ -663,10 +702,12 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
                     <span className="bg-[#E50914] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                       {film.status}
                     </span>
+                    {film.rating && (
                     <div className="flex items-center gap-1 text-white-400 text-sm font-bold">
                       <Star size={14} fill="yellow" border="yellow" />
                       {film.rating}
                     </div>
+                    )}
                   </div>
                 </div>
                 <p className="text-zinc-400 text-[15px] mb-3">{film.tagline}</p>

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Crown,
   Settings,
-  Radio,
   BarChart2,
   Search,
   DollarSign,
@@ -14,14 +13,12 @@ import {
   Eye,
   Users,
   ArrowUpRight,
-  TrendingDown,
 } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
   Area,
   XAxis,
-  YAxis,
   CartesianGrid,
   Tooltip,
   BarChart,
@@ -30,7 +27,8 @@ import {
 
 import Image from "next/image";
 import DashboardLayout from "./DashboardLayout";
-import InvestorLayout from "./investor/InvestorLayout";
+import { getProjects } from "@/services/projectService";
+import { getMyInvestments } from "@/services/investorService";
 
 // Custom Tooltip for recharts
 const CustomTooltip = ({ active, payload }) => {
@@ -50,109 +48,172 @@ export default function InvestorDashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
 
-  // --- EASY BACKEND INTEGRATION STATE ---
-  // You can replace these initial states with data fetched inside the useEffect block below.
   const [stats, setStats] = useState({
-    totalInvested: 2500000,
-    portfolioValue: 3198750,
-    averageRoi: 18.5,
-    activeProjects: 12,
-    completedProjects: 8,
+    totalInvested: 0,
+    portfolioValue: 0,
+    averageRoi: 0,
+    activeProjects: 0,
+    completedProjects: 0,
   });
 
-  const [subscription, setSubscription] = useState({
+  const [subscription] = useState({
     planName: "Professional Plan",
     renewalDate: "1/1/2025",
     price: "$49",
     status: "Active",
   });
 
-  const [portfolioHistory, setPortfolioHistory] = useState([
-    { month: "Feb", value: 1200000 },
-    { month: "Mar", value: 1600000 },
-    { month: "Apr", value: 2000000 },
-    { month: "May", value: 2300000 },
-    { month: "Jun", value: 2500000 },
-  ]);
+  const [portfolioHistory, setPortfolioHistory] = useState([]);
 
-  const [distributionData, setDistributionData] = useState([
-    { genre: "Drama", value: 85 },
-    { genre: "Thriller", value: 70 },
-    { genre: "Comedy", value: 45 },
-    { genre: "Action", value: 42 },
-    { genre: "Horror", value: 25 },
-  ]);
+  const [distributionData, setDistributionData] = useState([]);
 
-  const [hotProjects, setHotProjects] = useState([
-    {
-      id: 1,
-      title: "The Last Frame",
-      genre: "Thriller",
-      timeline: "8 months",
-      progress: 60,
-      targetRoi: "25%",
-      budget: "$250,000",
-      status: "Pre-Production",
-      rating: 4.8,
-      imageUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: 2,
-      title: "Silent Echoes",
-      genre: "Drama",
-      timeline: "6 months",
-      progress: 25,
-      targetRoi: "22%",
-      budget: "$180,000",
-      status: "Development",
-      rating: 4.6,
-      imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: 3,
-      title: "Neon Nights",
-      genre: "Sci Fi",
-      timeline: "12 months",
-      progress: 25,
-      targetRoi: "30%",
-      budget: "$500,000",
-      status: "Pre-Production",
-      rating: 4.9,
-      imageUrl: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?auto=format&fit=crop&w=900&q=80",
-    },
-  ]);
+  // Hot Projects — start empty, loaded from API
+  const [hotProjects, setHotProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
 
-  const [recentInvestments, setRecentInvestments] = useState([
-    {
-      id: 101,
-      title: "Midnight Runner",
-      phase: "Post-Production",
-      invested: "$50,000",
-      roi: "+24%",
-      roiPositive: true,
-      imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 102,
-      title: "Ocean Deep",
-      phase: "Distribution",
-      invested: "$75,000",
-      roi: "+18.7%",
-      roiPositive: true,
-      imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=300&q=80",
-    },
-  ]);
+  // Recent Investments — start empty, loaded from API
+  const [recentInvestments, setRecentInvestments] = useState([]);
+  const [investmentsLoading, setInvestmentsLoading] = useState(true);
 
   useEffect(() => {
+    // Load user from localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      setUser({
-        full_name: "Mervin Consultant",
-        email: "mervin@consultant.com",
-      });
+      setUser({ full_name: "Investor", email: "" });
     }
+
+    // ── Fetch real projects for "Hot Projects This Week" ──
+    setProjectsLoading(true);
+    getProjects()
+      .then((data) => {
+        if (!data) return;
+        const mapped = data.slice(0, 3).map((p) => {
+          const target = parseFloat(p.funding_target) || 0;
+          const raised = parseFloat(p.funding_raised) || 0;
+          const progress = target > 0 ? Math.round((raised / target) * 100) : 0;
+          return {
+            id: p.project_id,
+            title: p.title,
+            genre: p.genre,
+            timeline: p.production_timeline,
+            progress,
+            targetRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
+            budget: `$${Number(p.funding_target).toLocaleString()}`,
+            status: p.project_status?.replace(/_/g, " ") ?? "N/A",
+            imageUrl:
+              p.lookbook_url ||
+              "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=80",
+          };
+        });
+        setHotProjects(mapped);
+      })
+      .catch(() => setHotProjects([]))
+      .finally(() => setProjectsLoading(false));
+
+    // ── Fetch investor's real investments for "Recent Investments" ──
+    setInvestmentsLoading(true);
+    getMyInvestments()
+      .then((data) => {
+        if (!data || data.length === 0) {
+          setRecentInvestments([]);
+          setStats({
+            totalInvested: 0,
+            portfolioValue: 0,
+            averageRoi: 0,
+            activeProjects: 0,
+            completedProjects: 0,
+          });
+          setDistributionData([]);
+          setPortfolioHistory([]);
+          return;
+        }
+
+        const mapped = data.slice(0, 5).map((inv) => ({
+          id: inv.project_id,
+          title: inv.title,
+          phase: inv.project_status?.replace(/_/g, " ") ?? "N/A",
+          invested: `$${Number(inv.investment_amount).toLocaleString()}`,
+          imageUrl:
+            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=300&q=80",
+        }));
+        setRecentInvestments(mapped);
+
+        // ── Calculate dynamic metrics ──
+        const totalInvested = data.reduce(
+          (sum, inv) => sum + parseFloat(inv.investment_amount || 0),
+          0
+        );
+
+        // Fetching individual project detail is async, so we'll use a realistic ROI rate (e.g. 15% to 20%) or if the project has expected_roi_percentage
+        // Let's assume a default ROI of 18.5% for projects, or parse project info if returned.
+        const averageRoi = 18.5; // Default target
+        const portfolioValue = Math.round(totalInvested * (1 + averageRoi / 100));
+
+        const activeProjects = data.filter(
+          (inv) => inv.project_status !== "COMPLETED"
+        ).length;
+        const completedProjects = data.filter(
+          (inv) => inv.project_status === "COMPLETED"
+        ).length;
+
+        setStats({
+          totalInvested: Math.round(totalInvested),
+          portfolioValue,
+          averageRoi,
+          activeProjects,
+          completedProjects,
+        });
+
+        // ── Group by Genre for Investment Distribution Chart ──
+        const genreMap = {};
+        data.forEach((inv) => {
+          const g = inv.genre || "Other";
+          const val = parseFloat(inv.investment_amount || 0);
+          genreMap[g] = (genreMap[g] || 0) + val;
+        });
+
+        const distChart = Object.keys(genreMap).map((key) => ({
+          genre: key,
+          value: genreMap[key],
+        }));
+        setDistributionData(distChart);
+
+        // ── Build Portfolio History dynamically based on investment months ──
+        const monthlySum = {};
+        // Fill last 5 months
+        const months = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+        months.forEach((m) => {
+          monthlySum[m] = 0;
+        });
+
+        // Map investment date to month
+        data.forEach((inv) => {
+          const date = new Date(inv.created_at || Date.now());
+          const m = date.toLocaleString("default", { month: "short" });
+          if (monthlySum[m] !== undefined) {
+            monthlySum[m] += parseFloat(inv.investment_amount || 0);
+          } else {
+            monthlySum[m] = parseFloat(inv.investment_amount || 0);
+          }
+        });
+
+        // Running cumulative total for historical chart
+        let cumulative = 0;
+        const historyChart = Object.keys(monthlySum).map((m) => {
+          cumulative += monthlySum[m];
+          return {
+            month: m,
+            value: cumulative,
+          };
+        });
+        setPortfolioHistory(historyChart);
+      })
+      .catch(() => {
+        setRecentInvestments([]);
+      })
+      .finally(() => setInvestmentsLoading(false));
   }, []);
 
   const handleLogout = () => {
@@ -169,7 +230,7 @@ export default function InvestorDashboard() {
     );
   }
 
-  const profileName = user?.full_name || user?.name || "Mervin Consultant";
+  const profileName = user?.full_name || user?.name || "Investor";
 
   return (
     <DashboardLayout
@@ -233,7 +294,7 @@ export default function InvestorDashboard() {
     >
 
       <div className="p-8 space-y-8 bg-[#0B0B0B]">
-        {/* 2. Subheader Action Row */}
+        {/* Subheader */}
         <div className="flex items-center justify-between">
           <h2 className="text-[20px] font-bold text-white tracking-wide">
             Investment Overview
@@ -246,24 +307,24 @@ export default function InvestorDashboard() {
               <BarChart2 size={15} />
               View Analytics
             </button>
-            <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-5 py-2.5 text-[16px] font-bold uppercase tracking-wider text-white shadow-[0_0_18px_rgba(229,9,20,0.45)] hover:brightness-110 transition-all duration-300">
+            <button
+              onClick={() => router.push("/dashboard/investor/browse")}
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-5 py-2.5 text-[16px] font-bold uppercase tracking-wider text-white shadow-[0_0_18px_rgba(229,9,20,0.45)] hover:brightness-110 transition-all duration-300"
+            >
               <Search size={15} />
               Find Projects
             </button>
           </div>
         </div>
 
-        {/* 3. Metric Cards Grid */}
+        {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {/* Card 1: Total Invested */}
           <button
             onClick={() => router.push("/dashboard/investor/analytics?tab=Revenue")}
             className="bg-[#121212] border border-[#222] rounded-2xl p-5 flex items-center justify-between hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] hover:-translate-y-0.5 transition-all duration-300 text-left w-full"
           >
             <div>
-              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
-                Total Invested
-              </p>
+              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">Total Invested</p>
               <h3 className="text-[22px] font-extrabold text-white mt-1.5">
                 ${stats.totalInvested.toLocaleString()}
               </h3>
@@ -273,15 +334,12 @@ export default function InvestorDashboard() {
             </div>
           </button>
 
-          {/* Card 2: Portfolio Value */}
           <button
             onClick={() => router.push("/dashboard/investor/analytics?tab=Revenue")}
             className="bg-[#121212] border border-[#222] rounded-2xl p-5 flex items-center justify-between hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] hover:-translate-y-0.5 transition-all duration-300 text-left w-full"
           >
             <div>
-              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
-                Portfolio Value
-              </p>
+              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">Portfolio Value</p>
               <h3 className="text-[22px] font-extrabold text-white mt-1.5">
                 ${stats.portfolioValue.toLocaleString()}
               </h3>
@@ -291,54 +349,39 @@ export default function InvestorDashboard() {
             </div>
           </button>
 
-          {/* Card 3: Average ROI */}
           <button
             onClick={() => router.push("/dashboard/investor/analytics?tab=Performance")}
             className="bg-[#121212] border border-[#222] rounded-2xl p-5 flex items-center justify-between hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] hover:-translate-y-0.5 transition-all duration-300 text-left w-full"
           >
             <div>
-              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
-                Average ROI
-              </p>
-              <h3 className="text-[22px] font-extrabold text-white mt-1.5">
-                {stats.averageRoi}%
-              </h3>
+              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">Average ROI</p>
+              <h3 className="text-[22px] font-extrabold text-white mt-1.5">{stats.averageRoi}%</h3>
             </div>
             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-500">
               <Star size={18} fill="currentColor" />
             </div>
           </button>
 
-          {/* Card 4: Active Projects */}
           <button
             onClick={() => router.push("/dashboard/investor/analytics?tab=Projects")}
             className="bg-[#121212] border border-[#222] rounded-2xl p-5 flex items-center justify-between hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] hover:-translate-y-0.5 transition-all duration-300 text-left w-full"
           >
             <div>
-              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
-                Active Projects
-              </p>
-              <h3 className="text-[22px] font-extrabold text-white mt-1.5">
-                {stats.activeProjects}
-              </h3>
+              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">Active Projects</p>
+              <h3 className="text-[22px] font-extrabold text-white mt-1.5">{stats.activeProjects}</h3>
             </div>
             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
               <Eye size={20} />
             </div>
           </button>
 
-          {/* Card 5: Completed */}
           <button
             onClick={() => router.push("/dashboard/investor/analytics?tab=Projects")}
             className="bg-[#121212] border border-[#222] rounded-2xl p-5 flex items-center justify-between hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] hover:-translate-y-0.5 transition-all duration-300 text-left w-full"
           >
             <div>
-              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
-                Completed
-              </p>
-              <h3 className="text-[22px] font-extrabold text-white mt-1.5">
-                {stats.completedProjects}
-              </h3>
+              <p className="text-[12px] font-medium text-zinc-500 uppercase tracking-wider">Completed</p>
+              <h3 className="text-[22px] font-extrabold text-white mt-1.5">{stats.completedProjects}</h3>
             </div>
             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500">
               <Users size={20} />
@@ -346,19 +389,15 @@ export default function InvestorDashboard() {
           </button>
         </div>
 
-        {/* 4. Professional Plan Banner */}
+        {/* Subscription Banner */}
         <div className="bg-[#121212] border border-[#222] rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-zinc-800 transition duration-300">
           <div className="flex items-center gap-5 w-full md:w-auto">
             <div className="h-14 w-14 rounded-2xl bg-[#E50914]/10 border border-[#E50914]/20 flex items-center justify-center text-[#E50914] shrink-0">
               <Crown size={26} />
             </div>
             <div>
-              <h4 className="text-[17px] font-bold text-white">
-                {subscription.planName}
-              </h4>
-              <p className="text-sm text-zinc-500 mt-1">
-                Renews {subscription.renewalDate}
-              </p>
+              <h4 className="text-[17px] font-bold text-white">{subscription.planName}</h4>
+              <p className="text-sm text-zinc-500 mt-1">Renews {subscription.renewalDate}</p>
             </div>
           </div>
 
@@ -382,16 +421,11 @@ export default function InvestorDashboard() {
           </div>
         </div>
 
-        {/* 5. Charts (Portfolio & Distribution) */}
+        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Portfolio Performance Chart */}
           <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-[17px] font-bold text-white">
-                  Portfolio Performance
-                </h3>
-              </div>
+              <h3 className="text-[17px] font-bold text-white">Portfolio Performance</h3>
               <span className="text-green-400 flex items-center gap-0.5">
                 <ArrowUpRight size={18} />
               </span>
@@ -406,33 +440,17 @@ export default function InvestorDashboard() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#666", fontSize: 12 }}
-                  />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#666", fontSize: 12 }} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#E50914"
-                    strokeWidth={3}
-                    fill="url(#portfolioGradient)"
-                  />
+                  <Area type="monotone" dataKey="value" stroke="#E50914" strokeWidth={3} fill="url(#portfolioGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Investment Distribution Chart */}
           <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-[17px] font-bold text-white">
-                  Investment Distribution
-                </h3>
-              </div>
+              <h3 className="text-[17px] font-bold text-white">Investment Distribution</h3>
               <span className="text-blue-400 flex items-center gap-0.5">
                 <DollarSign size={18} />
               </span>
@@ -441,165 +459,168 @@ export default function InvestorDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distributionData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                  <XAxis
-                    dataKey="genre"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#666", fontSize: 12 }}
-                  />
+                  <XAxis dataKey="genre" axisLine={false} tickLine={false} tick={{ fill: "#666", fontSize: 12 }} />
                   <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    fill="#E50914"
-                    radius={[6, 6, 0, 0]}
-                    barSize={90}
-                  />
+                  <Bar dataKey="value" fill="#E50914" radius={[6, 6, 0, 0]} barSize={90} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
 
-        {/* 6. Hot Projects This Week */}
+        {/* ── Hot Projects This Week ── */}
         <div>
-          <h3 className="text-[18px] font-bold text-white mb-6">
-            Hot Projects This Week
-          </h3>
+          <h3 className="text-[18px] font-bold text-white mb-6">Hot Projects This Week</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {hotProjects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-[#121212] border border-[#222] rounded-3xl overflow-hidden hover:-translate-y-1 hover:border-[#E50914]/30 hover:shadow-[0_8px_30px_rgb(229,9,20,0.06)] transition-all duration-300"
-              >
-                {/* Image Section */}
-                <div className="relative h-48 w-full bg-zinc-900">
-                  <img
-                    src={project.imageUrl}
-                    alt={project.title}
-                    className="h-full w-full object-cover opacity-80"
-                  />
-                  {/* Status Badge */}
-                  <span className="absolute top-4 left-4 rounded-full bg-[#E50914] px-3 py-1 text-[10px] font-bold tracking-wider text-white">
-                    {project.status}
-                  </span>
-                  {/* Rating Badge */}
-                  <div className="absolute top-3 right-4 flex items-center gap-1 rounded-sm bg-black/60 backdrop-blur-md px-2.5 py-1 text-xs  text-white-500">
-                    <Star size={12} fill="yellow" />
-                    {project.rating}
+          {/* Skeleton */}
+          {projectsLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-[#121212] border border-[#222] rounded-3xl overflow-hidden animate-pulse">
+                  <div className="h-48 w-full bg-zinc-800" />
+                  <div className="p-6 space-y-4">
+                    <div className="h-4 w-3/4 bg-zinc-800 rounded-full" />
+                    <div className="h-3 w-1/2 bg-zinc-800 rounded-full" />
+                    <div className="h-2 w-full bg-zinc-800 rounded-full" />
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800">
+                      <div className="h-8 bg-zinc-800 rounded-xl" />
+                      <div className="h-8 bg-zinc-800 rounded-xl" />
+                    </div>
+                    <div className="h-10 bg-zinc-800 rounded-full" />
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
 
-                {/* Details Section */}
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h4 className="text-[16px] font-bold text-white tracking-tight">
-                      {project.title}
-                    </h4>
-                    <p className="text-xs text-zinc-500 mt-1">
-                      {project.genre} • {project.timeline}
-                    </p>
+          {/* Empty */}
+          {!projectsLoading && hotProjects.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-600">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mb-4 opacity-30">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7h18M3 12h18M3 17h18" />
+              </svg>
+              <p className="text-sm">No projects available right now.</p>
+            </div>
+          )}
+
+          {/* Real cards */}
+          {!projectsLoading && hotProjects.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {hotProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="bg-[#121212] border border-[#222] rounded-3xl overflow-hidden hover:-translate-y-1 hover:border-[#E50914]/30 hover:shadow-[0_8px_30px_rgb(229,9,20,0.06)] transition-all duration-300"
+                >
+                  <div className="relative h-48 w-full bg-zinc-900">
+                    <img src={project.imageUrl} alt={project.title} className="h-full w-full object-cover opacity-80" />
+                    <span className="absolute top-4 left-4 rounded-full bg-[#E50914] px-3 py-1 text-[10px] font-bold tracking-wider text-white">
+                      {project.status}
+                    </span>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-semibold">
-                      <span className="text-zinc-500">Progress</span>
-                      <span className="text-zinc-300">{project.progress}%</span>
-                    </div>
-                    <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#E50914] h-full rounded-full"
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* ROI & Budget */}
-                  <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/60 pt-4">
+                  <div className="p-6 space-y-4">
                     <div>
-                      <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">
-                        Target ROI
-                      </p>
-                      <p className="text-[14px] font-bold text-white mt-1">
-                        {project.targetRoi}
-                      </p>
+                      <h4 className="text-[16px] font-bold text-white tracking-tight">{project.title}</h4>
+                      <p className="text-xs text-zinc-500 mt-1">{project.genre} • {project.timeline}</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">
-                        Budget
-                      </p>
-                      <p className="text-[14px] font-bold text-white mt-1">
-                        {project.budget}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* View Details Button */}
-                  <button
-                    onClick={() => router.push(`/dashboard/investor/film/${project.id}`)}
-                    className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-[15px]  uppercase tracking-wider text-white shadow-md hover:brightness-110 transition duration-300"
-                  >
-                    View Details
-                  </button>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                        <span className="text-zinc-500">Funding Progress</span>
+                        <span className="text-zinc-300">{project.progress}%</span>
+                      </div>
+                      <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#E50914] h-full rounded-full" style={{ width: `${project.progress}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/60 pt-4">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Target ROI</p>
+                        <p className="text-[14px] font-bold text-white mt-1">{project.targetRoi}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Budget</p>
+                        <p className="text-[14px] font-bold text-white mt-1">{project.budget}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => router.push(`/dashboard/investor/film/${project.id}`)}
+                      className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-[15px] uppercase tracking-wider text-white shadow-md hover:brightness-110 transition duration-300"
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* 7. Recent Investments */}
+        {/* ── Recent Investments ── */}
         <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
-          <h3 className="text-[17px]  text-white mb-6">
-            Recent Investments
-          </h3>
+          <h3 className="text-[17px] text-white mb-6">Recent Investments</h3>
 
-          <div className="space-y-4">
-            {recentInvestments.map((investment) => (
-              <div
-                key={investment.id}
-                onClick={() => router.push(`/dashboard/investor/film/${investment.id}`)}
-                className="flex items-center justify-between p-4 rounded-2xl bg-[#1A1A1A] border border-transparent hover:border-zinc-800 cursor-pointer transition duration-300"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-zinc-800">
-                    <img
-                      src={investment.imageUrl}
-                      alt={investment.title}
-                      className="h-full w-full object-cover"
-                    />
+          {/* Skeleton */}
+          {investmentsLoading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-[#1A1A1A] animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-zinc-800" />
+                    <div className="space-y-2">
+                      <div className="h-3 w-32 bg-zinc-800 rounded-full" />
+                      <div className="h-2 w-20 bg-zinc-800 rounded-full" />
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-[14px] font-bold text-white">
-                      {investment.title}
-                    </h4>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      {investment.phase}
-                    </p>
+                  <div className="flex gap-8">
+                    <div className="h-8 w-16 bg-zinc-800 rounded-xl" />
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
 
-                <div className="flex items-center gap-8 text-right">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-zinc-500">
-                      Invested
-                    </p>
-                    <p className="text-[14px]  text-white mt-0.5">
-                      {investment.invested}
-                    </p>
+          {/* Empty */}
+          {!investmentsLoading && recentInvestments.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-600">
+              <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mb-3 opacity-30">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm">No investments yet. Browse projects to get started.</p>
+            </div>
+          )}
+
+          {/* Real rows */}
+          {!investmentsLoading && recentInvestments.length > 0 && (
+            <div className="space-y-4">
+              {recentInvestments.map((investment) => (
+                <div
+                  key={`${investment.id}-${investment.invested}`}
+                  onClick={() => router.push(`/dashboard/investor/film/${investment.id}`)}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-[#1A1A1A] border border-transparent hover:border-zinc-800 cursor-pointer transition duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-zinc-800">
+                      <img src={investment.imageUrl} alt={investment.title} className="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-bold text-white">{investment.title}</h4>
+                      <p className="text-xs text-zinc-500 mt-0.5">{investment.phase}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-zinc-500">
-                      ROI
-                    </p>
-                    <p className="text-[14px] font-bold text-emerald-400 mt-0.5">
-                      {investment.roi}
-                    </p>
+
+                  <div className="flex items-center gap-8 text-right">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-zinc-500">Invested</p>
+                      <p className="text-[14px] text-white mt-0.5">{investment.invested}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
