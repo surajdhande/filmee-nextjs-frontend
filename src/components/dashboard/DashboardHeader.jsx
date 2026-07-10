@@ -23,7 +23,7 @@ const DashboardHeader = ({
     <header className="w-full border-b border-[#262626] bg-[#121212]">
 
       {/* Top Row */}
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-6 py-6">
 
         {/* Left — Title without logo */}
         <div>
@@ -41,19 +41,19 @@ const DashboardHeader = ({
         {/* Right — Action buttons */}
         <div className="flex items-center gap-3">
 
-          <button className="flex items-center gap-1.5 rounded-full border border-red-600/70 px-4 py-1.5">
-            <Crown size={13} className="text-red-500" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-red-500">
+          <button className="flex items-center gap-2 rounded-full border border-red-600/70 px-6 py-2.5">
+            <Crown size={14} className="text-red-500" />
+            <span className="text-[12px] font-bold uppercase tracking-wider text-red-500">
               Professional
             </span>
-            <span className="rounded-full bg-blue-600 px-1.5 py-[1px] text-[9px] font-bold text-white">
+            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">
               7D
             </span>
           </button>
 
-          <button className="flex items-center gap-1.5 rounded-full border border-red-600/70 px-4 py-1.5 text-red-500 transition hover:bg-red-600/10">
-            <Settings size={13} />
-            <span className="text-[11px] font-bold uppercase tracking-wider">
+          <button className="flex items-center gap-2 rounded-full border border-red-600/70 px-6 py-2.5 text-red-500 transition hover:bg-red-600/10">
+            <Settings size={14} />
+            <span className="text-[12px] font-bold uppercase tracking-wider">
               Settings
             </span>
           </button>
@@ -94,8 +94,8 @@ const DashboardHeader = ({
           <div className="flex items-center gap-3">
 
             {showAnalyticsButton && (
-              <button className="flex items-center gap-1.5 rounded-full border border-red-600 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-red-500 transition hover:bg-red-600/10">
-                <BarChart2 size={13} />
+              <button className="flex items-center gap-2 rounded-full border border-red-600 px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-red-500 transition hover:bg-red-600/10">
+                <BarChart2 size={14} />
                 View Analytics
               </button>
             )}
@@ -105,9 +105,9 @@ const DashboardHeader = ({
                 onClick={() =>
                   router.push("/dashboard/filmmaker/create-project")
                 }
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] transition hover:brightness-110"
+                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] transition hover:brightness-110"
               >
-                <Plus size={14} />
+                <Plus size={15} />
                 Create Project
               </button>
             )}

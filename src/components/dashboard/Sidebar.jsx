@@ -25,47 +25,47 @@ import {
 
 const MENU_CONFIG = {
   FILMMAKER: [
-  {
-    name: "Overview",
-    icon: LayoutDashboard,
-    href: "/dashboard/filmmaker",
-  },
-  {
-    name: "Projects",
-    icon: Film,
-    href: "/dashboard/filmmaker/projects",
-  },
-  {
-    name: "Investor Applications",
-    icon: Users,
-    href: "/dashboard/filmmaker/applications",
-  },
-  {
-    name: "Escrow & Payments",
-    icon: Shield,
-    href: "/dashboard/filmmaker/payments",
-  },
-  {
-    name: "Messages",
-    icon: MessageSquare,
-    href: "/dashboard/filmmaker/messages",
-  },
-  {
-    name: "Analytics",
-    icon: BarChart3,
-    href: "/dashboard/filmmaker/analytics",
-  },
-  {
-    name: "Profile",
-    icon: User,
-    href: "/dashboard/filmmaker/profile",
-  },
-  {
-    name: "Subscription",
-    icon: Crown,
-    href: "/dashboard/filmmaker/subscription",
-  },
-],
+    {
+      name: "Overview",
+      icon: LayoutDashboard,
+      href: "/dashboard/filmmaker",
+    },
+    {
+      name: "Projects",
+      icon: Film,
+      href: "/dashboard/filmmaker/projects",
+    },
+    {
+      name: "Investor Applications",
+      icon: Users,
+      href: "/dashboard/filmmaker/applications",
+    },
+    {
+      name: "Escrow & Payments",
+      icon: Shield,
+      href: "/dashboard/filmmaker/payments",
+    },
+    {
+      name: "Messages",
+      icon: MessageSquare,
+      href: "/dashboard/filmmaker/messages",
+    },
+    {
+      name: "Analytics",
+      icon: BarChart3,
+      href: "/dashboard/filmmaker/analytics",
+    },
+    {
+      name: "Profile",
+      icon: User,
+      href: "/dashboard/filmmaker/profile",
+    },
+    {
+      name: "Subscription",
+      icon: Crown,
+      href: "/dashboard/filmmaker/subscription",
+    },
+  ],
   INVESTOR: [
     { name: "Overview", icon: BarChart3, href: "/dashboard/investor" },
     { name: "Browse Projects", icon: Search, href: "/dashboard/investor/browse" },
@@ -90,10 +90,12 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
   const menuItems = MENU_CONFIG[role] || [];
 
   return (
-    <div className="flex h-full flex-col bg-[#171717] pt-6 px-2">
-      {/* Menu — all items grouped in a single card */}
+    <div className="flex h-full w-[240px] flex-col pl-6 pt-6">
       <nav className="flex-1">
-        <div className="rounded-xl bg-[#1E1E1E] border border-[#2a2a2a] p-2 space-y-0.75">
+        <div className="flex w-full flex-col space-y-2 rounded-[24px] border border-[#2A2A2A] bg-[#141414] px-6 py-6">
+          <div className="mb-6 px-1">
+            <img src="/logo.png" alt="Filmee Logo" className="h-8 object-contain" />
+          </div>
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -101,29 +103,27 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group flex h-7 items-center justify-between rounded-lg px-3 transition-all duration-200   ${
+                className={`group flex h-12 w-full items-center justify-between rounded-full px-4 transition-all duration-200 ${
                   isActive
-                    ? " text-white bg-zinc-900 rounded-full px-1"
-                    : " "
+                    ? "bg-[#232323] text-white py-3"
+                    : "text-zinc-500 hover:text-white"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                   <item.icon
-                    size={15}
+                    size={18}
                     strokeWidth={2}
-                    className={`shrink-0 ${
-                      isActive
-                        ? "text-white"
-                        : "text-zinc-500 "
+                    className={`mr-3 shrink-0 ${
+                      isActive ? "text-white" : "text-zinc-500 group-hover:text-white"
                     }`}
                   />
-                  <span className="text-[12px] font-bold whitespace-nowrap">
+                  <span className={`text-[13px] font-bold ${isActive ? "text-white" : ""}`}>
                     {item.name}
                   </span>
                 </div>
 
                 {item.badgeCount !== undefined && (
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#E50914] text-[10px] font-bold text-white">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
                     {item.badgeCount}
                   </span>
                 )}

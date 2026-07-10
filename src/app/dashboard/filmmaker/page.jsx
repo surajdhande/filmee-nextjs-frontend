@@ -10,9 +10,11 @@ import ChartsSection from "@/components/dashboard/ChartsSection";
 import SubscriptionCard from "@/components/dashboard/SubscriptionCard";
 import ProjectsSection from "@/components/dashboard/ProjectsSection";
 import RecentActivity from "@/components/dashboard/RecentActivity";
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -24,11 +26,25 @@ export default function DashboardPage() {
     }
 
     setUser(JSON.parse(storedUser));
+    loadProfile();
   }, [router]);
+
+  async function loadProfile() {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/v1/profile/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setProfile(data.profile);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] text-white">
         Loading...
       </div>
     );
@@ -37,16 +53,18 @@ export default function DashboardPage() {
   return (
     <DashboardLayout
       header={
-        <DashboardHeader username={user?.full_name || user?.name || "John Director"} />
+        <DashboardHeader username={profile?.full_name || user?.full_name || user?.name || "User"} />
       }
     >
-      <div className="p-8">
+      <div className="flex flex-col gap-14 p-10 lg:pl-16">
         <StatsCardsSection />
 
         <SubscriptionCard />
 
         <ChartsSection />
+        
         <ProjectsSection />
+        
         <RecentActivity />
       </div>
     </DashboardLayout>
