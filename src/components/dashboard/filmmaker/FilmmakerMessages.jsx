@@ -1,11 +1,16 @@
 "use client";
 
+import {
+  socket,
+  joinRoom,
+  leaveRoom,
+  sendSocketMessage,
+} from "@/services/socketService";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   getConversations,
-  getConversation,
-  sendMessage,
+  getConversation
 } from "@/services/messageService";
 import {
   ArrowLeft,
@@ -101,22 +106,23 @@ const loadConversation = useCallback(async (userId) => {
   }
 };
 
-  const handleSend = async () => {
+  const handleSend = () => {
   const text = newMessage.trim();
 
   if (!text || !selectedConv) return;
 
-  try {
-    await sendMessage(selectedConv.id, text, null);
+  const currentUserId = JSON.parse(
+    atob(localStorage.getItem("token").split(".")[1])
+  ).user_id;
 
-    setNewMessage("");
+  sendSocketMessage(
+    currentUserId,
+    selectedConv.id,
+    text,
+    null
+  );
 
-    await loadConversation(selectedConv.id);
-
-    await fetchConversations();
-  } catch (error) {
-    console.error("Failed to send message:", error);
-  }
+  setNewMessage("");
 };
 
   const handleKeyDown = (e) => {
@@ -133,26 +139,100 @@ const loadConversation = useCallback(async (userId) => {
   fetchConversations();
 }, [fetchConversations]);
 
+// useEffect(() => {
+//   const interval = setInterval(async () => {
+//     console.log("Polling...");
+
+//     try {
+//       await fetchConversations();
+
+//       if (selectedConv) {
+//         console.log("Refreshing conversation:", selectedConv.id);
+
+//         await loadConversation(selectedConv.id);
+//       }
+//     } catch (error) {
+//       console.error("Polling failed:", error);
+//     }
+//   }, 3000);
+
+//   return () => clearInterval(interval);
+// }, [selectedConv, fetchConversations, loadConversation]);
+
 useEffect(() => {
-  const interval = setInterval(async () => {
-    console.log("Polling...");
+  socket.connect();
 
-    try {
-      await fetchConversations();
+  const currentUserId = JSON.parse(
+    atob(localStorage.getItem("token").split(".")[1])
+  ).user_id;
 
-      if (selectedConv) {
-        console.log("Refreshing conversation:", selectedConv.id);
+  socket.on("connected", (data) => {
+    console.log(data.message);
+    joinRoom(currentUserId);
+  });
 
-        await loadConversation(selectedConv.id);
-      }
-    } catch (error) {
-      console.error("Polling failed:", error);
-    }
-  }, 3000);
+  socket.on("joined", (data) => {
+    console.log(data.message);
+  });
 
-  return () => clearInterval(interval);
-}, [selectedConv, fetchConversations, loadConversation]);
+  socket.on("receive_message", (message) => {
+  console.log("Received:", message);
 
+  const currentUserId = JSON.parse(
+    atob(localStorage.getItem("token").split(".")[1])
+  ).user_id;
+
+  // Update the open chat instantly
+  if (
+    selectedConv &&
+    (selectedConv.id === message.sender_id ||
+      selectedConv.id === message.recipient_id)
+  ) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: message.message_id,
+        sender:
+          message.sender_id === currentUserId ? "me" : "other",
+        text: message.message_body,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    ]);
+  }
+
+  // Update conversation preview instantly
+  setConversations((prev) =>
+    prev.map((conv) =>
+      conv.id ===
+      (message.sender_id === currentUserId
+        ? message.recipient_id
+        : message.sender_id)
+        ? {
+            ...conv,
+            lastMessage: message.message_body,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }
+        : conv
+    )
+  );
+});
+
+  return () => {
+    leaveRoom(currentUserId);
+
+    socket.off("connected");
+    socket.off("joined");
+    socket.off("receive_message");
+
+    socket.disconnect();
+  };
+}, [selectedConv, loadConversation, fetchConversations]);
 
   const filteredConversations = conversations.filter((c) => {
     const matchesSearch =
