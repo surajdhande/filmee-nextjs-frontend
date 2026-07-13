@@ -270,17 +270,24 @@ function ProfileTab({ profile }) {
             Achievements &amp; Awards
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          {ACHIEVEMENTS.map((a) => (
-            <div
-              key={a.id}
-              className="flex flex-col items-center gap-2 rounded-xl bg-[#111] border border-zinc-800 p-5 text-center"
-            >
-              <Trophy size={22} className="text-[#E50914]" />
-              <p className="text-[11px] text-zinc-400 leading-snug">{a.label}</p>
-            </div>
-          ))}
-        </div>
+        {profile.achievements && profile.achievements.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4">
+            {profile.achievements.map((ach, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center gap-2 rounded-xl bg-[#111] border border-zinc-800 p-5 text-center"
+              >
+                <Trophy size={22} className="text-[#E50914]" />
+                <p className="text-[11px] text-zinc-400 leading-snug">{ach}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6 text-zinc-500">
+            <Trophy size={24} className="text-zinc-600 mb-2" />
+            <p className="text-xs">No achievements listed yet.</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -442,56 +449,353 @@ function PrivacyTab({ privacy, onChange }) {
   );
 }
 
+import { getMyProfile, updateMyProfile, uploadProfileImage, getMyInvestments } from "@/services/investorService";
+
+/* ─────────────────────────────────────────
+   EDIT PROFILE MODAL
+   ───────────────────────────────────────── */
+function EditProfileModal({ isOpen, onClose, profile, onSave }) {
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+    location: "",
+    website_portfolio_url: "",
+    bio: "",
+    years_of_experience: 0,
+    skills: [],
+    achievements: []
+  });
+
+  const [skillInput, setSkillInput] = useState("");
+  const [achievementInput, setAchievementInput] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (profile) {
+      const names = profile.full_name ? profile.full_name.split(" ") : ["", ""];
+      setFormData({
+        first_name: profile.first_name || names[0] || "",
+        last_name: profile.last_name || names.slice(1).join(" ") || "",
+        phone_number: profile.phone_number || profile.phone || "",
+        location: profile.location || "",
+        website_portfolio_url: profile.website_portfolio_url || profile.website || "",
+        bio: profile.bio || "",
+        years_of_experience: profile.years_of_experience || 0,
+        skills: profile.skills || [],
+        achievements: profile.achievements || []
+      });
+    }
+  }, [profile, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      if (imageFile) {
+        await uploadProfileImage(imageFile);
+      }
+      await updateMyProfile(formData);
+      onSave();
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddSkill = () => {
+    if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        skills: [...prev.skills, skillInput.trim()]
+      }));
+      setSkillInput("");
+    }
+  };
+
+  const handleRemoveSkill = (skill) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(s => s !== skill)
+    }));
+  };
+
+  const handleAddAchievement = () => {
+    if (achievementInput.trim() && !formData.achievements.includes(achievementInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        achievements: [...prev.achievements, achievementInput.trim()]
+      }));
+      setAchievementInput("");
+    }
+  };
+
+  const handleRemoveAchievement = (ach) => {
+    setFormData(prev => ({
+      ...prev,
+      achievements: prev.achievements.filter(a => a !== ach)
+    }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-zinc-800 bg-[#171717] p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <h3 className="text-[18px] font-bold text-white mb-4">Edit Profile</h3>
+        {error && <p className="text-xs text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">First Name</label>
+              <input
+                type="text"
+                required
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.first_name}
+                onChange={e => setFormData({ ...formData, first_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">Last Name</label>
+              <input
+                type="text"
+                required
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.last_name}
+                onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">Phone Number</label>
+              <input
+                type="text"
+                required
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.phone_number}
+                onChange={e => setFormData({ ...formData, phone_number: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">Location</label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">Website URL</label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.website_portfolio_url}
+                onChange={e => setFormData({ ...formData, website_portfolio_url: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-zinc-500 mb-1">Years of Experience</label>
+              <input
+                type="number"
+                className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914]"
+                value={formData.years_of_experience}
+                onChange={e => setFormData({ ...formData, years_of_experience: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-zinc-500 mb-1">Bio</label>
+            <textarea
+              className="w-full rounded-lg border border-zinc-700 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E50914] min-h-[80px]"
+              value={formData.bio}
+              onChange={e => setFormData({ ...formData, bio: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-zinc-500 mb-1">Profile Photo</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#E50914] file:text-white hover:file:bg-[#c0070f]"
+              onChange={e => setImageFile(e.target.files[0])}
+            />
+          </div>
+
+          {/* Skills Tag Input */}
+          <div>
+            <label className="block text-[11px] text-zinc-500 mb-1">Skills & Expertise</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Add skill..."
+                className="flex-1 rounded-lg border border-zinc-700 bg-[#111] px-3 py-1.5 text-xs text-white focus:outline-none"
+                value={skillInput}
+                onChange={e => setSkillInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleAddSkill())}
+              />
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                className="rounded-lg bg-[#E50914] px-4 py-1.5 text-xs font-bold text-white"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {formData.skills.map(skill => (
+                <span key={skill} className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2.5 py-1 text-[10px] text-white">
+                  {skill}
+                  <button type="button" onClick={() => handleRemoveSkill(skill)} className="text-zinc-500 hover:text-white">&times;</button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Achievements Input */}
+          <div>
+            <label className="block text-[11px] text-zinc-500 mb-1">Achievements & Awards</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Add achievement..."
+                className="flex-1 rounded-lg border border-zinc-700 bg-[#111] px-3 py-1.5 text-xs text-white focus:outline-none"
+                value={achievementInput}
+                onChange={e => setAchievementInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleAddAchievement())}
+              />
+              <button
+                type="button"
+                onClick={handleAddAchievement}
+                className="rounded-lg bg-[#E50914] px-4 py-1.5 text-xs font-bold text-white"
+              >
+                Add
+              </button>
+            </div>
+            <div className="space-y-1">
+              {formData.achievements.map(ach => (
+                <div key={ach} className="flex items-center justify-between rounded-lg bg-zinc-800/50 px-3 py-1 text-[11px] text-zinc-300">
+                  <span>{ach}</span>
+                  <button type="button" onClick={() => handleRemoveAchievement(ach)} className="text-zinc-500 hover:text-white">&times;</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-zinc-600 px-5 py-2 text-xs font-bold text-zinc-400 hover:bg-zinc-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-full bg-[#E50914] px-5 py-2 text-xs font-bold text-white disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────
    MAIN PAGE
    ───────────────────────────────────────── */
 export default function InvestorProfileSettings() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("Profile");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Profile state — replace with API call
+  // Profile state
   const [profile, setProfile] = useState(MOCK_PROFILE);
 
-  // Portfolio state — replace with API call
+  // Portfolio state
   const [portfolio, setPortfolio] = useState(MOCK_PORTFOLIO);
 
-  // Notification settings state — replace with API call
+  // Notification settings state
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
-  // Privacy settings state — replace with API call
+  // Privacy settings state
   const [privacy, setPrivacy] = useState(MOCK_PRIVACY);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const prof = await getMyProfile();
+      if (prof) {
+        setProfile({
+          full_name: prof.full_name || `${prof.first_name} ${prof.last_name}`.trim() || "Mervin Consultant",
+          first_name: prof.first_name,
+          last_name: prof.last_name,
+          role: prof.user_role || "Investor",
+          rating: 4.9, // Mock rating as not in DB schema yet
+          reviews: 127, // Mock reviews
+          location: prof.location || "Los Angeles, CA",
+          experience: prof.years_of_experience ? `${prof.years_of_experience}+ years experience` : "15+ years experience",
+          years_of_experience: prof.years_of_experience,
+          email: prof.email || "mervin.consultant@gmail.com",
+          phone: prof.phone_number || "+1 (555) 123-4567",
+          website: prof.website_portfolio_url || "www.example.com",
+          bio: prof.bio || "Experienced film investor focused on independent cinema and emerging talent.",
+          skills: prof.skills && prof.skills.length > 0 ? prof.skills : ["Film Analysis", "Market Research", "Risk Assessment"],
+          avatar: prof.profile_image_url || null,
+          achievements: prof.achievements && prof.achievements.length > 0 ? prof.achievements : []
+        });
+      }
+
+      const myInv = await getMyInvestments();
+      if (myInv && myInv.length > 0) {
+        const mappedPort = myInv.map((inv, index) => ({
+          id: inv.investment_id || index,
+          title: inv.title,
+          year: inv.created_at ? new Date(inv.created_at).getFullYear() : 2023,
+          role: "Investor",
+          image: inv.lookbook_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80"
+        }));
+        setPortfolio(mappedPort);
+      }
+    } catch (err) {
+      console.error("Failed to load profile data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // TODO: fetch real data when backend is ready
-    // async function load() {
-    //   const [prof, port, notif, priv] = await Promise.all([
-    //     fetch("/api/v1/investors/profile").then(r => r.json()),
-    //     fetch("/api/v1/investors/portfolio").then(r => r.json()),
-    //     fetch("/api/v1/investors/settings/notifications").then(r => r.json()),
-    //     fetch("/api/v1/investors/settings/privacy").then(r => r.json()),
-    //   ]);
-    //   setProfile(prof);
-    //   setPortfolio(port.items);
-    //   setNotifications(notif);
-    //   setPrivacy(priv);
-    // }
-    // load();
+    loadData();
   }, []);
 
   const handleEditProfile = () => {
-    // TODO: navigate to edit page or open modal
-    // PUT /api/v1/investors/profile
-    console.log("Edit profile clicked");
+    setIsEditOpen(true);
   };
 
   const handleNotificationChange = (key, val) => {
     setNotifications((prev) => ({ ...prev, [key]: val }));
-    // TODO: PUT /api/v1/investors/settings/notifications  body: { [key]: val }
   };
 
   const handlePrivacyChange = (key, val) => {
     setPrivacy((prev) => ({ ...prev, [key]: val }));
-    // TODO: PUT /api/v1/investors/settings/privacy  body: { [key]: val }
   };
 
   return (
@@ -549,7 +853,7 @@ export default function InvestorProfileSettings() {
 
       {/* ── Page Content (scrollable, no sidebar) ── */}
       <main className="flex-1 overflow-y-auto bg-black">
-        <div className="px-8 py-8">
+        <div className="mx-auto max-w-[70%] px-8 py-8">
           {/* Page sub-header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -598,20 +902,36 @@ export default function InvestorProfileSettings() {
             ))}
           </div>
 
-          {/* Tab content */}
-          {activeTab === "Profile" && <ProfileTab profile={profile} />}
-          {activeTab === "Portfolio" && <PortfolioTab items={portfolio} />}
-          {activeTab === "Settings" && (
-            <SettingsTab
-              notifications={notifications}
-              onChange={handleNotificationChange}
-            />
-          )}
-          {activeTab === "Privacy" && (
-            <PrivacyTab privacy={privacy} onChange={handlePrivacyChange} />
+          {/* Loading */}
+          {loading ? (
+            <div className="flex items-center justify-center py-20 text-zinc-500">
+              <span className="animate-spin mr-2">⏳</span> Loading profile settings...
+            </div>
+          ) : (
+            <>
+              {/* Tab content */}
+              {activeTab === "Profile" && <ProfileTab profile={profile} />}
+              {activeTab === "Portfolio" && <PortfolioTab items={portfolio} />}
+              {activeTab === "Settings" && (
+                <SettingsTab
+                  notifications={notifications}
+                  onChange={handleNotificationChange}
+                />
+              )}
+              {activeTab === "Privacy" && (
+                <PrivacyTab privacy={privacy} onChange={handlePrivacyChange} />
+              )}
+            </>
           )}
         </div>
       </main>
+
+      <EditProfileModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        profile={profile}
+        onSave={loadData}
+      />
     </div>
   );
 }
