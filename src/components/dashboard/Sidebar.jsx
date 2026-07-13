@@ -90,12 +90,9 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
   const menuItems = MENU_CONFIG[role] || [];
 
   return (
-    <div className="flex h-full w-[240px] flex-col pl-6 pt-6">
+    <div className="flex h-full w-[240px] flex-col pl-6 pt-24">
       <nav className="flex-1">
         <div className="flex w-full flex-col space-y-2 rounded-[24px] border border-[#2A2A2A] bg-[#141414] px-6 py-6">
-          <div className="mb-6 px-1">
-            <img src="/logo.png" alt="Filmee Logo" className="h-8 object-contain" />
-          </div>
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
 
