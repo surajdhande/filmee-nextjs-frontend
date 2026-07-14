@@ -29,12 +29,13 @@ const FILTERS = ["ALL", "ACTIVE", "VIDEO"];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function InvestorMessages() {
+export default function FilmmakerMessages() {
   const router = useRouter();
-    const [conversations, setConversations] = useState([]);  
-    const [activeFilter, setActiveFilter] = useState("ALL");
+  const [conversations, setConversations] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedConv, setSelectedConv] = useState(null);
+  const selectedConvRef = useRef(null);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const bottomRef = useRef(null);
@@ -139,25 +140,9 @@ const loadConversation = useCallback(async (userId) => {
   fetchConversations();
 }, [fetchConversations]);
 
-// useEffect(() => {
-//   const interval = setInterval(async () => {
-//     console.log("Polling...");
-
-//     try {
-//       await fetchConversations();
-
-//       if (selectedConv) {
-//         console.log("Refreshing conversation:", selectedConv.id);
-
-//         await loadConversation(selectedConv.id);
-//       }
-//     } catch (error) {
-//       console.error("Polling failed:", error);
-//     }
-//   }, 3000);
-
-//   return () => clearInterval(interval);
-// }, [selectedConv, fetchConversations, loadConversation]);
+useEffect(() => {
+  selectedConvRef.current = selectedConv;
+}, [selectedConv]);
 
 useEffect(() => {
   socket.connect();
@@ -176,52 +161,56 @@ useEffect(() => {
   });
 
   socket.on("receive_message", (message) => {
-  console.log("Received:", message);
+    console.log("=== SOCKET MESSAGE RECEIVED ===");
+    console.log("Socket Message:", message);
+    console.log("sent_at:", message.sent_at);
 
-  const currentUserId = JSON.parse(
-    atob(localStorage.getItem("token").split(".")[1])
-  ).user_id;
+    const activeConversation = selectedConvRef.current;
 
-  // Update the open chat instantly
-  if (
-    selectedConv &&
-    (selectedConv.id === message.sender_id ||
-      selectedConv.id === message.recipient_id)
-  ) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: message.message_id,
-        sender:
-          message.sender_id === currentUserId ? "me" : "other",
-        text: message.message_body,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
+    console.log("Selected Conversation:", activeConversation);
+
+    // Update the open chat instantly
+    if (
+      activeConversation &&
+      (
+        activeConversation.id === message.sender_id ||
+        activeConversation.id === message.recipient_id
+      )
+    ) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: message.message_id,
+          sender:
+            message.sender_id === currentUserId ? "me" : "other",
+          text: message.message_body,
+          time: new Date(message.sent_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
         }),
-      },
-    ]);
-  }
+                },
+      ]);
+    }
 
-  // Update conversation preview instantly
-  setConversations((prev) =>
-    prev.map((conv) =>
-      conv.id ===
-      (message.sender_id === currentUserId
-        ? message.recipient_id
-        : message.sender_id)
-        ? {
-            ...conv,
-            lastMessage: message.message_body,
-            time: new Date().toLocaleTimeString([], {
+    // Update conversation preview instantly
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id ===
+        (message.sender_id === currentUserId
+          ? message.recipient_id
+          : message.sender_id)
+          ? {
+              ...conv,
+              lastMessage: message.message_body,
+              time: new Date(message.sent_at).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             }),
-          }
-        : conv
-    )
-  );
-});
+            }
+          : conv
+      )
+    );
+  });
 
   return () => {
     leaveRoom(currentUserId);
@@ -232,7 +221,7 @@ useEffect(() => {
 
     socket.disconnect();
   };
-}, [selectedConv, loadConversation, fetchConversations]);
+}, []);
 
   const filteredConversations = conversations.filter((c) => {
     const matchesSearch =
