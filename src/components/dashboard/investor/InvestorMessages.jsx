@@ -12,108 +12,191 @@ import {
   Filter,
 } from "lucide-react";
 import Image from "next/image";
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const MOCK_CONVERSATIONS = [
-  {
-    id: 1,
-    name: "Mervin Filmmaker",
-    project: "Echoes of Tomorrow",
-    avatar: "M",
-    avatarColor: "#E50914",
-    unread: 2,
-    lastMessage: "Absolutely! I'm thrilled you're interested. Let me...",
-    time: "22h ago",
-    role: "Filmmaker",
-    isActive: true,
-    messages: [
-      {
-        id: 1,
-        sender: "me",
-        text: "Hello! I'm excited about this project. Can we discuss the investment details?",
-        time: "02:31 PM",
-      },
-      {
-        id: 2,
-        sender: "them",
-        text: "Absolutely! I'm thrilled you're interested. Let me know what specific aspects you'd like to know more about.",
-        time: "03:34 PM",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Sofia Chen",
-    project: "Neon Nights",
-    avatar: "S",
-    avatarColor: "#7C3AED",
-    unread: 0,
-    lastMessage: "The budget breakdown looks great. Thanks!",
-    time: "2d ago",
-    role: "Filmmaker",
-    isActive: false,
-    messages: [
-      {
-        id: 1,
-        sender: "them",
-        text: "Hi! I saw you viewed our Neon Nights project page. Any questions?",
-        time: "10:00 AM",
-      },
-      {
-        id: 2,
-        sender: "me",
-        text: "Yes, can you share more about the budget allocation?",
-        time: "10:15 AM",
-      },
-      {
-        id: 3,
-        sender: "them",
-        text: "The budget breakdown looks great. Thanks!",
-        time: "10:45 AM",
-      },
-    ],
-  },
-];
+import {
+  getConversations,
+  getConversationMessages,
+  sendMessage,
+  markAsRead,
+} from "@/services/messageService";
 
 // ─── Filter Tabs ──────────────────────────────────────────────────────────────
 
 const FILTERS = ["ALL", "ACTIVE", "VIDEO"];
 
+// Helper to format timestamps to relative time strings
+const formatTime = (isoString) => {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return diffMins <= 0 ? "Just now" : `${diffMins}m ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    } else {
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+  } catch (e) {
+    return "";
+  }
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function InvestorMessages() {
   const router = useRouter();
-  const [conversations] = useState(MOCK_CONVERSATIONS);
+  const [conversations, setConversations] = useState([]);
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedConv, setSelectedConv] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const bottomRef = useRef(null);
+
+  // Load current user from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      setCurrentUser(JSON.parse(stored));
+    }
+  }, []);
+
+  const loadConversations = async () => {
+    try {
+      const res = await getConversations();
+      if (res.success && res.data) {
+        const mapped = res.data.map((c) => {
+          const name = c.full_name || "Unknown User";
+          const initials = name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+
+          return {
+            id: c.other_user_id,
+            name: name,
+            project: c.user_role ? c.user_role.charAt(0).toUpperCase() + c.user_role.slice(1) : "Project Inquiry",
+            avatar: initials || "?",
+            avatarColor: c.user_role === "filmmaker" ? "#E50914" : "#7C3AED",
+            unread: c.unread_count || 0,
+            lastMessage: c.message_body || "",
+            time: c.sent_at ? formatTime(c.sent_at) : "",
+            role: c.user_role || "User",
+            isActive: c.unread_count > 0,
+            raw: c,
+          };
+        });
+        setConversations(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
+    }
+  };
+
+  // Poll conversations list
+  useEffect(() => {
+    loadConversations();
+    const interval = setInterval(() => {
+      loadConversations();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSelectConversation = (conv) => {
-    setSelectedConv(conv);
-    setMessages(conv.messages);
+  // Load messages for a selected conversation
+  const loadMessages = async (convId) => {
+    try {
+      const res = await getConversationMessages(convId);
+      if (res.success && res.data) {
+        const mappedMsgs = res.data.map((m) => ({
+          id: m.message_id,
+          sender: m.sender_id === currentUser?.user_id ? "me" : "them",
+          text: m.message_body,
+          time: new Date(m.sent_at).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        }));
+        setMessages(mappedMsgs);
+      }
+    } catch (err) {
+      console.error("Failed to load messages:", err);
+    }
   };
 
-  const handleSend = () => {
+  const handleSelectConversation = async (conv) => {
+    setSelectedConv(conv);
+    await loadMessages(conv.id);
+
+    // Mark as read
+    if (conv.unread > 0) {
+      try {
+        await markAsRead(conv.id);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))
+        );
+      } catch (err) {
+        console.error("Failed to mark messages as read:", err);
+      }
+    }
+  };
+
+  // Poll selected conversation messages
+  useEffect(() => {
+    if (!selectedConv || !currentUser) return;
+    const fetchInterval = setInterval(() => {
+      loadMessages(selectedConv.id);
+    }, 4000);
+    return () => clearInterval(fetchInterval);
+  }, [selectedConv, currentUser]);
+
+  const handleSend = async () => {
     const text = newMessage.trim();
     if (!text || !selectedConv) return;
 
-    const msg = {
-      id: messages.length + 1,
-      sender: "me",
-      text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-    setMessages((prev) => [...prev, msg]);
-    setNewMessage("");
+    try {
+      const res = await sendMessage(selectedConv.id, text);
+      if (res.success) {
+        const newMsgId = res.data?.message_id;
+        const msg = {
+          id: newMsgId || Date.now(),
+          sender: "me",
+          text,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setMessages((prev) => [...prev, msg]);
+        setNewMessage("");
+
+        // Instantly update local conversation info
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === selectedConv.id
+              ? {
+                  ...c,
+                  lastMessage: text,
+                  time: "Just now",
+                }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    }
   };
 
   const handleKeyDown = (e) => {
