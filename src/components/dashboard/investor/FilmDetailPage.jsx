@@ -58,6 +58,9 @@ function mapProjectToFilm(p) {
     status: p.project_status?.replace(/_/g, " ") ?? "—",
     rating: null,
 
+    // filmmaker identity — used by "Contact Filmmaker" button
+    teamFilmakerId: p.filmmaker_id ?? null,
+
     images: [heroImage],
 
     fundingProgress: progress,
@@ -111,6 +114,7 @@ function mapProjectToFilm(p) {
     ],
   };
 }
+
 
 function fmt(n) {
   return `$${Number(n).toLocaleString()}`;
@@ -464,7 +468,18 @@ function ApplyToInvestModal({ film, onClose }) {
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
 function InvestmentPanel({ film }) {
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
+
+  function handleContactFilmaker() {
+    const params = new URLSearchParams({
+      filmerId: film.teamFilmakerId ?? "",
+      filmerName: film.team?.[0]?.name ?? "Filmmaker",
+      projectId: film.id ?? "",
+      projectTitle: film.title ?? "",
+    });
+    router.push(`/dashboard/investor/messages?${params.toString()}`);
+  }
 
   return (
     <>
@@ -513,10 +528,12 @@ function InvestmentPanel({ film }) {
           <TrendingUp size={16} />
           Apply to Invest
         </button>
-        <button className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm  uppercase tracking-wider py-3 rounded-full ">
+        <button
+          onClick={handleContactFilmaker}
+          className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm uppercase tracking-wider py-3 rounded-full hover:bg-[#E50914]/10 transition duration-200"
+        >
           <MessageSquare size={14} />
           Contact Filmmaker
-          <span className="text-[10px] text-red-600 font-normal">(Apply First)</span>
         </button>
       </div>
 
@@ -524,6 +541,7 @@ function InvestmentPanel({ film }) {
     </>
   );
 }
+
 
 // ── Main Component ────────────────────────────────────────────────────────────
 // Props:
