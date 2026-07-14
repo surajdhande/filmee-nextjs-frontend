@@ -5,8 +5,6 @@ const API_BASE_URL = "http://127.0.0.1:5000/api/v1/messages";
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
 
-  console.log("JWT:", token);
-
   return {
     Authorization: `Bearer ${token}`,
   };
@@ -31,8 +29,6 @@ export const getConversation = async (userId) => {
     }
   );
 
-  console.log("Conversations API Response:", response.data);
-
 return response.data.data;  
 };
 
@@ -56,11 +52,11 @@ export const sendMessage = async (
   return response.data;
 };
 
-export const markMessageAsRead = async (messageId) => {
+export const markMessageAsRead = async (conversationUserId) => {
   const response = await axios.put(
     `${API_BASE_URL}/read`,
     {
-      message_id: messageId,
+      conversation_user_id: conversationUserId,
     },
     {
       headers: getAuthHeaders(),

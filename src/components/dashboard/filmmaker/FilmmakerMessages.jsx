@@ -9,8 +9,9 @@ import {
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
+  getConversation,
   getConversations,
-  getConversation
+  markMessageAsRead,
 } from "@/services/messageService";
 import {
   ArrowLeft,
@@ -52,7 +53,7 @@ const fetchConversations = useCallback(async () => {
       project: "",
       avatar: conversation.full_name?.charAt(0) || "?",
       avatarColor: "#E50914",
-      unread: conversation.is_read ? 0 : 1,
+      unread: conversation.unread_count,
       lastMessage: conversation.message_body,
       time: new Date(conversation.sent_at).toLocaleTimeString([], {
         hour: "2-digit",
@@ -62,19 +63,16 @@ const fetchConversations = useCallback(async () => {
       isActive: false,
     }));
 
-    console.log("Formatted Conversations:", formatted);
-
     setConversations(formatted);
-    console.log("State being set:", formatted);
   } catch (error) {
     console.error("Failed to fetch conversations:", error);
   }
 }, []);
 
 const loadConversation = useCallback(async (userId) => {
-    console.log("Loading conversation:", userId);
+    // console.log("Loading conversation:", userId);
   try {
-    console.log("Loading conversation:", userId);
+    // console.log("Loading conversation:", userId);
     const data = await getConversation(userId);
 
     const currentUserId = JSON.parse(
@@ -92,6 +90,9 @@ const loadConversation = useCallback(async (userId) => {
     }));
 
     setMessages(formattedMessages);
+    await markMessageAsRead(userId);
+    await fetchConversations();
+
   } catch (error) {
     console.error(error);
   }
@@ -161,23 +162,23 @@ useEffect(() => {
   });
 
   socket.on("receive_message", (message) => {
-    console.log("=== SOCKET MESSAGE RECEIVED ===");
-    console.log("Socket Message:", message);
-    console.log("sent_at:", message.sent_at);
+  const activeConversation = selectedConvRef.current;
 
-    const activeConversation = selectedConvRef.current;
+  // Update the open chat instantly
+  if (
+    activeConversation &&
+    (
+      activeConversation.id === message.sender_id ||
+      activeConversation.id === message.recipient_id
+    )
+  ) {
+    setMessages((prev) => {
+      // Prevent duplicate messages
+      if (prev.some((m) => m.id === message.message_id)) {
+        return prev;
+      }
 
-    console.log("Selected Conversation:", activeConversation);
-
-    // Update the open chat instantly
-    if (
-      activeConversation &&
-      (
-        activeConversation.id === message.sender_id ||
-        activeConversation.id === message.recipient_id
-      )
-    ) {
-      setMessages((prev) => [
+      return [
         ...prev,
         {
           id: message.message_id,
@@ -185,32 +186,33 @@ useEffect(() => {
             message.sender_id === currentUserId ? "me" : "other",
           text: message.message_body,
           time: new Date(message.sent_at).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        }),
-                },
-      ]);
-    }
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ];
+    });
+  }
 
-    // Update conversation preview instantly
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id ===
-        (message.sender_id === currentUserId
-          ? message.recipient_id
-          : message.sender_id)
-          ? {
-              ...conv,
-              lastMessage: message.message_body,
-              time: new Date(message.sent_at).toLocaleTimeString([], {
+  // Update conversation preview
+  setConversations((prev) =>
+    prev.map((conv) =>
+      conv.id ===
+      (message.sender_id === currentUserId
+        ? message.recipient_id
+        : message.sender_id)
+        ? {
+            ...conv,
+            lastMessage: message.message_body,
+            time: new Date(message.sent_at).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             }),
-            }
-          : conv
-      )
-    );
-  });
+          }
+        : conv
+    )
+  );
+});
 
   return () => {
     leaveRoom(currentUserId);
