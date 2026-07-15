@@ -9,6 +9,9 @@ function getAuthHeaders() {
   };
 }
 
+// ─────────────────────────────────────────────────────────────
+// Fetch all conversations for the logged-in user
+// ─────────────────────────────────────────────────────────────
 export const getConversations = async () => {
   const response = await axios.get(
     `${API_BASE_URL}/conversations`,
@@ -16,9 +19,13 @@ export const getConversations = async () => {
       headers: getAuthHeaders(),
     }
   );
+
   return response.data.data;
 };
 
+// ─────────────────────────────────────────────────────────────
+// Fetch messages for a selected conversation
+// ─────────────────────────────────────────────────────────────
 export const getConversation = async (userId) => {
   const response = await axios.get(
     `${API_BASE_URL}/conversation/${userId}`,
@@ -26,9 +33,13 @@ export const getConversation = async (userId) => {
       headers: getAuthHeaders(),
     }
   );
-return response.data.data;  
+
+  return response.data.data;
 };
 
+// ─────────────────────────────────────────────────────────────
+// Send Message
+// ─────────────────────────────────────────────────────────────
 export const sendMessage = async (
   recipientId,
   messageBody,
@@ -45,9 +56,13 @@ export const sendMessage = async (
       headers: getAuthHeaders(),
     }
   );
+
   return response.data;
 };
 
+// ─────────────────────────────────────────────────────────────
+// Mark Conversation As Read
+// ─────────────────────────────────────────────────────────────
 export const markMessageAsRead = async (conversationUserId) => {
   const response = await axios.put(
     `${API_BASE_URL}/read`,
@@ -58,10 +73,14 @@ export const markMessageAsRead = async (conversationUserId) => {
       headers: getAuthHeaders(),
     }
   );
+
   return response.data;
 };
 
+// ─────────────────────────────────────────────────────────────
 // Search Users
+// Returns up to 10 users matching the search query
+// ─────────────────────────────────────────────────────────────
 export const searchUsers = async (query) => {
   const response = await axios.post(
     `${API_BASE_URL}/search-users`,

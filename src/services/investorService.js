@@ -41,3 +41,47 @@ export const createInvestment = async (projectId, amount) => {
   );
   return response.data;
 };
+
+/* ─── Profile API ─────────────────────────────────────────────────── */
+
+/**
+ * GET /api/v1/profile/me
+ * Returns the logged-in user's full profile.
+ */
+export const getMyProfile = async () => {
+  const response = await axios.get(`${API_BASE_URL}/profile/me`, {
+    headers: getAuthHeaders(),
+  });
+  return response.data.profile;
+};
+
+/**
+ * PUT /api/v1/profile/me
+ * Updates profile fields. All fields below are accepted by the backend.
+ * @param {Object} data - { first_name, last_name, phone_number, bio,
+ *                          location, website_portfolio_url,
+ *                          years_of_experience, skills[], achievements[] }
+ */
+export const updateMyProfile = async (data) => {
+  const response = await axios.put(`${API_BASE_URL}/profile/me`, data, {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};
+
+/**
+ * PUT /api/v1/profile/me/image
+ * Uploads a profile avatar image (multipart/form-data).
+ * @param {File} imageFile
+ */
+export const uploadProfileImage = async (imageFile) => {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+  const response = await axios.put(`${API_BASE_URL}/profile/me/image`, formData, {
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data; // { message, profile_image_url }
+};

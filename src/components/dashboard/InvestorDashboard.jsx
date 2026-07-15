@@ -264,7 +264,10 @@ export default function InvestorDashboard() {
                 </span>
               </button>
 
-              <button className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300">
+              <button
+                onClick={() => router.push("/dashboard/investor/settings")}
+                className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300"
+              >
                 <Settings size={13} className="text-[#E50914]"/>
                 <span className="text-[15px] font-bold uppercase tracking-wider text-[#E50914]">
                   Settings
