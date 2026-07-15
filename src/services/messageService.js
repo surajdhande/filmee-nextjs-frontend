@@ -4,7 +4,6 @@ const API_BASE_URL = "http://127.0.0.1:5000/api/v1/messages";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
-
   return {
     Authorization: `Bearer ${token}`,
   };
@@ -17,7 +16,6 @@ export const getConversations = async () => {
       headers: getAuthHeaders(),
     }
   );
-
   return response.data.data;
 };
 
@@ -28,7 +26,6 @@ export const getConversation = async (userId) => {
       headers: getAuthHeaders(),
     }
   );
-
 return response.data.data;  
 };
 
@@ -48,7 +45,6 @@ export const sendMessage = async (
       headers: getAuthHeaders(),
     }
   );
-
   return response.data;
 };
 
@@ -62,6 +58,20 @@ export const markMessageAsRead = async (conversationUserId) => {
       headers: getAuthHeaders(),
     }
   );
-
   return response.data;
+};
+
+// Search Users
+export const searchUsers = async (query) => {
+  const response = await axios.post(
+    `${API_BASE_URL}/search-users`,
+    {
+      query,
+    },
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data.data;
 };

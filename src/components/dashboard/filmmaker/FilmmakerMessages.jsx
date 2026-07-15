@@ -12,6 +12,7 @@ import {
   getConversation,
   getConversations,
   markMessageAsRead,
+  searchUsers,
 } from "@/services/messageService";
 import {
   ArrowLeft,
@@ -21,6 +22,7 @@ import {
   Send,
   Shield,
   Filter,
+  Plus,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -39,11 +41,17 @@ export default function FilmmakerMessages() {
   const selectedConvRef = useRef(null);
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+const [searchResults, setSearchResults] = useState([]);
+const [isSearching, setIsSearching] = useState(false);
   const bottomRef = useRef(null);
 
 const fetchConversations = useCallback(async () => {
   try {
     const data = await getConversations();
+
+    console.log("Conversations API:", data);
 
     console.log("Fetched Conversations:", data);
 
@@ -99,6 +107,9 @@ const loadConversation = useCallback(async (userId) => {
 }, []);
 
   const handleSelectConversation = async (conv) => {
+  
+    console.log("Selected:", conv.id, conv.name, conv.role);
+
   try {
     setSelectedConv(conv);
 
@@ -108,8 +119,9 @@ const loadConversation = useCallback(async (userId) => {
   }
 };
 
-  const handleSend = () => {
-  const text = newMessage.trim();
+// Send Message
+// Sends a realtime message through Socket.IO
+const handleSend = async () => {  const text = newMessage.trim();
 
   if (!text || !selectedConv) return;
 
@@ -118,13 +130,15 @@ const loadConversation = useCallback(async (userId) => {
   ).user_id;
 
   sendSocketMessage(
-    currentUserId,
-    selectedConv.id,
-    text,
-    null
-  );
-
+  currentUserId,
+  selectedConv.id,
+  text,
+  null
+);
   setNewMessage("");
+
+  // Refresh sidebar so newly created conversations appear
+  await fetchConversations();
 };
 
   const handleKeyDown = (e) => {
@@ -195,23 +209,59 @@ useEffect(() => {
   }
 
   // Update conversation preview
-  setConversations((prev) =>
-    prev.map((conv) =>
-      conv.id ===
-      (message.sender_id === currentUserId
-        ? message.recipient_id
-        : message.sender_id)
-        ? {
-            ...conv,
-            lastMessage: message.message_body,
-            time: new Date(message.sent_at).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          }
-        : conv
-    )
+  // ─────────────────────────────────────────────────────────────
+// Update Conversation Sidebar
+// - Update existing conversation
+// - Add a new conversation if it doesn't exist
+// ─────────────────────────────────────────────────────────────
+setConversations((prev) => {
+  const otherUserId =
+    message.sender_id === currentUserId
+      ? message.recipient_id
+      : message.sender_id;
+
+  // Check whether the conversation already exists
+  const existingConversation = prev.find(
+    (conv) => conv.id === otherUserId
   );
+
+  // Update existing conversation
+    if (existingConversation) {
+    const updatedConversation = {
+      ...existingConversation,
+      lastMessage: message.message_body,
+      time: new Date(message.sent_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    return [
+      updatedConversation,
+      ...prev.filter((conv) => conv.id !== otherUserId),
+    ];
+  }
+
+  // Add new conversation to the top of the sidebar
+  return [
+    {
+      id: selectedConvRef.current?.id,
+      name: selectedConvRef.current?.name,
+      project: "",
+      avatar: selectedConvRef.current?.avatar,
+      avatarColor: "#E50914",
+      unread: 0,
+      lastMessage: message.message_body,
+      time: new Date(message.sent_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      role: selectedConvRef.current?.role,
+      isActive: false,
+    },
+    ...prev,
+  ];
+});
 });
 
   return () => {
@@ -224,6 +274,31 @@ useEffect(() => {
     socket.disconnect();
   };
 }, []);
+
+// Search Users
+useEffect(() => {
+  // Don't search for empty text
+  if (!userSearch.trim()) {
+    setSearchResults([]);
+    return;
+  }
+
+  const timeout = setTimeout(async () => {
+    try {
+      setIsSearching(true);
+
+      const users = await searchUsers(userSearch);
+      console.log("Search Results:", users);
+      setSearchResults(users);
+    } catch (error) {
+      console.error("Failed to search users:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(timeout);
+}, [userSearch]);
 
   const filteredConversations = conversations.filter((c) => {
     const matchesSearch =
@@ -275,11 +350,20 @@ useEffect(() => {
                 {filteredConversations.length} chat{filteredConversations.length !== 1 ? "s" : ""}
               </p>
             </div>
-            {totalUnread > 0 && (
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
-                {totalUnread}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+          <button
+          onClick={() => setShowNewChatModal(true)}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2A2A2A] bg-[#161616] text-white transition hover:bg-[#222]"
+        >
+            <Plus size={16} />
+          </button>
+
+          {totalUnread > 0 && (
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
+              {totalUnread}
+            </span>
+          )}
+        </div>
           </div>
 
           {/* Search */}
@@ -493,6 +577,135 @@ useEffect(() => {
           )}
         </div>
       </div>
+            {/* ─────────────────────────────────────────────────────────────
+          New Message Modal
+          Opens when user clicks the "+" button
+      ───────────────────────────────────────────────────────────── */}
+      {showNewChatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="w-[420px] rounded-2xl border border-[#2A2A2A] bg-[#111] shadow-2xl">
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#222] px-5 py-4">
+              <h2 className="text-lg font-semibold text-white">
+                New Message
+              </h2>
+
+              <button
+                onClick={() => setShowNewChatModal(false)}
+                className="text-zinc-400 transition hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {
+            /* ─────────────────────────────────────────────────────────────
+                Search Input
+            ───────────────────────────────────────────────────────────── */}
+    <div className="p-5">
+
+      <div className="flex items-center gap-2 rounded-xl border border-[#2A2A2A] bg-[#1A1A1A] px-3 py-2">
+
+        <Search
+          size={16}
+          className="text-zinc-500 shrink-0"
+        />
+
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={userSearch}
+          onChange={(e) => setUserSearch(e.target.value)}
+          className="w-full bg-transparent text-sm text-white placeholder-zinc-500 outline-none"
+        />
+
+      </div>
+      {/* ─────────────────────────────────────────────────────────────
+          Search Results
+      ───────────────────────────────────────────────────────────── */}
+
+      <div className="mt-4 max-h-72 overflow-y-auto">
+
+        {/* Loading State */}
+        {isSearching && (
+          <p className="py-4 text-center text-sm text-zinc-500">
+            Searching...
+          </p>
+        )}
+
+        {/* Search Results */}
+        {!isSearching &&
+          searchResults.map((user) => (
+            <button
+            key={user.user_id}
+            onClick={async () => {
+              // ─────────────────────────────────────────────────────────────
+              // Open selected user's conversation
+              // If no conversation exists, an empty chat is shown.
+              // The first message will automatically create the conversation.
+              // ─────────────────────────────────────────────────────────────
+
+              const conversation = {
+                id: user.user_id,
+                name: user.full_name,
+                project: "",
+                avatar: user.full_name.charAt(0),
+                avatarColor: "#E50914",
+                unread: 0,
+                lastMessage: "",
+                time: "",
+                role: user.user_role,
+                isActive: false,
+              };
+
+              setSelectedConv(conversation);
+
+              await loadConversation(user.user_id);
+
+              setShowNewChatModal(false);
+
+              setUserSearch("");
+
+              setSearchResults([]);
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-[#1A1A1A]"
+          >
+              {/* Avatar */}
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E50914] font-bold text-white">
+                {user.full_name.charAt(0)}
+              </div>
+
+              {/* User Details */}
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-semibold text-white">
+                  {user.full_name}
+                </span>
+
+                <span className="text-xs uppercase text-zinc-500">
+                  {user.user_role}
+                </span>
+              </div>
+            </button>
+          ))}
+
+        {/* Empty State */}
+        {!isSearching &&
+          userSearch.trim() &&
+          searchResults.length === 0 && (
+            <p className="py-4 text-center text-sm text-zinc-500">
+              No users found.
+            </p>
+          )}
+
+      </div>
+
+    </div>
+
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }
