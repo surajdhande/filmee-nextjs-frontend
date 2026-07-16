@@ -15,20 +15,9 @@ import Image from "next/image";
 import {
   getConversations,
   getConversation,
+  sendMessage,
   markMessageAsRead,
 } from "@/services/messageService";
-import {
-  socket,
-  joinRoom,
-  leaveRoom,
-  sendSocketMessage,
-} from "@/services/socketService";
-import {
-  socket,
-  joinRoom,
-  leaveRoom,
-  sendSocketMessage,
-} from "@/services/socketService";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -100,85 +89,32 @@ export default function InvestorMessages() {
   const [isSending, setIsSending]           = useState(false);
   const bottomRef = useRef(null);
 
-<<<<<<< HEAD
-  // ── Load current user ──────────────────────────────────────────────────────
-=======
-  const selectedConvRef = useRef(null);
-
   // Load current user from localStorage
->>>>>>> 7c90892 (Message ui integrated)
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setCurrentUser(JSON.parse(stored));
   }, []);
 
-<<<<<<< HEAD
-  // ── Core data functions (defined before effects that use them) ─────────────
-
-  const loadMessages = useCallback(async (convId) => {
-    try {
-      const res = await getConversationMessages(convId);
-      if (res.success && res.data) {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const mapped = res.data.map((m) => ({
-=======
+  // ── Load conversations ─────────────────────────────────────────────────────
   const loadConversations = useCallback(async () => {
     try {
       const data = await getConversations();
       if (Array.isArray(data)) {
-        const mapped = data.map((c) => {
-          const name = c.full_name || "Unknown User";
-          const initials = name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase();
-
-          return {
-            id: c.other_user_id,
-            name: name,
-            project: c.user_role ? c.user_role.charAt(0).toUpperCase() + c.user_role.slice(1) : "Project Inquiry",
-            avatar: initials || "?",
-            avatarColor: c.user_role === "filmmaker" ? "#E50914" : "#7C3AED",
-            unread: c.unread_count || 0,
-            lastMessage: c.message_body || "",
-            time: c.sent_at ? formatTime(c.sent_at) : "",
-            role: c.user_role || "User",
-            isActive: c.unread_count > 0,
-            raw: c,
-          };
-        });
-        setConversations(mapped);
+        setConversations(data.map(mapConversation));
       }
     } catch (err) {
       console.error("Failed to load conversations:", err);
     }
   }, []);
-  }, []);
 
-  // Poll conversations list as fallback
-  // Poll conversations list as fallback
-  useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
-  }, [loadConversations]);
-
-  // Scroll to bottom on new messages
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Load messages for a selected conversation
+  // ── Load messages for a selected conversation ──────────────────────────────
   const loadMessages = useCallback(async (convId) => {
-    if (!currentUser) return;
-  const loadMessages = useCallback(async (convId) => {
-    if (!currentUser) return;
+    if (!convId) return;
     try {
       const data = await getConversation(convId);
       if (Array.isArray(data)) {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         const mappedMsgs = data.map((m) => ({
->>>>>>> 7c90892 (Message ui integrated)
           id: m.message_id,
           sender: m.sender_id === storedUser.user_id ? "me" : "them",
           text: m.message_body,
@@ -187,34 +123,19 @@ export default function InvestorMessages() {
             minute: "2-digit",
           }),
         }));
-        setMessages(mapped);
+        setMessages(mappedMsgs);
       }
     } catch (err) {
       console.error("Failed to load messages:", err);
     }
-<<<<<<< HEAD
-  }, []);
-=======
-  }, [currentUser]);
->>>>>>> 7c90892 (Message ui integrated)
-
-  const loadConversations = useCallback(async () => {
-    try {
-      const res = await getConversations();
-      if (res.success && res.data) {
-        setConversations(res.data.map(mapConversation));
-      }
-    } catch (err) {
-      console.error("Failed to load conversations:", err);
-    }
   }, []);
 
+  // ── Open a conversation ────────────────────────────────────────────────────
   const openConversation = useCallback(async (conv) => {
     setSelectedConv(conv);
     await loadMessages(conv.id);
     if (conv.unread > 0) {
       try {
-        await markMessageAsRead(conv.id);
         await markMessageAsRead(conv.id);
         setConversations((prev) =>
           prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))
@@ -225,139 +146,26 @@ export default function InvestorMessages() {
     }
   }, [loadMessages]);
 
-<<<<<<< HEAD
   // ── Poll conversations ─────────────────────────────────────────────────────
   useEffect(() => {
     loadConversations();
     const interval = setInterval(loadConversations, 5000);
     return () => clearInterval(interval);
   }, [loadConversations]);
-=======
-  useEffect(() => {
-    selectedConvRef.current = selectedConv;
-  }, [selectedConv]);
-
-  // Socket connection and listener setup
-  useEffect(() => {
-    if (!currentUser) return;
-
-    socket.connect();
-    const currentUserId = currentUser.user_id;
-
-    socket.on("connected", (data) => {
-      console.log("Socket connected:", data.message);
-      joinRoom(currentUserId);
-    });
-
-    socket.on("joined", (data) => {
-      console.log("Socket joined:", data.message);
-    });
-
-    socket.on("receive_message", (message) => {
-      const activeConversation = selectedConvRef.current;
-
-      // Update current chat messages instantly
-      if (
-        activeConversation &&
-        (activeConversation.id === message.sender_id ||
-          activeConversation.id === message.recipient_id)
-      ) {
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === message.message_id)) {
-            return prev;
-          }
-          return [
-            ...prev,
-            {
-              id: message.message_id,
-              sender: message.sender_id === currentUserId ? "me" : "them",
-              text: message.message_body,
-              time: new Date(message.sent_at).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            },
-          ];
-        });
-      }
-
-      // Update conversation list preview
-      setConversations((prev) => {
-        const otherUserId =
-          message.sender_id === currentUserId
-            ? message.recipient_id
-            : message.sender_id;
-
-        const existingConv = prev.find((conv) => conv.id === otherUserId);
-
-        if (existingConv) {
-          const updatedConv = {
-            ...existingConv,
-            lastMessage: message.message_body,
-            time: formatTime(message.sent_at),
-            unread:
-              activeConversation?.id === otherUserId
-                ? 0
-                : (existingConv.unread || 0) + (message.sender_id !== currentUserId ? 1 : 0),
-            isActive: activeConversation?.id !== otherUserId && message.sender_id !== currentUserId,
-          };
-
-          return [
-            updatedConv,
-            ...prev.filter((conv) => conv.id !== otherUserId),
-          ];
-        }
-
-        // Add new conversation if it doesn't exist in the list
-        return [
-          {
-            id: otherUserId,
-            name: message.sender_name || "New Conversation",
-            project: "Project Inquiry",
-            avatar: "?",
-            avatarColor: "#7C3AED",
-            unread: message.sender_id !== currentUserId ? 1 : 0,
-            lastMessage: message.message_body,
-            time: formatTime(message.sent_at),
-            role: "User",
-            isActive: message.sender_id !== currentUserId,
-          },
-          ...prev,
-        ];
-      });
-    });
-
-    return () => {
-      leaveRoom(currentUserId);
-      socket.off("connected");
-      socket.off("joined");
-      socket.off("receive_message");
-      socket.disconnect();
-    };
-  }, [currentUser]);
->>>>>>> 7c90892 (Message ui integrated)
 
   // ── Auto-open filmmaker conversation from URL params ───────────────────────
-  // Runs once conversations finish loading (or immediately if no prior convs).
-  // Uses a ref-based "tried" flag so it fires even when conversations is [].
-  const autoOpenTriedRef = useRef(false);
-
   useEffect(() => {
     if (!paramFilmerId || autoOpenDone) return;
 
     const filmerId = parseInt(paramFilmerId, 10);
     if (isNaN(filmerId)) return;
 
-    // Wait until we've attempted at least one fetch (conversations may be empty
-    // but that's fine — we'll just send a new message to start the thread).
-    // We piggy-back on autoOpenDone to prevent re-running.
     const run = async () => {
       setAutoOpenDone(true);
 
       const existing = conversations.find((c) => c.id === filmerId);
 
       if (existing) {
-        // Prior conversation found — open it directly
         openConversation(existing);
         return;
       }
@@ -396,9 +204,6 @@ export default function InvestorMessages() {
       }
     };
 
-    // Fire immediately after first conversations fetch attempt.
-    // The poll useEffect calls loadConversations() once on mount;
-    // by the time this effect runs, conversations state is settled.
     run();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations, paramFilmerId, autoOpenDone]);
@@ -418,15 +223,14 @@ export default function InvestorMessages() {
   // ── Send a message ────────────────────────────────────────────────────────
   const handleSend = async () => {
     const text = newMessage.trim();
-<<<<<<< HEAD
     if (!text || !selectedConv || isSending) return;
 
     setIsSending(true);
     try {
       const res = await sendMessage(selectedConv.id, text);
-      if (res.success) {
+      if (res) {
         const optimistic = {
-          id: res.data?.message_id || Date.now(),
+          id: res.message_id || Date.now(),
           sender: "me",
           text,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -444,13 +248,6 @@ export default function InvestorMessages() {
     } finally {
       setIsSending(false);
     }
-=======
-    if (!text || !selectedConv || !currentUser) return;
-
-    sendSocketMessage(currentUser.user_id, selectedConv.id, text, null);
-    setNewMessage("");
-    await loadConversations();
->>>>>>> 7c90892 (Message ui integrated)
   };
 
   const handleKeyDown = (e) => {
