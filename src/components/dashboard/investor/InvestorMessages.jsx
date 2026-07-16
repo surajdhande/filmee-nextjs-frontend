@@ -14,9 +14,9 @@ import {
 import Image from "next/image";
 import {
   getConversations,
-  getConversationMessages,
+  getConversation,
   sendMessage,
-  markAsRead,
+  markMessageAsRead,
 } from "@/services/messageService";
 
 // ─── Filter Tabs ──────────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ export default function InvestorMessages() {
   // Load messages for a selected conversation
   const loadMessages = async (convId) => {
     try {
-      const res = await getConversationMessages(convId);
+      const res = await getConversation(convId);
       if (res.success && res.data) {
         const mappedMsgs = res.data.map((m) => ({
           id: m.message_id,
@@ -145,7 +145,7 @@ export default function InvestorMessages() {
     // Mark as read
     if (conv.unread > 0) {
       try {
-        await markAsRead(conv.id);
+        await markMessageAsRead(conv.id);
         setConversations((prev) =>
           prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))
         );

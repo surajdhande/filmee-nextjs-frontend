@@ -4,7 +4,7 @@ import { Film, DollarSign, Eye, TrendingUp } from "lucide-react";
 
 const StatsCardsSection = () => {
   return (
-    <section className="mb-12 mt-6">
+    <section className="mt-5 mb-10">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Projects"
