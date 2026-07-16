@@ -18,6 +18,12 @@ import {
   sendMessage,
   markAsRead,
 } from "@/services/messageService";
+import {
+  socket,
+  joinRoom,
+  leaveRoom,
+  sendSocketMessage,
+} from "@/services/socketService";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -89,12 +95,19 @@ export default function InvestorMessages() {
   const [isSending, setIsSending]           = useState(false);
   const bottomRef = useRef(null);
 
+<<<<<<< HEAD
   // ── Load current user ──────────────────────────────────────────────────────
+=======
+  const selectedConvRef = useRef(null);
+
+  // Load current user from localStorage
+>>>>>>> 7c90892 (Message ui integrated)
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setCurrentUser(JSON.parse(stored));
   }, []);
 
+<<<<<<< HEAD
   // ── Core data functions (defined before effects that use them) ─────────────
 
   const loadMessages = useCallback(async (convId) => {
@@ -103,6 +116,59 @@ export default function InvestorMessages() {
       if (res.success && res.data) {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         const mapped = res.data.map((m) => ({
+=======
+  const loadConversations = useCallback(async () => {
+    try {
+      const data = await getConversations();
+      if (Array.isArray(data)) {
+        const mapped = data.map((c) => {
+          const name = c.full_name || "Unknown User";
+          const initials = name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+
+          return {
+            id: c.other_user_id,
+            name: name,
+            project: c.user_role ? c.user_role.charAt(0).toUpperCase() + c.user_role.slice(1) : "Project Inquiry",
+            avatar: initials || "?",
+            avatarColor: c.user_role === "filmmaker" ? "#E50914" : "#7C3AED",
+            unread: c.unread_count || 0,
+            lastMessage: c.message_body || "",
+            time: c.sent_at ? formatTime(c.sent_at) : "",
+            role: c.user_role || "User",
+            isActive: c.unread_count > 0,
+            raw: c,
+          };
+        });
+        setConversations(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
+    }
+  }, []);
+
+  // Poll conversations list as fallback
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Load messages for a selected conversation
+  const loadMessages = useCallback(async (convId) => {
+    if (!currentUser) return;
+    try {
+      const data = await getConversation(convId);
+      if (Array.isArray(data)) {
+        const mappedMsgs = data.map((m) => ({
+>>>>>>> 7c90892 (Message ui integrated)
           id: m.message_id,
           sender: m.sender_id === storedUser.user_id ? "me" : "them",
           text: m.message_body,
@@ -116,7 +182,11 @@ export default function InvestorMessages() {
     } catch (err) {
       console.error("Failed to load messages:", err);
     }
+<<<<<<< HEAD
   }, []);
+=======
+  }, [currentUser]);
+>>>>>>> 7c90892 (Message ui integrated)
 
   const loadConversations = useCallback(async () => {
     try {
@@ -134,7 +204,7 @@ export default function InvestorMessages() {
     await loadMessages(conv.id);
     if (conv.unread > 0) {
       try {
-        await markAsRead(conv.id);
+        await markMessageAsRead(conv.id);
         setConversations((prev) =>
           prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))
         );
@@ -144,12 +214,117 @@ export default function InvestorMessages() {
     }
   }, [loadMessages]);
 
+<<<<<<< HEAD
   // ── Poll conversations ─────────────────────────────────────────────────────
   useEffect(() => {
     loadConversations();
     const interval = setInterval(loadConversations, 5000);
     return () => clearInterval(interval);
   }, [loadConversations]);
+=======
+  useEffect(() => {
+    selectedConvRef.current = selectedConv;
+  }, [selectedConv]);
+
+  // Socket connection and listener setup
+  useEffect(() => {
+    if (!currentUser) return;
+
+    socket.connect();
+    const currentUserId = currentUser.user_id;
+
+    socket.on("connected", (data) => {
+      console.log("Socket connected:", data.message);
+      joinRoom(currentUserId);
+    });
+
+    socket.on("joined", (data) => {
+      console.log("Socket joined:", data.message);
+    });
+
+    socket.on("receive_message", (message) => {
+      const activeConversation = selectedConvRef.current;
+
+      // Update current chat messages instantly
+      if (
+        activeConversation &&
+        (activeConversation.id === message.sender_id ||
+          activeConversation.id === message.recipient_id)
+      ) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === message.message_id)) {
+            return prev;
+          }
+          return [
+            ...prev,
+            {
+              id: message.message_id,
+              sender: message.sender_id === currentUserId ? "me" : "them",
+              text: message.message_body,
+              time: new Date(message.sent_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ];
+        });
+      }
+
+      // Update conversation list preview
+      setConversations((prev) => {
+        const otherUserId =
+          message.sender_id === currentUserId
+            ? message.recipient_id
+            : message.sender_id;
+
+        const existingConv = prev.find((conv) => conv.id === otherUserId);
+
+        if (existingConv) {
+          const updatedConv = {
+            ...existingConv,
+            lastMessage: message.message_body,
+            time: formatTime(message.sent_at),
+            unread:
+              activeConversation?.id === otherUserId
+                ? 0
+                : (existingConv.unread || 0) + (message.sender_id !== currentUserId ? 1 : 0),
+            isActive: activeConversation?.id !== otherUserId && message.sender_id !== currentUserId,
+          };
+
+          return [
+            updatedConv,
+            ...prev.filter((conv) => conv.id !== otherUserId),
+          ];
+        }
+
+        // Add new conversation if it doesn't exist in the list
+        return [
+          {
+            id: otherUserId,
+            name: message.sender_name || "New Conversation",
+            project: "Project Inquiry",
+            avatar: "?",
+            avatarColor: "#7C3AED",
+            unread: message.sender_id !== currentUserId ? 1 : 0,
+            lastMessage: message.message_body,
+            time: formatTime(message.sent_at),
+            role: "User",
+            isActive: message.sender_id !== currentUserId,
+          },
+          ...prev,
+        ];
+      });
+    });
+
+    return () => {
+      leaveRoom(currentUserId);
+      socket.off("connected");
+      socket.off("joined");
+      socket.off("receive_message");
+      socket.disconnect();
+    };
+  }, [currentUser]);
+>>>>>>> 7c90892 (Message ui integrated)
 
   // ── Auto-open filmmaker conversation from URL params ───────────────────────
   // Runs once conversations finish loading (or immediately if no prior convs).
@@ -232,6 +407,7 @@ export default function InvestorMessages() {
   // ── Send a message ────────────────────────────────────────────────────────
   const handleSend = async () => {
     const text = newMessage.trim();
+<<<<<<< HEAD
     if (!text || !selectedConv || isSending) return;
 
     setIsSending(true);
@@ -257,6 +433,13 @@ export default function InvestorMessages() {
     } finally {
       setIsSending(false);
     }
+=======
+    if (!text || !selectedConv || !currentUser) return;
+
+    sendSocketMessage(currentUser.user_id, selectedConv.id, text, null);
+    setNewMessage("");
+    await loadConversations();
+>>>>>>> 7c90892 (Message ui integrated)
   };
 
   const handleKeyDown = (e) => {

@@ -49,6 +49,7 @@ function mapProjectToFilm(p) {
 
   return {
     id: p.project_id,
+    filmmakerId: p.filmmaker_id,
     title: p.title,
     tagline: p.logline || "",
     genre: p.genre || "—",
@@ -529,8 +530,32 @@ function InvestmentPanel({ film }) {
           Apply to Invest
         </button>
         <button
+<<<<<<< HEAD
           onClick={handleContactFilmaker}
           className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm uppercase tracking-wider py-3 rounded-full hover:bg-[#E50914]/10 transition duration-200"
+=======
+          onClick={async () => {
+            if (!film.filmmakerId) {
+              alert("Filmmaker contact information is not available.");
+              return;
+            }
+            try {
+              // Initiate conversation by sending an initial system message
+              await sendMessage(
+                film.filmmakerId,
+                `Hi! I'm interested in discussing your project: "${film.title}".`,
+                film.id
+              );
+              // Route to the dashboard investor messages page
+              router.push("/dashboard/investor/messages");
+            } catch (err) {
+              console.error("Failed to initiate contact:", err);
+              // If the conversation was already initiated, we can still redirect them
+              router.push("/dashboard/investor/messages");
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm  uppercase tracking-wider py-3 rounded-full hover:bg-red-600/10 transition-all"
+>>>>>>> 7c90892 (Message ui integrated)
         >
           <MessageSquare size={14} />
           Contact Filmmaker
