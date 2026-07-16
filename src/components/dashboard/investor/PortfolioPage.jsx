@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, FolderOpen } from "lucide-react";
 import InvestorLayout from "./InvestorLayout";
 import PortfolioCard from "./PortfolioCard";
 import { getMyInvestments } from "@/services/investorService";
 
 export default function PortfolioPage() {
+  const router = useRouter();
   const [portfolio, setPortfolio] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,13 +21,21 @@ export default function PortfolioPage() {
         setPortfolio(data || []);
       } catch (err) {
         console.error("Failed to load portfolio:", err);
-        setError("Failed to load your investments. Please try again.");
+        const status = err?.response?.status;
+        if (status === 401 || status === 403) {
+          // Session expired — redirect to login
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          router.push("/login");
+        } else {
+          setError("Failed to load your investments. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
     }
     fetchPortfolio();
-  }, []);
+  }, [router]);
 
   // Map API fields to PortfolioCard shape
   const mapped = portfolio.map((inv) => {

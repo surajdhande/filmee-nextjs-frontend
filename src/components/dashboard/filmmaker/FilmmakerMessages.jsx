@@ -43,11 +43,29 @@ export default function FilmmakerMessages() {
   const [messages, setMessages] = useState([]);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [userSearch, setUserSearch] = useState("");
-const [searchResults, setSearchResults] = useState([]);
-const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const bottomRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Safeguard: Redirect if not logged in
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    if (!storedUser || !token) {
+      router.push("/login");
+      return;
+    }
+    try {
+      setCurrentUser(JSON.parse(storedUser));
+    } catch (e) {
+      router.push("/login");
+    }
+  }, [router]);
 
 const fetchConversations = useCallback(async () => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (!token) return;
   try {
     const data = await getConversations();
 
@@ -78,26 +96,37 @@ const fetchConversations = useCallback(async () => {
 }, []);
 
 const loadConversation = useCallback(async (userId) => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (!token) return;
     // console.log("Loading conversation:", userId);
   try {
     // console.log("Loading conversation:", userId);
     const data = await getConversation(userId);
 
     const currentUserId = JSON.parse(
-      atob(localStorage.getItem("token").split(".")[1])
+      atob(token.split(".")[1])
     ).user_id;
 
-    const formattedMessages = data.map((message) => ({
-      id: message.message_id,
-      sender: message.sender_id === currentUserId ? "me" : "other",
-      text: message.message_body,
-      time: new Date(message.sent_at).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    }));
+    console.log("[FILMMAKER JWT user_id]:", currentUserId, typeof currentUserId);
 
-    setMessages(formattedMessages);
+    const formattedMessages = data.map((message) => {
+      const isMine = String(message.sender_id) === String(currentUserId);
+      console.log(
+        "[MSG DEBUG]",
+        "sender_id:", message.sender_id, "("+typeof message.sender_id+")",
+        "currentUserId:", currentUserId, "("+typeof currentUserId+")",
+        "isMine:", isMine
+      );
+      return {
+        id: message.message_id,
+        sender: isMine ? "me" : "other",
+        text: message.message_body,
+        time: new Date(message.sent_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+    });
     await markMessageAsRead(userId);
     await fetchConversations();
 
@@ -125,8 +154,11 @@ const handleSend = async () => {  const text = newMessage.trim();
 
   if (!text || !selectedConv) return;
 
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (!token) return;
+
   const currentUserId = JSON.parse(
-    atob(localStorage.getItem("token").split(".")[1])
+    atob(token.split(".")[1])
   ).user_id;
 
   sendSocketMessage(
@@ -160,10 +192,13 @@ useEffect(() => {
 }, [selectedConv]);
 
 useEffect(() => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (!token) return;
+
   socket.connect();
 
   const currentUserId = JSON.parse(
-    atob(localStorage.getItem("token").split(".")[1])
+    atob(token.split(".")[1])
   ).user_id;
 
   socket.on("connected", (data) => {
@@ -197,7 +232,7 @@ useEffect(() => {
         {
           id: message.message_id,
           sender:
-            message.sender_id === currentUserId ? "me" : "other",
+            Number(message.sender_id) === Number(currentUserId) ? "me" : "other",
           text: message.message_body,
           time: new Date(message.sent_at).toLocaleTimeString([], {
             hour: "2-digit",
@@ -310,6 +345,14 @@ useEffect(() => {
   });
 
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+
+  if (!currentUser) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-[#0B0B0B] text-white overflow-hidden">

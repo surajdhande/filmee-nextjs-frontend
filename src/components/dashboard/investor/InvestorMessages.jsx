@@ -71,12 +71,21 @@ export default function InvestorMessages() {
   // Load current user from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    if (stored) {
-      setCurrentUser(JSON.parse(stored));
+    const token = localStorage.getItem("token");
+    if (!stored || !token) {
+      router.push("/login");
+      return;
     }
-  }, []);
+    try {
+      setCurrentUser(JSON.parse(stored));
+    } catch (e) {
+      router.push("/login");
+    }
+  }, [router]);
 
   const loadConversations = useCallback(async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) return;
     try {
       const data = await getConversations();
       if (Array.isArray(data)) {
@@ -126,15 +135,24 @@ export default function InvestorMessages() {
     try {
       const data = await getConversation(convId);
       if (Array.isArray(data)) {
-        const mappedMsgs = data.map((m) => ({
-          id: m.message_id,
-          sender: m.sender_id === currentUser?.user_id ? "me" : "them",
-          text: m.message_body,
-          time: new Date(m.sent_at).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        }));
+        const mappedMsgs = data.map((m) => {
+          const isMine = String(m.sender_id) === String(currentUser?.user_id);
+          console.log(
+            "[MSG DEBUG]",
+            "sender_id:", m.sender_id, "("+typeof m.sender_id+")",
+            "user_id:", currentUser?.user_id, "("+typeof currentUser?.user_id+")",
+            "isMine:", isMine
+          );
+          return {
+            id: m.message_id,
+            sender: isMine ? "me" : "them",
+            text: m.message_body,
+            time: new Date(m.sent_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+        });
         setMessages(mappedMsgs);
       }
     } catch (err) {
@@ -196,7 +214,7 @@ export default function InvestorMessages() {
             ...prev,
             {
               id: message.message_id,
-              sender: message.sender_id === currentUserId ? "me" : "them",
+              sender: Number(message.sender_id) === Number(currentUserId) ? "me" : "them",
               text: message.message_body,
               time: new Date(message.sent_at).toLocaleTimeString([], {
                 hour: "2-digit",
@@ -288,6 +306,14 @@ export default function InvestorMessages() {
   });
 
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+
+  if (!currentUser) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-[#0B0B0B] text-white overflow-hidden">
