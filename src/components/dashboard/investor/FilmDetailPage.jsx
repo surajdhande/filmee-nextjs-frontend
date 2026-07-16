@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getProjectDetail } from "@/services/projectService";
 import { createInvestment } from "@/services/investorService";
+import { sendMessage } from "@/services/messageService";
 import {
   ArrowLeft,
   Share2,
@@ -49,6 +50,7 @@ function mapProjectToFilm(p) {
 
   return {
     id: p.project_id,
+    filmmakerId: p.filmmaker_id,
     title: p.title,
     tagline: p.logline || "",
     genre: p.genre || "—",
@@ -464,6 +466,7 @@ function ApplyToInvestModal({ film, onClose }) {
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
 function InvestmentPanel({ film }) {
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -513,10 +516,31 @@ function InvestmentPanel({ film }) {
           <TrendingUp size={16} />
           Apply to Invest
         </button>
-        <button className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm  uppercase tracking-wider py-3 rounded-full ">
+        <button
+          onClick={async () => {
+            if (!film.filmmakerId) {
+              alert("Filmmaker contact information is not available.");
+              return;
+            }
+            try {
+              // Initiate conversation by sending an initial system message
+              await sendMessage(
+                film.filmmakerId,
+                `Hi! I'm interested in discussing your project: "${film.title}".`,
+                film.id
+              );
+              // Route to the dashboard investor messages page
+              router.push("/dashboard/investor/messages");
+            } catch (err) {
+              console.error("Failed to initiate contact:", err);
+              // If the conversation was already initiated, we can still redirect them
+              router.push("/dashboard/investor/messages");
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm  uppercase tracking-wider py-3 rounded-full hover:bg-red-600/10 transition-all"
+        >
           <MessageSquare size={14} />
           Contact Filmmaker
-          <span className="text-[10px] text-red-600 font-normal">(Apply First)</span>
         </button>
       </div>
 

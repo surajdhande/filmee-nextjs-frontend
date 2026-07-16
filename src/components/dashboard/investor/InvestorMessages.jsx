@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -14,10 +14,15 @@ import {
 import Image from "next/image";
 import {
   getConversations,
-  getConversationMessages,
-  sendMessage,
-  markAsRead,
+  getConversation,
+  markMessageAsRead,
 } from "@/services/messageService";
+import {
+  socket,
+  joinRoom,
+  leaveRoom,
+  sendSocketMessage,
+} from "@/services/socketService";
 
 // ─── Filter Tabs ──────────────────────────────────────────────────────────────
 
@@ -61,6 +66,8 @@ export default function InvestorMessages() {
   const [currentUser, setCurrentUser] = useState(null);
   const bottomRef = useRef(null);
 
+  const selectedConvRef = useRef(null);
+
   // Load current user from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -69,11 +76,11 @@ export default function InvestorMessages() {
     }
   }, []);
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
-      const res = await getConversations();
-      if (res.success && res.data) {
-        const mapped = res.data.map((c) => {
+      const data = await getConversations();
+      if (Array.isArray(data)) {
+        const mapped = data.map((c) => {
           const name = c.full_name || "Unknown User";
           const initials = name
             .split(" ")
@@ -101,16 +108,12 @@ export default function InvestorMessages() {
     } catch (err) {
       console.error("Failed to load conversations:", err);
     }
-  };
+  }, []);
 
-  // Poll conversations list
+  // Poll conversations list as fallback
   useEffect(() => {
     loadConversations();
-    const interval = setInterval(() => {
-      loadConversations();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [loadConversations]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -118,11 +121,12 @@ export default function InvestorMessages() {
   }, [messages]);
 
   // Load messages for a selected conversation
-  const loadMessages = async (convId) => {
+  const loadMessages = useCallback(async (convId) => {
+    if (!currentUser) return;
     try {
-      const res = await getConversationMessages(convId);
-      if (res.success && res.data) {
-        const mappedMsgs = res.data.map((m) => ({
+      const data = await getConversation(convId);
+      if (Array.isArray(data)) {
+        const mappedMsgs = data.map((m) => ({
           id: m.message_id,
           sender: m.sender_id === currentUser?.user_id ? "me" : "them",
           text: m.message_body,
@@ -136,7 +140,7 @@ export default function InvestorMessages() {
     } catch (err) {
       console.error("Failed to load messages:", err);
     }
-  };
+  }, [currentUser]);
 
   const handleSelectConversation = async (conv) => {
     setSelectedConv(conv);
@@ -145,7 +149,7 @@ export default function InvestorMessages() {
     // Mark as read
     if (conv.unread > 0) {
       try {
-        await markAsRead(conv.id);
+        await markMessageAsRead(conv.id);
         setConversations((prev) =>
           prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))
         );
@@ -155,48 +159,116 @@ export default function InvestorMessages() {
     }
   };
 
-  // Poll selected conversation messages
   useEffect(() => {
-    if (!selectedConv || !currentUser) return;
-    const fetchInterval = setInterval(() => {
-      loadMessages(selectedConv.id);
-    }, 4000);
-    return () => clearInterval(fetchInterval);
-  }, [selectedConv, currentUser]);
+    selectedConvRef.current = selectedConv;
+  }, [selectedConv]);
+
+  // Socket connection and listener setup
+  useEffect(() => {
+    if (!currentUser) return;
+
+    socket.connect();
+    const currentUserId = currentUser.user_id;
+
+    socket.on("connected", (data) => {
+      console.log("Socket connected:", data.message);
+      joinRoom(currentUserId);
+    });
+
+    socket.on("joined", (data) => {
+      console.log("Socket joined:", data.message);
+    });
+
+    socket.on("receive_message", (message) => {
+      const activeConversation = selectedConvRef.current;
+
+      // Update current chat messages instantly
+      if (
+        activeConversation &&
+        (activeConversation.id === message.sender_id ||
+          activeConversation.id === message.recipient_id)
+      ) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === message.message_id)) {
+            return prev;
+          }
+          return [
+            ...prev,
+            {
+              id: message.message_id,
+              sender: message.sender_id === currentUserId ? "me" : "them",
+              text: message.message_body,
+              time: new Date(message.sent_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ];
+        });
+      }
+
+      // Update conversation list preview
+      setConversations((prev) => {
+        const otherUserId =
+          message.sender_id === currentUserId
+            ? message.recipient_id
+            : message.sender_id;
+
+        const existingConv = prev.find((conv) => conv.id === otherUserId);
+
+        if (existingConv) {
+          const updatedConv = {
+            ...existingConv,
+            lastMessage: message.message_body,
+            time: formatTime(message.sent_at),
+            unread:
+              activeConversation?.id === otherUserId
+                ? 0
+                : (existingConv.unread || 0) + (message.sender_id !== currentUserId ? 1 : 0),
+            isActive: activeConversation?.id !== otherUserId && message.sender_id !== currentUserId,
+          };
+
+          return [
+            updatedConv,
+            ...prev.filter((conv) => conv.id !== otherUserId),
+          ];
+        }
+
+        // Add new conversation if it doesn't exist in the list
+        return [
+          {
+            id: otherUserId,
+            name: message.sender_name || "New Conversation",
+            project: "Project Inquiry",
+            avatar: "?",
+            avatarColor: "#7C3AED",
+            unread: message.sender_id !== currentUserId ? 1 : 0,
+            lastMessage: message.message_body,
+            time: formatTime(message.sent_at),
+            role: "User",
+            isActive: message.sender_id !== currentUserId,
+          },
+          ...prev,
+        ];
+      });
+    });
+
+    return () => {
+      leaveRoom(currentUserId);
+      socket.off("connected");
+      socket.off("joined");
+      socket.off("receive_message");
+      socket.disconnect();
+    };
+  }, [currentUser]);
 
   const handleSend = async () => {
     const text = newMessage.trim();
-    if (!text || !selectedConv) return;
+    if (!text || !selectedConv || !currentUser) return;
 
-    try {
-      const res = await sendMessage(selectedConv.id, text);
-      if (res.success) {
-        const newMsgId = res.data?.message_id;
-        const msg = {
-          id: newMsgId || Date.now(),
-          sender: "me",
-          text,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-        setMessages((prev) => [...prev, msg]);
-        setNewMessage("");
-
-        // Instantly update local conversation info
-        setConversations((prev) =>
-          prev.map((c) =>
-            c.id === selectedConv.id
-              ? {
-                  ...c,
-                  lastMessage: text,
-                  time: "Just now",
-                }
-              : c
-          )
-        );
-      }
-    } catch (err) {
-      console.error("Failed to send message:", err);
-    }
+    sendSocketMessage(currentUser.user_id, selectedConv.id, text, null);
+    setNewMessage("");
+    await loadConversations();
   };
 
   const handleKeyDown = (e) => {
