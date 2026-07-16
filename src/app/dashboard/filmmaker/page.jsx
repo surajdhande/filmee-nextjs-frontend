@@ -23,7 +23,7 @@ export default function DashboardPage() {
       return;
     }
 
-    setUser(JSON.parse(storedUser));
+    setUser(() => JSON.parse(storedUser));
   }, [router]);
 
   if (!user) {
@@ -35,7 +35,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout role="FILMMAKER">
   <DashboardHeader username={user?.full_name || user?.name || "John Director"} />
 
   <div className="p-8">

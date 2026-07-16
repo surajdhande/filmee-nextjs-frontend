@@ -47,7 +47,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/Talent"
             className="transition duration-300 hover:text-red-500"
           >
             Talent

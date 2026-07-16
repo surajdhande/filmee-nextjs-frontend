@@ -13,7 +13,8 @@ export default function TalentDashboardPage() {
     const token = localStorage.getItem("token");
 
     if (!storedUser || !token) {
-      router.replace("/login");
+      // Not authenticated — redirect to signup with Talent role pre-selected
+      router.replace("/signup?role=TALENT");
       return;
     }
 

@@ -1,13 +1,14 @@
 import React from "react";
 import Sidebar from "./Sidebar";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, role = "FILMMAKER" }) => {
   return (
     <div className="flex h-screen bg-[#0B0B0B] text-white overflow-hidden">
 
+
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-[250px] shrink-0 bg-[#171717] border-r border-[#262626]">
-        <Sidebar role="FILMMAKER" />
+        <Sidebar role={role} />
       </aside>
 
       {/* Main Content */}

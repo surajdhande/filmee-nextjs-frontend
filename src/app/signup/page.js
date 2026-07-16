@@ -78,7 +78,11 @@ const handleSubmit = async (e) => {
 
     alert(response.message);
 
-    router.push("/login");
+    if (formData.user_role === "TALENT") {
+      router.push("/talent/dashboard");
+    } else {
+      router.push("/login");
+    }
 
   } catch (error) {
     console.error(error);
