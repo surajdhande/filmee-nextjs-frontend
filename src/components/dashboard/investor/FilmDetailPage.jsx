@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getProjectDetail } from "@/services/projectService";
 import { createInvestment } from "@/services/investorService";
+import { sendMessage } from "@/services/messageService";
 import {
   ArrowLeft,
   Share2,

@@ -47,6 +47,7 @@ const CustomTooltip = ({ active, payload }) => {
 export default function InvestorDashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [authError, setAuthError] = useState(false);
 
   const [stats, setStats] = useState({
     totalInvested: 0,
@@ -210,8 +211,17 @@ export default function InvestorDashboard() {
         });
         setPortfolioHistory(historyChart);
       })
-      .catch(() => {
-        setRecentInvestments([]);
+      .catch((err) => {
+        const status = err?.response?.status;
+        if (status === 401 || status === 403) {
+          // Token missing or expired — clear storage and redirect
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuthError(true);
+          router.push("/login");
+        } else {
+          setRecentInvestments([]);
+        }
       })
       .finally(() => setInvestmentsLoading(false));
   }, []);

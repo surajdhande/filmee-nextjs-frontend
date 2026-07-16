@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { BarChart2, Plus } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCardsSection from "@/components/dashboard/StatsCardsSection";
@@ -51,22 +51,52 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout
-      header={
-        <DashboardHeader username={profile?.full_name || user?.full_name || user?.name || "User"} />
-      }
+  <DashboardLayout
+    header={
+      <DashboardHeader
+        username={
+          profile?.full_name ||
+          user?.full_name ||
+          user?.name ||
+          "User"
+        }
+        showOverviewTitle={false}
+      />
+    }
+  >
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6">
+
+  {/* =========================================================
+      Dashboard Actions
+      ========================================================= */}
+  <div className="flex justify-end gap-4">
+
+    <button className="flex items-center gap-2 rounded-full border border-red-600 px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-red-500 transition hover:bg-red-600/10">
+      <BarChart2 size={14} />
+      View Analytics
+    </button>
+
+    <button
+      onClick={() => router.push("/dashboard/filmmaker/create-project")}
+      className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] transition hover:brightness-110"
     >
-      <div className="flex flex-col gap-14 p-10 lg:pl-16">
-        <StatsCardsSection />
+      <Plus size={15} />
+      Create Project
+    </button>
 
-        <SubscriptionCard />
+  </div>
 
-        <ChartsSection />
-        
-        <ProjectsSection />
-        
-        <RecentActivity />
-      </div>
-    </DashboardLayout>
-  );
+  <StatsCardsSection />
+
+  <SubscriptionCard />
+
+  <ChartsSection />
+
+  <ProjectsSection />
+
+  <RecentActivity />
+
+</div>
+  </DashboardLayout>
+);
 }

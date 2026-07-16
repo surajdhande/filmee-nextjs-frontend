@@ -14,10 +14,15 @@ import {
 import Image from "next/image";
 import {
   getConversations,
-  getConversationMessages,
-  sendMessage,
-  markAsRead,
+  getConversation,
+  markMessageAsRead,
 } from "@/services/messageService";
+import {
+  socket,
+  joinRoom,
+  leaveRoom,
+  sendSocketMessage,
+} from "@/services/socketService";
 import {
   socket,
   joinRoom,
@@ -150,10 +155,13 @@ export default function InvestorMessages() {
       console.error("Failed to load conversations:", err);
     }
   }, []);
+  }, []);
 
+  // Poll conversations list as fallback
   // Poll conversations list as fallback
   useEffect(() => {
     loadConversations();
+  }, [loadConversations]);
   }, [loadConversations]);
 
   // Scroll to bottom on new messages
@@ -162,6 +170,8 @@ export default function InvestorMessages() {
   }, [messages]);
 
   // Load messages for a selected conversation
+  const loadMessages = useCallback(async (convId) => {
+    if (!currentUser) return;
   const loadMessages = useCallback(async (convId) => {
     if (!currentUser) return;
     try {
@@ -204,6 +214,7 @@ export default function InvestorMessages() {
     await loadMessages(conv.id);
     if (conv.unread > 0) {
       try {
+        await markMessageAsRead(conv.id);
         await markMessageAsRead(conv.id);
         setConversations((prev) =>
           prev.map((c) => (c.id === conv.id ? { ...c, unread: 0, isActive: false } : c))

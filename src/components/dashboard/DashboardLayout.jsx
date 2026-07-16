@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "./Sidebar";
+import Image from "next/image";
 
 const DashboardLayout = ({
   children,
@@ -9,9 +10,20 @@ const DashboardLayout = ({
   return (
     <div className="flex h-screen overflow-hidden bg-[#0B0B0B] text-white">
       {/* Sidebar */}
-      <aside className="hidden w-[240px] shrink-0 flex-col bg-[#0B0B0B] lg:flex">
-        <Sidebar role={role} />
-      </aside>
+      <aside className="hidden w-[240px] shrink-0 bg-[#0B0B0B] lg:flex lg:flex-col">
+
+      <div className="flex h-[74px] items-center justify-center border-b border-[#262626]">
+        <Image
+          src="/logo.png"
+          alt="Filmee"
+          width={110}
+          height={32}
+          className="object-contain"
+        />
+      </div>
+
+      <Sidebar role={role} />
+    </aside>
 
       {/* Right Side */}
       <div className="flex flex-1 flex-col overflow-hidden">
