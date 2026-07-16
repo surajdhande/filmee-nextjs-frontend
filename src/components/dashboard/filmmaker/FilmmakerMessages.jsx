@@ -13,6 +13,7 @@ import {
   getConversations,
   markMessageAsRead,
   searchUsers,
+  sendMessage,
 } from "@/services/messageService";
 import {
   ArrowLeft,
@@ -127,6 +128,7 @@ const loadConversation = useCallback(async (userId) => {
         }),
       };
     });
+    setMessages(formattedMessages);
     await markMessageAsRead(userId);
     await fetchConversations();
 
@@ -149,8 +151,9 @@ const loadConversation = useCallback(async (userId) => {
 };
 
 // Send Message
-// Sends a realtime message through Socket.IO
-const handleSend = async () => {  const text = newMessage.trim();
+// Persists the message via REST then broadcasts through Socket.IO
+const handleSend = async () => {
+  const text = newMessage.trim();
 
   if (!text || !selectedConv) return;
 
@@ -161,16 +164,36 @@ const handleSend = async () => {  const text = newMessage.trim();
     atob(token.split(".")[1])
   ).user_id;
 
-  sendSocketMessage(
-  currentUserId,
-  selectedConv.id,
-  text,
-  null
-);
   setNewMessage("");
 
-  // Refresh sidebar so newly created conversations appear
-  await fetchConversations();
+  try {
+    // Persist the message to the database first
+    const res = await sendMessage(selectedConv.id, text, null);
+
+    // Optimistically add the sent message to the chat
+    const optimistic = {
+      id: res?.message_id || Date.now(),
+      sender: "me",
+      text,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setMessages((prev) => [...prev, optimistic]);
+
+    // Broadcast via Socket.IO for real-time delivery to the recipient
+    sendSocketMessage(
+      currentUserId,
+      selectedConv.id,
+      text,
+      null
+    );
+
+    // Refresh sidebar so newly created conversations appear
+    await fetchConversations();
+  } catch (error) {
+    console.error("Failed to send message:", error);
+    // Restore the message text so the user can retry
+    setNewMessage(text);
+  }
 };
 
   const handleKeyDown = (e) => {
@@ -184,8 +207,15 @@ const handleSend = async () => {  const text = newMessage.trim();
   }, [messages]);
 
   useEffect(() => {
-  fetchConversations();
-}, [fetchConversations]);
+    fetchConversations();
+  }, [fetchConversations]);
+
+  // Poll messages for the active conversation every 4 seconds (fallback for missed socket events)
+  useEffect(() => {
+    if (!selectedConv) return;
+    const interval = setInterval(() => loadConversation(selectedConv.id), 4000);
+    return () => clearInterval(interval);
+  }, [selectedConv, loadConversation]);
 
 useEffect(() => {
   selectedConvRef.current = selectedConv;
@@ -222,8 +252,12 @@ useEffect(() => {
     )
   ) {
     setMessages((prev) => {
-      // Prevent duplicate messages
+      // Prevent duplicate messages (by real id)
       if (prev.some((m) => m.id === message.message_id)) {
+        return prev;
+      }
+      // Skip echo of our own sent messages — already added optimistically
+      if (Number(message.sender_id) === Number(currentUserId)) {
         return prev;
       }
 
