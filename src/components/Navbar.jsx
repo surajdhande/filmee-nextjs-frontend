@@ -40,7 +40,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/projects"
             className="transition duration-300 hover:text-red-500"
           >
             Projects
