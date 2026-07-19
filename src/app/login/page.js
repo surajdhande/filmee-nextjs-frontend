@@ -34,15 +34,18 @@ const LoginPage = () => {
       });
 
       localStorage.setItem("token", response.token);
-
       localStorage.setItem(
         "user",
         JSON.stringify(response.user)
       );
 
-      alert(response.message || "Login successful");
-
       const role = response.user.role;
+      if (role) {
+        localStorage.setItem(`${role.toLowerCase()}_token`, response.token);
+        localStorage.setItem(`${role.toLowerCase()}_user`, JSON.stringify(response.user));
+      }
+
+      alert(response.message || "Login successful");
 
       if (role === "FILMMAKER") {
         router.push("/dashboard/filmmaker");
