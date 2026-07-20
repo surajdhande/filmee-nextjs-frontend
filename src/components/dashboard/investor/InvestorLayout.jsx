@@ -23,6 +23,8 @@ export default function InvestorLayout({ children }) {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("investor_user");
+    localStorage.removeItem("investor_token");
     router.push("/login");
   };
 

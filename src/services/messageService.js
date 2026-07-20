@@ -4,7 +4,17 @@ const API_BASE_URL = "http://127.0.0.1:5000/api/v1/messages";
 
 function getAuthHeaders() {
   if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("token");
+  let token = localStorage.getItem("token");
+  
+  const path = window.location.pathname;
+  if (path.includes("/dashboard/filmmaker")) {
+    token = localStorage.getItem("filmmaker_token") || token;
+  } else if (path.includes("/dashboard/investor")) {
+    token = localStorage.getItem("investor_token") || token;
+  } else if (path.includes("/dashboard/talent")) {
+    token = localStorage.getItem("talent_token") || token;
+  }
+
   if (!token) return {};
   return {
     Authorization: `Bearer ${token}`,
@@ -19,6 +29,12 @@ axios.interceptors.response.use(
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        localStorage.removeItem("filmmaker_token");
+        localStorage.removeItem("filmmaker_user");
+        localStorage.removeItem("investor_token");
+        localStorage.removeItem("investor_user");
+        localStorage.removeItem("talent_token");
+        localStorage.removeItem("talent_user");
         // Only redirect if we are not already on login, signup or landing pages
         const path = window.location.pathname;
         if (path !== "/login" && path !== "/signup" && path !== "/") {

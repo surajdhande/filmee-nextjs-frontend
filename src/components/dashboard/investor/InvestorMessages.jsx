@@ -10,8 +10,9 @@ import {
   Send,
   Shield,
   Filter,
+  Clock,
+  User,
 } from "lucide-react";
-import Image from "next/image";
 import {
   getConversations,
   getConversation,
@@ -89,11 +90,37 @@ export default function InvestorMessages() {
   const [isSending, setIsSending]           = useState(false);
   const bottomRef = useRef(null);
 
+  const getCurrentUserId = useCallback(() => {
+    let token = typeof window !== "undefined" ? localStorage.getItem("investor_token") : null;
+    if (!token) {
+      token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    }
+    if (!token) return null;
+    try {
+      const decoded = JSON.parse(atob(token.split(".")[1]));
+      const storedUser = JSON.parse(localStorage.getItem("investor_user") || localStorage.getItem("user") || "null");
+      if (storedUser && String(storedUser.user_id ?? storedUser.id) !== String(decoded.user_id)) {
+        console.warn(
+          "[Auth mismatch] Token user_id does not match stored 'user' object. " +
+          "This usually means another login overwrote localStorage in this tab " +
+          "(e.g. two dashboards open in tabs of the same browser). " +
+          "Messages will render on the wrong side until this is fixed.",
+          { tokenUserId: decoded.user_id, storedUser }
+        );
+      }
+      return decoded.user_id;
+    } catch (e) {
+      console.error("Failed to decode auth token:", e);
+      return null;
+    }
+  }, []);
+
   // Load current user from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setCurrentUser(JSON.parse(stored));
-  }, []);
+    getCurrentUserId();
+  }, [getCurrentUserId]);
 
   // ── Load conversations ─────────────────────────────────────────────────────
   const loadConversations = useCallback(async () => {
@@ -113,22 +140,26 @@ export default function InvestorMessages() {
     try {
       const data = await getConversation(convId);
       if (Array.isArray(data)) {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const mappedMsgs = data.map((m) => ({
-          id: m.message_id,
-          sender: m.sender_id === storedUser.user_id ? "me" : "them",
-          text: m.message_body,
-          time: new Date(m.sent_at).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        }));
+        const currentUserId = getCurrentUserId();
+
+        const mappedMsgs = data.map((m) => {
+          const isMe = String(m.sender_id) === String(currentUserId);
+          return {
+            id: m.message_id,
+            sender: isMe ? "me" : "them",
+            text: m.message_body,
+            time: new Date(m.sent_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+        });
         setMessages(mappedMsgs);
       }
     } catch (err) {
       console.error("Failed to load messages:", err);
     }
-  }, []);
+  }, [getCurrentUserId]);
 
   // ── Open a conversation ────────────────────────────────────────────────────
   const openConversation = useCallback(async (conv) => {
@@ -273,7 +304,7 @@ export default function InvestorMessages() {
     <div className="flex flex-col h-screen bg-[#0B0B0B] text-white overflow-hidden">
 
       {/* ── Top nav bar ── */}
-      <header className="shrink-0 w-full border-b border-[#262626] bg-[#0E0E0E]">
+      <header className="shrink-0 w-full border-b border-[#1A1A1A] bg-[#0B0B0B]">
         <div className="flex items-center gap-3 px-6 py-4">
           <button
             onClick={() => router.push("/dashboard/investor")}
@@ -281,7 +312,6 @@ export default function InvestorMessages() {
           >
             <ArrowLeft size={18} />
           </button>
-          <Image src="/logo.png" alt="Filmee Logo" width={30} height={30} className="rounded-lg object-contain" />
           <div>
             <h1 className="text-[16px] font-bold leading-none text-white tracking-tight">Messages</h1>
             <p className="mt-1 text-[11px] text-zinc-500">Secure communication platform</p>
@@ -293,98 +323,102 @@ export default function InvestorMessages() {
       <div className="flex flex-1 overflow-hidden bg-[#0B0B0B]">
 
         {/* ── LEFT PANEL: Conversation List ── */}
-        <div className="w-[380px] shrink-0 flex flex-col border-r border-[#222] bg-[#111]">
+        <div className="w-[380px] shrink-0 flex flex-col border-r border-[#1A1A1A] bg-[#0B0B0B]">
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
-            <div>
-              <h2 className="text-[17px] font-bold text-white">Messages</h2>
-              <p className="text-[11px] text-zinc-500">
-                {filteredConversations.length} chat{filteredConversations.length !== 1 ? "s" : ""}
-              </p>
+            <h2 className="text-[17px] font-bold text-white">Messages</h2>
+            <div className="rounded-full border border-zinc-800 bg-black px-3 py-1 text-[11px] font-medium text-zinc-300">
+              {filteredConversations.length} {filteredConversations.length === 1 ? "chat" : "chats"}
             </div>
-            {totalUnread > 0 && (
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
-                {totalUnread}
-              </span>
-            )}
           </div>
 
           {/* Search */}
           <div className="px-4 pb-3">
-            <div className="flex items-center gap-2 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2">
-              <Search size={14} className="text-zinc-500 shrink-0" />
+            <div className="flex items-center gap-2 rounded-full bg-[#121212] border border-[#222] px-4 py-2.5">
               <input
                 type="text"
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-[13px] text-white placeholder-zinc-500 outline-none"
+                className="w-full bg-transparent text-[13px] text-white placeholder-zinc-550 outline-none px-1"
               />
             </div>
           </div>
 
           {/* Filter Tabs */}
           <div className="flex items-center gap-2 px-4 pb-4">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-bold tracking-wider transition-all duration-200 ${
-                  activeFilter === f
-                    ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.4)]"
-                    : "border border-[#2A2A2A] text-zinc-400 hover:border-zinc-600 hover:text-white"
-                }`}
-              >
-                {f === "VIDEO" && <Video size={11} />}
-                {f === "ACTIVE" && (
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
-                  </span>
-                )}
-                {f}
-              </button>
-            ))}
+            {FILTERS.map((f) => {
+              let Icon;
+              if (f === "ALL") Icon = MessageSquare;
+              else if (f === "ACTIVE") Icon = User;
+              else if (f === "VIDEO") Icon = Video;
+
+              return (
+                <button
+                  key={f}
+                  onClick={() => setActiveFilter(f)}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-bold tracking-wider transition-all duration-200 ${
+                    activeFilter === f
+                      ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.6)]"
+                      : "border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-white"
+                  }`}
+                >
+                  {Icon && <Icon size={12} />}
+                  {f}
+                </button>
+              );
+            })}
           </div>
 
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-4">
+          <div className="flex-1 overflow-y-auto px-3 space-y-2 pb-4">
             {filteredConversations.length === 0 ? (
-              <p className="text-center text-zinc-600 text-sm mt-10">No conversations found.</p>
+              <p className="text-center text-zinc-650 text-sm mt-10">No conversations found.</p>
             ) : (
               filteredConversations.map((conv) => (
                 <button
                   key={conv.id}
                   onClick={() => openConversation(conv)}
-                  className={`w-full text-left flex items-start gap-3 rounded-xl p-3 transition-all duration-200 ${
+                  className={`w-full text-left flex flex-col rounded-2xl p-4 transition-all duration-200 border ${
                     selectedConv?.id === conv.id
-                      ? "bg-[#1E1E1E] border border-[#2A2A2A]"
-                      : "hover:bg-[#1A1A1A]"
+                      ? "bg-[#161616]/90 border-[#E50914] shadow-[0_0_10px_rgba(229,9,20,0.15)]"
+                      : "bg-[#111111]/40 border-transparent hover:bg-[#161616]/50 hover:border-zinc-800"
                   }`}
                 >
-                  <div className="relative shrink-0">
-                    <div
-                      className="h-10 w-10 rounded-full flex items-center justify-center text-[15px] font-bold text-white"
-                      style={{ backgroundColor: conv.avatarColor }}
-                    >
-                      {conv.avatar}
+                  <div className="flex gap-3 items-start w-full">
+                    {/* Avatar */}
+                    <div className="relative shrink-0">
+                      <div
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-[15px] font-bold text-white bg-[#E50914]"
+                        style={{ backgroundColor: conv.avatarColor }}
+                      >
+                        {conv.avatar}
+                      </div>
                     </div>
-                    {conv.unread > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#E50914] text-[9px] font-bold text-white">
-                        {conv.unread}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-bold text-white truncate">{conv.name}</span>
-                      <span className="text-[10px] text-zinc-500 shrink-0 ml-2">{conv.time}</span>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-[13px] font-bold text-white truncate">{conv.name}</span>
+                          {conv.unread > 0 && (
+                            <span className="flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-[#E50914] text-[10px] font-bold text-white shrink-0">
+                              {conv.unread}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 shrink-0 ml-2">
+                          <Clock size={10} />
+                          <span>{conv.time}</span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{conv.project}</p>
+                      <p className="text-[12px] text-zinc-400 mt-1 truncate">{conv.lastMessage}</p>
+                      <div className="mt-2.5">
+                        <span className="inline-flex items-center rounded-full border border-zinc-800 bg-black px-2.5 py-0.5 text-[10px] text-zinc-350 font-medium capitalize">
+                          {conv.role}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{conv.project}</p>
-                    <p className="text-[12px] text-zinc-400 mt-1 truncate">{conv.lastMessage}</p>
-                    <span className="mt-1.5 inline-block rounded-sm border border-[#E50914]/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#E50914]">
-                      {conv.role}
-                    </span>
                   </div>
                 </button>
               ))
@@ -393,11 +427,11 @@ export default function InvestorMessages() {
         </div>
 
         {/* ── RIGHT PANEL: Chat or Welcome ── */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col bg-[#0B0B0B]">
           {selectedConv ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#222] bg-[#111]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A] bg-[#0B0B0B]">
                 <div className="flex items-center gap-3">
                   <div
                     className="h-9 w-9 rounded-full flex items-center justify-center text-[14px] font-bold text-white"
@@ -406,29 +440,33 @@ export default function InvestorMessages() {
                     {selectedConv.avatar}
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-bold text-white">{selectedConv.name}</h3>
-                    <p className="text-[11px] text-zinc-500">{selectedConv.role}</p>
+                    <h3 className="text-[14px] font-bold text-white leading-tight">{selectedConv.name}</h3>
+                    <p className="text-[11px] text-zinc-550 mt-0.5">{selectedConv.project}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-[12px] font-bold text-zinc-300 hover:border-[#E50914]/50 hover:text-white transition">
-                    <Video size={13} className="text-[#E50914]" />
+                  <button className="flex items-center gap-1.5 rounded-full border border-[#E50914] px-4 py-1.5 text-[12px] font-bold text-[#E50914] hover:bg-[#E50914]/10 transition">
+                    <Video size={13} />
                     VIDEO CALL
                   </button>
-                  <span className="rounded-sm border border-[#E50914]/30 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#E50914]">
-                    Investor
-                  </span>
+                  <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-black px-3 py-1.5 text-xs font-medium text-white">
+                    <User size={12} className="text-zinc-400" />
+                    <span className="capitalize">{selectedConv.role}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 bg-[#0B0B0B]">
-                <p className="text-center text-[12px] text-zinc-600 mb-2">
-                  Chatting with <span className="text-zinc-400 font-semibold">{selectedConv.name}</span>
-                </p>
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-[#0B0B0B]">
+                {/* System message */}
+                <div className="flex justify-center my-2">
+                  <div className="rounded-full bg-[#161616] border border-[#222] px-5 py-1.5 text-[11px] text-zinc-350 text-center">
+                    Chat room created. You can now communicate about the investment opportunity.
+                  </div>
+                </div>
 
                 {messages.length === 0 && (
-                  <p className="text-center text-zinc-600 text-[12px]">No messages yet. Say hello!</p>
+                  <p className="text-center text-zinc-650 text-[12px]">No messages yet. Say hello!</p>
                 )}
 
                 {messages.map((msg) => (
@@ -438,10 +476,10 @@ export default function InvestorMessages() {
                   >
                     <div className="max-w-[65%] space-y-1">
                       <div
-                        className={`rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
+                        className={`rounded-2xl px-5 py-3 text-[13px] leading-relaxed ${
                           msg.sender === "me"
                             ? "bg-[#E50914] text-white rounded-br-sm"
-                            : "bg-[#1E1E1E] text-zinc-200 border border-[#2A2A2A] rounded-bl-sm"
+                            : "bg-[#161616] text-white border border-zinc-850 rounded-bl-sm"
                         }`}
                       >
                         {msg.text}
@@ -460,8 +498,8 @@ export default function InvestorMessages() {
               </div>
 
               {/* Input Area */}
-              <div className="px-6 py-4 border-t border-[#222] bg-[#111]">
-                <div className="flex items-center gap-3 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] px-4 py-3">
+              <div className="px-6 py-4 border-t border-[#1A1A1A] bg-[#0B0B0B]">
+                <div className="flex items-center gap-3 rounded-full bg-[#121212] border border-[#222] px-4 py-2.5">
                   <input
                     type="text"
                     placeholder={`Message ${selectedConv.name}...`}
@@ -469,17 +507,17 @@ export default function InvestorMessages() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     autoFocus
-                    className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-500 outline-none"
+                    className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-550 outline-none px-2"
                   />
                   <button
                     onClick={handleSend}
                     disabled={!newMessage.trim() || isSending}
-                    className="h-9 w-9 flex items-center justify-center rounded-full bg-[#E50914] text-white disabled:opacity-40 hover:brightness-110 transition"
+                    className="h-9 w-9 flex items-center justify-center rounded-full bg-[#E50914] text-white disabled:opacity-40 hover:brightness-110 transition shrink-0 shadow-[0_0_10px_rgba(229,9,20,0.4)]"
                   >
-                    <Send size={15} />
+                    <Send size={14} className="transform translate-x-[0.5px]" />
                   </button>
                 </div>
-                <p className="mt-2 text-[11px] text-zinc-600 text-center">
+                <p className="mt-2.5 text-[10px] text-zinc-500 text-center">
                   Messages are secured and filtered for personal contact information.
                 </p>
               </div>
