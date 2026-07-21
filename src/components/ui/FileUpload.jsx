@@ -1,6 +1,7 @@
 "use client";
 
-import { Upload } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { UploadCloud } from "lucide-react";
 
 export default function FileUpload({
   title,
@@ -8,36 +9,49 @@ export default function FileUpload({
   file,
   onChange,
 }) {
-  return (
-    <label className="group flex h-36 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#303030] bg-[#151515] transition hover:border-[#E50914] hover:bg-[#191919]">
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    multiple: false,
+    accept,
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        console.log(title, acceptedFiles[0]);
+        onChange(acceptedFiles[0]);
+      }
+    },
+  });
 
-      <Upload
+  return (
+    <div
+      {...getRootProps()}
+      className={`group flex h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-[#151515] transition-all duration-200
+      ${
+        isDragActive
+          ? "border-[#E50914] bg-[#1E1E1E]"
+          : "border-[#303030] hover:border-[#E50914] hover:bg-[#191919]"
+      }`}
+    >
+      <input {...getInputProps()} />
+
+      <UploadCloud
         size={34}
-        className="mb-3 text-[#A1A1AA] transition group-hover:text-[#E50914]"
+        className={`mb-3 transition ${
+          isDragActive
+            ? "text-[#E50914]"
+            : "text-[#A1A1AA] group-hover:text-[#E50914]"
+        }`}
       />
 
       <p className="text-[15px] font-semibold text-white">
         {title}
       </p>
 
-      <p className="mt-1 text-sm text-[#9CA3AF]">
-        {file ? file.name : "Click to upload"}
+      <p className="mt-1 px-2 text-center text-sm text-[#9CA3AF]">
+        {file
+          ? file.name
+          : isDragActive
+          ? "Drop file here..."
+          : "Drag & Drop or Click to Upload"}
       </p>
-
-      <input
-        hidden
-        type="file"
-        accept={accept}
-        onChange={(e) => {
-          const selectedFile = e.target.files?.[0];
-
-          if (!selectedFile) return;
-
-          console.log(title, selectedFile);
-
-          onChange(selectedFile);
-        }}
-      />
-    </label>
+    </div>
   );
 }

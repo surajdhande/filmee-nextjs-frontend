@@ -32,52 +32,62 @@ export default function StepFour({
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
         <FileUpload
-          title="Pitch Deck"
-          accept=".pdf"
-          file={projectData.pitchDeck}
-          onChange={(file) =>
-            setProjectData({
-              ...projectData,
-              pitchDeck: file,
-            })
-          }
-        />
+        title="Pitch Deck"
+        accept={{
+          "application/pdf": [".pdf"],
+        }}
+        file={projectData.pitchDeck}
+        onChange={(file) =>
+          setProjectData({
+            ...projectData,
+            pitchDeck: file,
+          })
+        }
+      />
 
-        <FileUpload
-          title="Trailer / Teaser"
-          accept="video/*"
-          file={projectData.trailer}
-          onChange={(file) =>
-            setProjectData({
-              ...projectData,
-              trailer: file,
-            })
-          }
-        />
+      <FileUpload
+        title="Trailer / Teaser"
+        accept={{
+          "video/*": [],
+        }}
+        file={projectData.trailer}
+        onChange={(file) =>
+          setProjectData({
+            ...projectData,
+            trailer: file,
+          })
+        }
+      />
 
-        <FileUpload
-          title="Storyboards"
-          accept="image/*,.pdf"
-          file={projectData.storyboard}
-          onChange={(file) =>
-            setProjectData({
-              ...projectData,
-              storyboard: file,
-            })
-          }
-        />
+      <FileUpload
+        title="Storyboards"
+        accept={{
+          "image/*": [],
+          "application/pdf": [".pdf"],
+        }}
+        file={projectData.storyboard}
+        onChange={(file) =>
+          setProjectData({
+            ...projectData,
+            storyboard: file,
+          })
+        }
+      />
 
-        <FileUpload
-          title="Lookbook"
-          accept=".pdf,image/*"
-          file={projectData.lookbook}
-          onChange={(file) =>
-            setProjectData({
-              ...projectData,
-              lookbook: file,
-            })
-          }
-        />
+      <FileUpload
+        title="Lookbook"
+        accept={{
+          "image/*": [],
+          "application/pdf": [".pdf"],
+        }}
+        file={projectData.lookbook}
+        onChange={(file) =>
+          setProjectData({
+            ...projectData,
+            lookbook: file,
+          })
+        }
+      />
 
       </div>
 

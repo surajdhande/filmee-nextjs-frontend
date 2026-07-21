@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,7 +14,7 @@ import {
   Clapperboard,
 } from "lucide-react";
 
-const SignupPageContent = () => {
+const SignupPageInner = () => {
 const router = useRouter();
 const searchParams = useSearchParams();
 const selectedRole = useMemo(
