@@ -424,7 +424,7 @@ const ROLES = [
   },
 ];
 
-function FindRolesPage({ onApplyClick }) {
+function FindRolesPage({ onApplyClick, onViewDetails }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRoles = ROLES.filter(
@@ -516,7 +516,10 @@ function FindRolesPage({ onApplyClick }) {
             </div>
 
             <div className="p-6 pt-0 flex gap-3">
-              <button className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[11px] font-black py-3 rounded-xl uppercase tracking-wider transition-all duration-200">
+              <button
+                onClick={() => onViewDetails && onViewDetails(opp)}
+                className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[11px] font-black py-3 rounded-xl uppercase tracking-wider transition-all duration-200"
+              >
                 VIEW DETAILS
               </button>
               <button
@@ -810,7 +813,12 @@ function renderPage(activeNav, onNavChange, pageProps) {
         />
       );
     case "find-roles":
-      return <FindRolesPage onApplyClick={pageProps.onApplyClick} />;
+      return (
+        <FindRolesPage
+          onApplyClick={pageProps.onApplyClick}
+          onViewDetails={pageProps.onViewDetails}
+        />
+      );
     case "applications":
       return <MyApplicationsPage applications={pageProps.applications} />;
     case "portfolio":
@@ -904,11 +912,27 @@ export default function Dashboard() {
     router.push(`/dashboard/talent/application/${appId}`);
   };
 
+  // Navigate to matching application detail page for the given opportunity
+  const handleViewDetails = (opp) => {
+    const matchedApp =
+      recentApps.find((app) => app.role.toLowerCase() === opp.role.toLowerCase()) ||
+      applications.find((app) => app.role.toLowerCase() === opp.role.toLowerCase()) ||
+      recentApps.find((app) => app.project.toLowerCase() === opp.project.toLowerCase()) ||
+      applications.find((app) => app.project.toLowerCase() === opp.project.toLowerCase());
+
+    if (matchedApp) {
+      router.push(`/dashboard/talent/application/${matchedApp.id}`);
+    } else {
+      router.push(`/dashboard/talent/application/${opp.id || 1}`);
+    }
+  };
+
   const pageProps = {
     applications,
     recentApps,
     onApplyClick: handleApplyClick,
     onViewApp: handleViewApp,
+    onViewDetails: handleViewDetails,
   };
 
   return (

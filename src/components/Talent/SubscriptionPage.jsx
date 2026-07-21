@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Crown, CheckCircle2, ShieldAlert, CreditCard, Download, Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function SubscriptionPage({ onBack }) {
   const [activeTab, setActiveTab] = useState("overview");
+  const router = useRouter();
 
   // Mock data for usage stats
   const usageStats = {
@@ -51,7 +53,10 @@ export default function SubscriptionPage({ onBack }) {
           </div>
         </div>
 
-        <button className="flex items-center gap-2 border border-red-700/60 hover:border-red-650 hover:bg-red-950/20 text-red-500 text-xs font-black px-5 py-2.5 rounded-full transition-all duration-200 tracking-wider uppercase">
+        <button
+  onClick={() => router.push("/pricing")}
+  className="flex items-center gap-2 border border-red-700/60 hover:border-red-650 hover:bg-red-950/20 text-red-500 text-xs font-black px-5 py-2.5 rounded-full transition-all duration-200 tracking-wider uppercase"
+>
           VIEW ALL PLANS
           <span className="text-[10px]">↗</span>
         </button>
@@ -116,10 +121,13 @@ export default function SubscriptionPage({ onBack }) {
                 </div>
               </div>
 
-              <button className="w-full mt-6 flex items-center justify-center gap-2 border border-red-700/60 hover:bg-red-950/20 text-red-500 text-xs font-black py-3 rounded-xl transition-all duration-200 uppercase tracking-wider">
-                <Crown size={14} className="text-red-500" />
-                UPGRADE PLAN
-              </button>
+              <button
+  onClick={() => setActiveTab("change-plan")}
+  className="w-full mt-6 flex items-center justify-center gap-2 border border-red-700/60 hover:bg-red-950/20 text-red-500 text-xs font-black py-3 rounded-xl transition-all duration-200 uppercase tracking-wider"
+>
+  <Crown size={14} className="text-red-500" />
+  UPGRADE PLAN
+</button>
             </div>
 
             {/* Usage Stats Card */}

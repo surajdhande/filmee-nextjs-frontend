@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getProjects } from "@/services/projectService";
 
 const formatCurrencyK = (value) => {
@@ -21,6 +22,7 @@ const getDaysAgo = (dateString) => {
 };
 
 const TrendingProjects = () => {
+  const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -115,7 +117,10 @@ const TrendingProjects = () => {
                     </div>
 
                     {/* Button */}
-                    <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-red-500 py-3 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110">
+                    <button
+                      onClick={() => router.push(`/dashboard/talent/application/${project.project_id}`)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-red-500 py-3 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110"
+                    >
                       <Play className="h-4 w-4 fill-white" />
                       View Details
                     </button>

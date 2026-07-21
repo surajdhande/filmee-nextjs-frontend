@@ -40,14 +40,14 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/project-overview"
             className="transition duration-300 hover:text-red-500"
           >
             Projects
           </Link>
 
           <Link
-            href="/Talent"
+            href="/talent-overview"
             className="transition duration-300 hover:text-red-500"
           >
             Talent
@@ -61,7 +61,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/pricing"
             className="transition duration-300 hover:text-red-500"
           >
             Pricing
@@ -71,15 +71,19 @@ export default function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-4">
 
-          <Search
-            size={22}
-            className="cursor-pointer text-white transition duration-300 hover:text-red-500"
-          />
+          <Link href="/search">
+            <Search
+              size={22}
+              className="cursor-pointer text-white transition duration-300 hover:text-red-500"
+            />
+          </Link>
 
-          <Bell
-            size={22}
-            className="cursor-pointer text-white transition duration-300 hover:text-red-500"
-          />
+          <Link href="/notifications">
+            <Bell
+              size={22}
+              className="cursor-pointer text-white transition duration-300 hover:text-red-500"
+            />
+          </Link>
 
           <Link href="/login">
             <AuthButton variant="outline">

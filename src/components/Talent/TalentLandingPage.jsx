@@ -81,14 +81,18 @@ export default function TalentLandingPage() {
 
         {/* Right Actions */}
         <div className="flex items-center space-x-5">
-          <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all">
-            <Search size={20} />
-          </button>
+          <Link href="/search">
+            <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all">
+              <Search size={20} />
+            </button>
+          </Link>
           
-          <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all relative">
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-red-500" />
-          </button>
+          <Link href="/notifications">
+            <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all relative">
+              <Bell size={20} />
+              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-red-500" />
+            </button>
+          </Link>
 
           <button className="hidden sm:inline-block border border-red-950/80 hover:border-red-655 bg-transparent text-red-500 text-[11px] font-bold px-6 py-2.5 rounded-full uppercase tracking-wider transition-all duration-300 hover:bg-red-950/10">
             Sign In
