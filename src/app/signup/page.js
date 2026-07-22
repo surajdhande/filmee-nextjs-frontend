@@ -5,6 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signupUser } from "@/services/authService";
+import Toast from "@/components/ui/Toast";
 import {
   User,
   Mail,
@@ -31,6 +32,11 @@ user_role: "",
 });
 
 const [loading, setLoading] = useState(false);
+const [toast, setToast] = useState(null); // { message, type }
+
+const showToast = (message, type = "success") => {
+  setToast({ message, type });
+};
 useEffect(() => {
   if (!selectedRole) return;
 
@@ -59,7 +65,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (formData.password !== formData.confirm_password) {
-    alert("Passwords do not match");
+    showToast("Passwords do not match", "error");
     return;
   }
 
@@ -77,16 +83,16 @@ const handleSubmit = async (e) => {
 
     const response = await signupUser(payload);
 
-    alert(response.message);
+    showToast(response.message || "Account created successfully!", "success");
 
-    router.push("/login");
+    setTimeout(() => router.push("/login"), 1800);
 
   } catch (error) {
     console.error(error);
 
-    alert(
-      error.response?.data?.message ||
-      "Signup failed"
+    showToast(
+      error.response?.data?.message || "Signup failed",
+      "error"
     );
   } finally {
     setLoading(false);
@@ -231,6 +237,15 @@ return ( <div
     </form>
 
   </div>
+
+  {/* Custom Toast */}
+  {toast && (
+    <Toast
+      message={toast.message}
+      type={toast.type}
+      onClose={() => setToast(null)}
+    />
+  )}
 
 </div>
 
