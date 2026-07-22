@@ -1,22 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Dashboard from "@/components/Talent/Dashboard";
+import { useRouter, useParams } from "next/navigation";
+import ApplicationDetailPage from "@/components/Talent/ApplicationDetailPage";
 
-export default function TalentDashboardPage() {
+export default function ApplicationPage() {
   const router = useRouter();
+  const params = useParams();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
-
-    if (!storedUser || !token) {
+    const user = localStorage.getItem("user");
+    if (!token || !user) {
       router.replace("/login");
       return;
     }
-
     setReady(true);
   }, [router]);
 
@@ -28,5 +27,5 @@ export default function TalentDashboardPage() {
     );
   }
 
-  return <Dashboard />;
+  return <ApplicationDetailPage id={Number(params.id)} />;
 }
