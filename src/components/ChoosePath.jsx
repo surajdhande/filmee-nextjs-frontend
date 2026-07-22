@@ -104,7 +104,9 @@ export default function ChoosePath() {
 
                 <button
                   onClick={() =>
-                    router.push(`/signup?role=${item.role}`)
+                    item.href
+                      ? router.push(item.href)
+                      : router.push(`/signup?role=${item.role}`)
                   }
                   className="mt-8 w-full rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 py-3 font-semibold text-white transition duration-300 hover:brightness-110"
                 >

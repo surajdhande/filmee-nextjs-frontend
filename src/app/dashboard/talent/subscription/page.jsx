@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Dashboard from "@/components/Talent/Dashboard";
+import SubscriptionPage from "@/components/Talent/SubscriptionPage";
 
-export default function TalentDashboardPage() {
+export default function SubscriptionRoutePage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
 
@@ -28,5 +28,9 @@ export default function TalentDashboardPage() {
     );
   }
 
-  return <Dashboard />;
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <SubscriptionPage onBack={() => router.push("/dashboard/talent")} />
+    </div>
+  );
 }

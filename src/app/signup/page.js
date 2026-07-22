@@ -85,7 +85,11 @@ const handleSubmit = async (e) => {
 
     showToast(response.message || "Account created successfully!", "success");
 
-    setTimeout(() => router.push("/login"), 1800);
+    if (formData.user_role === "TALENT") {
+      router.push("/talent/dashboard");
+    } else {
+      router.push("/login");
+    }
 
   } catch (error) {
     console.error(error);
