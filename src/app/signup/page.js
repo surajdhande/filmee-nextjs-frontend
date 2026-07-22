@@ -5,6 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signupUser } from "@/services/authService";
+import Toast from "@/components/ui/Toast";
 import {
   User,
   Mail,
@@ -31,6 +32,11 @@ const SignupPageInner = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type }
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
   useEffect(() => {
     if (!selectedRole) return;
 
@@ -77,7 +83,7 @@ const SignupPageInner = () => {
 
       const response = await signupUser(payload);
 
-      alert(response.message);
+      showToast(response.message || "Account created successfully!", "success");
 
       if (formData.user_role === "TALENT") {
         router.push("/talent/dashboard");
@@ -88,9 +94,9 @@ const SignupPageInner = () => {
     } catch (error) {
       console.error(error);
 
-      alert(
-        error.response?.data?.message ||
-        "Signup failed"
+      showToast(
+        error.response?.data?.message || "Signup failed",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -235,6 +241,15 @@ const SignupPageInner = () => {
       </form>
 
     </div>
+
+    {/* Custom Toast */}
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    )}
 
   </div>
 

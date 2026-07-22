@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/authService";
+import Toast from "@/components/ui/Toast";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -14,6 +15,11 @@ const LoginPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type }
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -34,32 +40,38 @@ const LoginPage = () => {
       });
 
       localStorage.setItem("token", response.token);
-
       localStorage.setItem(
         "user",
         JSON.stringify(response.user)
       );
 
-      alert(response.message || "Login successful");
-
       const role = response.user.role;
-
-      if (role === "FILMMAKER") {
-        router.push("/dashboard/filmmaker");
-      } else if (role === "INVESTOR") {
-        router.push("/dashboard/investor");
-      } else if (role === "TALENT") {
-        router.push("/dashboard/talent");
-      } else {
-        router.push("/");
+      if (role) {
+        localStorage.setItem(`${role.toLowerCase()}_token`, response.token);
+        localStorage.setItem(`${role.toLowerCase()}_user`, JSON.stringify(response.user));
       }
+
+      showToast(response.message || "Login successful", "success");
+
+      // Small delay so the user sees the toast before navigation
+      setTimeout(() => {
+        if (role === "FILMMAKER") {
+          router.push("/dashboard/filmmaker");
+        } else if (role === "INVESTOR") {
+          router.push("/dashboard/investor");
+        } else if (role === "TALENT") {
+          router.push("/dashboard/talent");
+        } else {
+          router.push("/");
+        }
+      }, 1500);
 
     } catch (error) {
       console.error(error);
 
-      alert(
-        error?.response?.data?.message ||
-        "Login failed"
+      showToast(
+        error?.response?.data?.message || "Login failed",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -75,7 +87,7 @@ const LoginPage = () => {
       backgroundSize: "cover",
       backgroundPosition: "center",
     }}
->
+  >
   {/* Dark Overlay */}
   <div className="absolute inset-0 bg-black/80" />
 
@@ -144,6 +156,15 @@ const LoginPage = () => {
         </form>
 
       </div>
+
+    {/* Custom Toast */}
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    )}
 
     </div>
   );

@@ -1,11 +1,7 @@
-"use client";
-
-import { useRouter } from "next/navigation";
 import React from "react";
 import { Crown, Zap } from "lucide-react";
 
 const SubscriptionCard = () => {
-   const router = useRouter();
   return (
     <section className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
       <div className="flex items-center justify-between">
@@ -27,11 +23,11 @@ const SubscriptionCard = () => {
             </p>
 
             <button
-  onClick={() => router.push("/dashboard/talent/subscription")}
-  className="mt-6 rounded-full border border-red-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600/10"
->
-  Manage Subscription
-</button>
+              onClick={() => router.push("/dashboard/talent/subscription")}
+              className="mt-6 rounded-full border border-red-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600/10"
+            >
+              Manage Subscription
+            </button>
           </div>
 
         </div>

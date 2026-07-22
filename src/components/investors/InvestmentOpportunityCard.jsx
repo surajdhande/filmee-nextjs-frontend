@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 
 const riskColorMap = {
@@ -17,6 +18,13 @@ const phaseColorMap = {
 };
 
 export default function InvestmentOpportunityCard({ opportunity }) {
+  const filmId =
+    opportunity?.project_id ||
+    opportunity?.id ||
+    opportunity?._id ||
+    opportunity?.filmId ||
+    "1";
+
   const {
     title,
     genre,
@@ -36,7 +44,7 @@ export default function InvestmentOpportunityCard({ opportunity }) {
     highlights,
     location,
     rating,
-  } = opportunity;
+  } = opportunity || {};
 
   const fundingPercentage =
     fundingTarget > 0 ? Math.round((fundingRaised / fundingTarget) * 100) : 0;
@@ -44,7 +52,7 @@ export default function InvestmentOpportunityCard({ opportunity }) {
   const formatCurrency = (value) => {
     if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
     if (value >= 1000) return `$${Math.floor(value / 1000).toLocaleString()},000`;
-    return `$${value.toLocaleString()}`;
+    return `$${(value || 0).toLocaleString()}`;
   };
 
   return (
@@ -133,9 +141,9 @@ export default function InvestmentOpportunityCard({ opportunity }) {
               Key Highlights:
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
-              {highlights.map((tag) => (
+              {highlights.map((tag, index) => (
                 <span
-                  key={tag}
+                  key={typeof tag === "string" ? `${tag}-${index}` : index}
                   className="rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs text-zinc-300"
                 >
                   {tag}
@@ -159,12 +167,18 @@ export default function InvestmentOpportunityCard({ opportunity }) {
 
         {/* Action buttons */}
         <div className="mt-6 grid grid-cols-2 gap-3">
-          <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:brightness-110 hover:shadow-lg hover:shadow-red-600/30">
+          <Link
+            href="/login"
+            className="flex items-center justify-center rounded-full bg-gradient-to-r from-red-700 to-red-500 py-3 text-center text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:brightness-110 hover:shadow-lg hover:shadow-red-600/30"
+          >
             Invest Now
-          </button>
-          <button className="rounded-full border border-red-700 py-3 text-sm font-bold uppercase tracking-wide text-red-600 transition-all duration-300 hover:bg-red-600 hover:text-white">
+          </Link>
+          <Link
+            href={`/dashboard/investor/film/${filmId}`}
+            className="flex items-center justify-center rounded-full border border-red-700 py-3 text-center text-sm font-bold uppercase tracking-wide text-red-600 transition-all duration-300 hover:bg-red-600 hover:text-white"
+          >
             Learn More
-          </button>
+          </Link>
         </div>
       </div>
     </div>

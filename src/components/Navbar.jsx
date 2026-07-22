@@ -12,23 +12,23 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link
-            href="/"
-            className="flex items-center gap-3"
-            >
-            <Image
-                src="/logo.png"
-                alt="Filmee Logo"
-                width={60}
-                height={60}
-                priority
-            />
+          href="/"
+          className="flex items-center gap-3"
+        >
+          <Image
+            src="/logo.png"
+            alt="Filmee Logo"
+            width={60}
+            height={60}
+            priority
+          />
 
-            <div className="text-3xl font-extrabold tracking-tight leading-none">
-                <span className="text-white">Fil</span>
-                <span className="text-red-500">m</span>
-                <span className="text-white">ee</span>
-                </div>
-            </Link>
+          <div className="text-3xl font-extrabold tracking-tight leading-none">
+            <span className="text-white">Fil</span>
+            <span className="text-red-500">m</span>
+            <span className="text-white">ee</span>
+          </div>
+        </Link>
 
         {/* Navigation */}
         <div className="hidden lg:flex items-center gap-12 text-[15px] font-semibold text-white">
