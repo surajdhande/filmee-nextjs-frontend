@@ -2,15 +2,21 @@ import AuthButton from "./AuthButton";
 
 export default function Hero() {
   return (
-    <section
-      className="relative flex min-h-screen items-center bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba')",
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/30" />
+    <section className="relative flex min-h-screen items-center overflow-hidden">
+      {/* Background Video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        className="absolute inset-0 h-full w-full object-cover scale-110"
+      >
+        <source src="/videos/hero.mp4" type="video/mp4" />
+      </video>
+
+{/* Dark Overlay */}
+<div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
       {/* Content */}
       <div className="relative z-10 ml-24 max-w-4xl pt-24">

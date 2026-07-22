@@ -9,22 +9,22 @@ const StatsCard = ({
   trendLabel,
 }) => {
   return (
-    <div className="group rounded-2xl border border-[#262626] bg-[#171717] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-red-500/30 hover:shadow-[0_0_25px_rgba(229,9,20,0.12)]">
+    <div className="group flex h-[145px] flex-col justify-between rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-red-500/30 hover:shadow-[0_0_25px_rgba(229,9,20,0.12)]">
       
       {/* Top */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-red-500">
+          <p className="text-[13px] font-medium text-zinc-400">
             {title}
           </p>
 
-          <h3 className="mt-2 text-3xl font-bold tracking-tight text-white">
+          <h3 className="mt-2 text-[30px] font-bold tracking-tight text-white leading-none">
             {value}
           </h3>
         </div>
 
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#202020] text-red-500">
-          {icon}
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1E1E1E] text-red-500">
+          {React.cloneElement(icon, { size: 22 })}
         </div>
       </div>
 

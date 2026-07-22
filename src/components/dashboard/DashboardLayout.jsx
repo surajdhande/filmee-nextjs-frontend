@@ -1,21 +1,40 @@
 import React from "react";
 import Sidebar from "./Sidebar";
+import Image from "next/image";
 
-const DashboardLayout = ({ children, role = "FILMMAKER" }) => {
+const DashboardLayout = ({
+  children,
+  header = null,
+  role = "FILMMAKER",
+}) => {
   return (
-    <div className="flex h-screen bg-[#0B0B0B] text-white overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#0B0B0B] text-white">
+      {/* Sidebar */}
+      <aside className="hidden w-[240px] shrink-0 bg-[#0B0B0B] lg:flex lg:flex-col">
 
+      <div className="flex h-[74px] items-center justify-center border-b border-[#262626]">
+        <Image
+          src="/logo.png"
+          alt="Filmee"
+          width={110}
+          height={32}
+          className="object-contain"
+        />
+      </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-[250px] shrink-0 bg-[#171717] border-r border-[#262626]">
-        <Sidebar role={role} />
-      </aside>
+      <Sidebar role={role} />
+    </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-[#0B0B0B]">
-        {children}
-      </main>
+      {/* Right Side */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Optional Header */}
+        {header && <div className="shrink-0">{header}</div>}
 
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-[#0B0B0B]">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
