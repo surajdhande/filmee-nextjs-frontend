@@ -107,10 +107,25 @@ const ROLES = [
     priority: "Medium",
     priorityColor: "bg-yellow-500",
   },
+  {
+    id: 6,
+    icon: Mic2,
+    title: "Sound Designer",
+    project: "Broken Silence",
+    description: "Crafting immersive soundscapes and foley for a psychological drama. Pro Tools expertise essential.",
+    pay: "$14,000",
+    duration: "10 weeks",
+    location: "Chicago, IL",
+    applied: 38,
+    requirements: ["Pro Tools certified", "Foley artistry", "Surround sound mixing"],
+    deadline: "Mar 10, 2025",
+    priority: "High",
+    priorityColor: "bg-red-600",
+  },
 ];
 
-const ROLE_OPTIONS = ["All Roles", "Cinematographer", "Actor", "Composer", "Editor", "Designer"];
-const LOCATION_OPTIONS = ["All Locations", "Los Angeles, CA", "New York, NY", "Atlanta, GA", "Vancouver, BC", "Remote"];
+const ROLE_OPTIONS = ["All Roles", "Cinematographer", "Actor", "Composer", "Editor", "Designer", "Sound Designer"];
+const LOCATION_OPTIONS = ["All Locations", "Los Angeles, CA", "New York, NY", "Atlanta, GA", "Vancouver, BC", "Chicago, IL", "Remote"];
 
 // ── Component ────────────────────────────────────────────────────────────────
 

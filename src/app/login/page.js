@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/services/authService";
 import Toast from "@/components/ui/Toast";
 
 const LoginPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -55,7 +57,9 @@ const LoginPage = () => {
 
       // Small delay so the user sees the toast before navigation
       setTimeout(() => {
-        if (role === "FILMMAKER") {
+        if (redirectTo) {
+          router.push(redirectTo);
+        } else if (role === "FILMMAKER") {
           router.push("/dashboard/filmmaker");
         } else if (role === "INVESTOR") {
           router.push("/dashboard/investor");
@@ -170,4 +174,14 @@ const LoginPage = () => {
   );
 }
 
-export default LoginPage;
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        Loading...
+      </div>
+    }>
+      <LoginPage />
+    </Suspense>
+  );
+}

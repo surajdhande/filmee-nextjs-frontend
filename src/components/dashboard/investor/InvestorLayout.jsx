@@ -25,7 +25,7 @@ export default function InvestorLayout({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("investor_user");
     localStorage.removeItem("investor_token");
-    router.push("/login");
+    router.push("/");
   };
 
   const profileName = user?.full_name || user?.name || "Mervin Consultant";

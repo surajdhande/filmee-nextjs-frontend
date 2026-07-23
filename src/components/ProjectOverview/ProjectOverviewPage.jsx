@@ -316,7 +316,7 @@ export default function ProjectOverviewPage() {
                       {formatBudget(project.budget)}
                     </div>
                     <button
-                      onClick={() => router.push("/login")}
+                      onClick={() => router.push("/login?redirect=/dashboard/filmmaker/projects")}
                       className="bg-red-600 hover:bg-red-500 transition-colors duration-200 rounded-full p-2"
                     >
                       <Play size={14} className="fill-white text-white" />

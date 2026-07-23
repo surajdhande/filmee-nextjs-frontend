@@ -603,7 +603,7 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    router.push("/login");
+    router.push("/");
   };
 
   const profileName = user?.full_name || user?.name || "Investor";
