@@ -265,29 +265,23 @@ export default function ProjectOverviewPage() {
           })}
         </div>
 
-        {/* ── Masonry-style Project Grid ── */}
+        {/* ── Project Grid ── */}
         {filtered.length === 0 ? (
           <p className="text-center text-zinc-500 py-20">No projects match your search.</p>
         ) : (
-          <div
-            className="columns-2 md:columns-3 lg:columns-4 gap-4"
-            style={{ columnGap: "16px" }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filtered.map((project) => (
               <div
                 key={project.id}
                 onMouseEnter={() => setHovered(project.id)}
                 onMouseLeave={() => setHovered(null)}
-                className="relative break-inside-avoid mb-4 overflow-hidden rounded-2xl cursor-pointer group"
-                style={{ display: "inline-block", width: "100%" }}
+                className="relative h-64 overflow-hidden rounded-2xl cursor-pointer group"
               >
                 {/* Image */}
                 <img
                   src={project.image}
                   alt={project.title}
-                  className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-                    project.size === "tall" ? "h-72" : "h-48"
-                  }`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 
                 {/* Dark overlay on hover */}
@@ -316,7 +310,7 @@ export default function ProjectOverviewPage() {
                       {formatBudget(project.budget)}
                     </div>
                     <button
-                      onClick={() => router.push("/login")}
+                      onClick={() => router.push("/login?redirect=/dashboard/filmmaker/projects")}
                       className="bg-red-600 hover:bg-red-500 transition-colors duration-200 rounded-full p-2"
                     >
                       <Play size={14} className="fill-white text-white" />

@@ -88,7 +88,8 @@ const SignupPageInner = () => {
       if (formData.user_role === "TALENT") {
         router.push("/talent/dashboard");
       } else {
-        router.push("/login");
+        const redirectParam = searchParams.get("redirect");
+        router.push(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login");
       }
 
     } catch (error) {
