@@ -168,7 +168,7 @@ export default function InvestmentOpportunityCard({ opportunity }) {
         {/* Action buttons */}
         <div className="mt-6 grid grid-cols-2 gap-3">
           <Link
-            href="/login"
+            href="/login?redirect=/dashboard/investor/browse"
             className="flex items-center justify-center rounded-full bg-gradient-to-r from-red-700 to-red-500 py-3 text-center text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:brightness-110 hover:shadow-lg hover:shadow-red-600/30"
           >
             Invest Now

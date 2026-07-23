@@ -6,10 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/services/authService";
 import Toast from "@/components/ui/Toast";
 
-const LoginPage = () => {
+const LoginPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
+  const redirectParam = searchParams.get("redirect") || searchParams.get("callbackUrl") || searchParams.get("redirect_to");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -57,8 +57,17 @@ const LoginPage = () => {
 
       // Small delay so the user sees the toast before navigation
       setTimeout(() => {
-        if (redirectTo) {
-          router.push(redirectTo);
+        if (redirectParam) {
+          if (redirectParam.startsWith("http://") || redirectParam.startsWith("https://")) {
+            try {
+              const urlObj = new URL(redirectParam);
+              router.push(urlObj.pathname + urlObj.search + urlObj.hash);
+            } catch {
+              window.location.href = redirectParam;
+            }
+          } else {
+            router.push(redirectParam);
+          }
         } else if (role === "FILMMAKER") {
           router.push("/dashboard/filmmaker");
         } else if (role === "INVESTOR") {
@@ -82,18 +91,22 @@ const LoginPage = () => {
     }
   };
 
+  const signupHref = redirectParam
+    ? `/signup?redirect=${encodeURIComponent(redirectParam)}`
+    : "/signup";
+
   return (
     <div
-    className="relative flex min-h-screen items-center justify-center overflow-hidden px-4"
-    style={{
-      backgroundImage:
-        "url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
-  >
-  {/* Dark Overlay */}
-  <div className="absolute inset-0 bg-black/80" />
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/80" />
 
       <div className="relative z-10 w-full max-w-lg rounded-3xl border border-white/10 bg-zinc-950/90 p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
@@ -150,7 +163,7 @@ const LoginPage = () => {
           <div className="text-center text-sm text-zinc-400">
             Don't have an account?{" "}
             <Link
-              href="/signup"
+              href={signupHref}
               className="font-medium text-red-500 hover:text-red-400"
             >
               Create Account
@@ -161,27 +174,29 @@ const LoginPage = () => {
 
       </div>
 
-    {/* Custom Toast */}
-    {toast && (
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast(null)}
-      />
-    )}
+      {/* Custom Toast */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
     </div>
   );
-}
+};
 
-export default function LoginPageWrapper() {
+export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        Loading...
-      </div>
-    }>
-      <LoginPage />
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-black text-white">
+          Loading...
+        </div>
+      }
+    >
+      <LoginPageContent />
     </Suspense>
   );
 }
