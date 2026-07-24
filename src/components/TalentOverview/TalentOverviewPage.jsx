@@ -341,7 +341,7 @@ export default function TalentOverviewPage() {
                   <div className="flex items-center justify-between mt-auto pt-2">
                     <p className="text-xs text-zinc-500">Deadline: {role.deadline}</p>
                     <button
-                      onClick={() => router.push("/login")}
+                      onClick={() => router.push("/login?redirect=second_section")}
                       className="bg-gradient-to-r from-red-700 to-red-500 hover:brightness-110 text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all duration-200 hover:scale-105"
                     >
                       APPLY NOW

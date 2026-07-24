@@ -57,7 +57,17 @@ const LoginPageContent = () => {
 
       // Small delay so the user sees the toast before navigation
       setTimeout(() => {
-        if (redirectParam) {
+        if (redirectParam === "second_section") {
+          if (role === "FILMMAKER") {
+            router.push("/dashboard/filmmaker/projects");
+          } else if (role === "TALENT") {
+            router.push("/dashboard/talent?tab=find-roles");
+          } else if (role === "INVESTOR") {
+            router.push("/dashboard/investor/browse");
+          } else {
+            router.push("/");
+          }
+        } else if (redirectParam) {
           if (redirectParam.startsWith("http://") || redirectParam.startsWith("https://")) {
             try {
               const urlObj = new URL(redirectParam);

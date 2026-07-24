@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Eye,
   Search,
@@ -838,7 +838,15 @@ function renderPage(activeNav, onNavChange, pageProps) {
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function Dashboard() {
   const router = useRouter();
-  const [activeNav, setActiveNav] = useState("overview");
+  const searchParams = useSearchParams();
+  const [activeNav, setActiveNav] = useState(searchParams.get("tab") || "overview");
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveNav(tab);
+    }
+  }, [searchParams]);
 
   // ── Apply Modal state ────────────────────────────────────────────────────────
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);

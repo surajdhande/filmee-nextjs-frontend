@@ -85,10 +85,10 @@ const SignupPageInner = () => {
 
       showToast(response.message || "Account created successfully!", "success");
 
-      if (formData.user_role === "TALENT") {
+      const redirectParam = searchParams.get("redirect");
+      if (formData.user_role === "TALENT" && !redirectParam) {
         router.push("/talent/dashboard");
       } else {
-        const redirectParam = searchParams.get("redirect");
         router.push(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login");
       }
 
