@@ -145,22 +145,22 @@ const RECENT_APPS = [
 // ─── Overview Page ────────────────────────────────────────────────────────────
 function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
   return (
-    <main className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8">
       {/* ── Section title + Find Opportunities ── */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-black text-white tracking-tight">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
           Dashboard Overview
         </h2>
-        <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-xs font-black px-5 py-2.5 rounded-full transition-all duration-200 shadow-[0_0_16px_rgba(220,38,38,0.4)] hover:shadow-[0_0_24px_rgba(220,38,38,0.6)]">
+        <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-xs font-black px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-200 shadow-[0_0_16px_rgba(220,38,38,0.4)] hover:shadow-[0_0_24px_rgba(220,38,38,0.6)] w-full sm:w-auto justify-center">
           <Search size={14} />
           FIND OPPORTUNITIES
         </button>
       </div>
 
       {/* ── Free Plan Warning Banner ── */}
-      <div className="flex items-center justify-between bg-[#1a1200] border border-yellow-700/60 rounded-2xl px-6 py-4">
-        <div className="flex items-center gap-3">
-          <AlertTriangle size={18} className="text-yellow-500 flex-shrink-0" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-[#1a1200] border border-yellow-700/60 rounded-2xl px-4 md:px-6 py-3 md:py-4">
+        <div className="flex items-start sm:items-center gap-3">
+          <AlertTriangle size={18} className="text-yellow-500 flex-shrink-0 mt-0.5 sm:mt-0" />
           <div>
             <p className="text-sm font-bold text-yellow-400">Free Plan Limits</p>
             <p className="text-xs text-zinc-400 mt-0.5">
@@ -171,14 +171,14 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
         </div>
         <button
           onClick={() => onNavChange("subscription")}
-          className="flex-shrink-0 ml-8 bg-red-600 hover:bg-red-500 text-white text-xs font-black px-6 py-2.5 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)]"
+          className="flex-shrink-0 w-full sm:w-auto sm:ml-4 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-xs font-black px-4 md:px-6 py-2 md:py-2.5 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)] text-center"
         >
           UPGRADE NOW
         </button>
       </div>
 
       {/* ── Stats Grid ── */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {STATS.map((stat, i) => {
           const Icon = stat.icon;
           return (
@@ -204,10 +204,10 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
       </div>
 
       {/* ── Subscription Card ── */}
-      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-full bg-red-950/40 border border-red-800/50 flex items-center justify-center">
-            <Crown size={20} className="text-red-500" />
+      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl px-4 md:px-6 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-red-950/40 border border-red-800/50 flex items-center justify-center flex-shrink-0">
+            <Crown size={18} className="text-red-500" />
           </div>
           <div>
             <p className="text-sm font-bold text-white">Free Plan</p>
@@ -215,30 +215,32 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <p className="text-2xl font-black text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 w-full sm:w-auto">
+          <p className="text-xl md:text-2xl font-black text-white">
             $0<span className="text-sm font-normal text-zinc-400">/monthly</span>
           </p>
-          <button
-            onClick={() => onNavChange("subscription")}
-            className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[11px] font-black px-5 py-2 rounded-full transition-colors uppercase tracking-wider"
-          >
-            MANAGE SUBSCRIPTION
-          </button>
-          <button
-            onClick={() => onNavChange("subscription")}
-            className="flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-[11px] font-black px-5 py-2 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)] uppercase tracking-wider"
-          >
-            <Crown size={12} />
-            UPGRADE NOW
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => onNavChange("subscription")}
+              className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[10px] md:text-[11px] font-black px-4 md:px-5 py-2 rounded-full transition-colors uppercase tracking-wider text-center"
+            >
+              MANAGE SUBSCRIPTION
+            </button>
+            <button
+              onClick={() => onNavChange("subscription")}
+              className="flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black px-4 md:px-5 py-2 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)] uppercase tracking-wider"
+            >
+              <Crown size={11} />
+              UPGRADE NOW
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ── Hot Opportunities ── */}
       <div>
-        <h3 className="text-xl font-black text-white mb-5">Hot Opportunities</h3>
-        <div className="grid grid-cols-3 gap-5">
+        <h3 className="text-lg md:text-xl font-black text-white mb-4 md:mb-5">Hot Opportunities</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
           {OPPORTUNITIES.map((opp) => (
             <div
               key={opp.id}
@@ -312,25 +314,25 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
       </div>
 
       {/* ── Recent Applications ── */}
-      <div className="pb-8">
-        <h3 className="text-xl font-black text-white mb-5">
+      <div className="pb-4 md:pb-8">
+        <h3 className="text-lg md:text-xl font-black text-white mb-4 md:mb-5">
           Recent Applications
         </h3>
         <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl overflow-hidden divide-y divide-zinc-800/60">
           {recentApps.map((app) => (
             <div
               key={app.id}
-              className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-800/20 transition-colors"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-4 md:px-6 py-3 md:py-4 hover:bg-zinc-800/20 transition-colors"
             >
               {/* Thumbnail */}
               <img
                 src={app.image}
                 alt={app.role}
-                className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                className="w-full sm:w-14 sm:h-14 h-32 rounded-xl object-cover flex-shrink-0"
               />
 
               {/* Info */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
                 <p className="text-sm font-bold text-white truncate">{app.role}</p>
                 <p className="text-xs text-zinc-400 truncate">{app.project}</p>
                 <p className="text-xs text-zinc-500 mt-0.5">
@@ -339,15 +341,15 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
               </div>
 
               {/* Status + View */}
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                 <span
-                  className={`${app.statusColor} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wide`}
+                  className={`${app.statusColor} text-white text-[9px] md:text-[10px] font-black px-2.5 md:px-3 py-1 rounded-full uppercase tracking-wide`}
                 >
                   {app.status}
                 </span>
                 <button
                   onClick={() => onViewApp && onViewApp(app.id)}
-                  className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[10px] font-black px-4 py-1.5 rounded-full transition-colors uppercase tracking-wider cursor-pointer"
+                  className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[9px] md:text-[10px] font-black px-3 md:px-4 py-1.5 rounded-full transition-colors uppercase tracking-wider cursor-pointer"
                 >
                   VIEW
                 </button>
@@ -435,32 +437,32 @@ function FindRolesPage({ onApplyClick }) {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8">
       {/* ── Section title + Search & Filter ── */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-black text-white tracking-tight">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
           Available Opportunities
         </h2>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none">
             <input
               type="text"
               placeholder="Search roles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-[#141414] border border-zinc-800 text-white rounded-lg pl-4 pr-10 py-2.5 text-sm w-64 focus:outline-none focus:border-red-600 transition-colors"
+              className="bg-[#141414] border border-zinc-800 text-white rounded-lg pl-4 pr-10 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-red-600 transition-colors"
             />
             <Search className="absolute right-3 top-3 text-zinc-500" size={16} />
           </div>
-          <button className="flex items-center gap-2 border border-zinc-850 hover:bg-zinc-850 text-white text-xs font-black px-4 py-2.5 rounded-lg transition-colors border-red-700/50 uppercase tracking-wider">
+          <button className="flex items-center gap-2 border border-zinc-850 hover:bg-zinc-850 text-white text-[10px] md:text-xs font-black px-3 md:px-4 py-2.5 rounded-lg transition-colors border-red-700/50 uppercase tracking-wider flex-shrink-0">
             <Search size={14} className="text-red-500" />
-            FILTER
+            <span className="hidden sm:inline">FILTER</span>
           </button>
         </div>
       </div>
 
       {/* ── Opportunities Grid ── */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {filteredRoles.map((opp) => (
           <div
             key={opp.id}
@@ -515,13 +517,13 @@ function FindRolesPage({ onApplyClick }) {
               </div>
             </div>
 
-            <div className="p-6 pt-0 flex gap-3">
-              <button className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[11px] font-black py-3 rounded-xl uppercase tracking-wider transition-all duration-200">
+            <div className="p-4 md:p-6 pt-0 flex flex-col sm:flex-row gap-2 md:gap-3">
+              <button className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2.5 md:py-3 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
                 VIEW DETAILS
               </button>
               <button
                 onClick={() => onApplyClick(opp)}
-                className="flex-2 bg-red-600 hover:bg-red-500 text-white text-[11px] font-black py-3 px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.3)]"
+                className="flex-1 sm:flex-2 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black py-2.5 md:py-3 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.3)] text-center"
               >
                 APPLY FOR ROLE
               </button>
@@ -579,17 +581,17 @@ function MyApplicationsPage({ applications }) {
   });
 
   return (
-    <main className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8">
       {/* ── Section title + Filter ── */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-black text-white tracking-tight">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
           My Applications
         </h2>
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[#141414] border border-zinc-800 text-zinc-300 rounded-lg px-4 py-2.5 text-sm w-44 focus:outline-none focus:border-red-650 transition-colors cursor-pointer appearance-none pr-10"
+            className="bg-[#141414] border border-zinc-800 text-zinc-300 rounded-lg px-4 py-2.5 text-sm w-full sm:w-44 focus:outline-none focus:border-red-650 transition-colors cursor-pointer appearance-none pr-10"
           >
             <option value="All">All Status</option>
             <option value="Shortlisted">Shortlisted</option>
@@ -609,28 +611,28 @@ function MyApplicationsPage({ applications }) {
       </div>
 
       {/* ── Applications List ── */}
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {filteredApps.map((app) => (
           <div
             key={app.id}
-            className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 flex gap-6 items-center justify-between group hover:border-zinc-700 transition-all duration-300"
+            className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center justify-between group hover:border-zinc-700 transition-all duration-300"
           >
-            <div className="flex gap-6 items-center">
+            <div className="flex gap-4 md:gap-6 items-start md:items-center w-full md:w-auto">
               {/* Thumbnail */}
               <img
                 src={app.image}
                 alt={app.role}
-                className="w-40 h-24 rounded-xl object-cover flex-shrink-0"
+                className="w-24 h-16 sm:w-32 sm:h-20 md:w-40 md:h-24 rounded-xl object-cover flex-shrink-0"
               />
 
               {/* Details */}
-              <div className="space-y-2">
+              <div className="space-y-1 md:space-y-2 flex-1">
                 <div>
-                  <h4 className="text-xl font-black text-white">{app.role}</h4>
-                  <p className="text-sm text-zinc-400 font-semibold">{app.project}</p>
-                  <p className="text-xs text-zinc-500">by {app.director}</p>
+                  <h4 className="text-base md:text-xl font-black text-white">{app.role}</h4>
+                  <p className="text-xs md:text-sm text-zinc-400 font-semibold">{app.project}</p>
+                  <p className="text-[10px] md:text-xs text-zinc-500">by {app.director}</p>
                 </div>
-                <p className="text-xs text-zinc-500 flex items-center gap-1.5">
+                <p className="text-[10px] md:text-xs text-zinc-500 flex items-center gap-1.5">
                   <Calendar size={12} className="text-zinc-500" />
                   {app.appliedDate}
                 </p>
@@ -638,24 +640,24 @@ function MyApplicationsPage({ applications }) {
             </div>
 
             {/* Actions + Status */}
-            <div className="flex flex-col items-end gap-6 justify-between self-stretch">
+            <div className="flex flex-col items-start md:items-end gap-3 md:gap-6 justify-between w-full md:w-auto md:self-stretch">
               {/* Status Badge */}
               <span
-                className={`${app.statusColor} text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider`}
+                className={`${app.statusColor} text-[9px] md:text-[10px] font-black px-3 md:px-3.5 py-1 rounded-full uppercase tracking-wider`}
               >
                 {app.status}
               </span>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
-                <button className="bg-red-650 hover:bg-red-500 text-white text-[11px] font-black py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.2)]">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto">
+                <button className="bg-red-650 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.2)] text-center">
                   VIEW APPLICATION
                 </button>
-                <button className="border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[11px] font-black py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all duration-200">
+                <button className="border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
                   MESSAGE
                 </button>
                 {app.status === "Under Review" && (
-                  <button className="border border-zinc-800 hover:bg-zinc-800/40 text-zinc-500 hover:text-red-500 text-[11px] font-black py-2.5 px-6 rounded-xl uppercase tracking-wider transition-all duration-200">
+                  <button className="border border-zinc-800 hover:bg-zinc-800/40 text-zinc-500 hover:text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
                     WITHDRAW
                   </button>
                 )}
@@ -778,11 +780,11 @@ function ApplyModal({ opportunity, onClose, onSubmit }) {
 // ─── Placeholder pages for other nav items ────────────────────────────────────
 function PlaceholderPage({ title }) {
   return (
-    <main className="flex-1 overflow-y-auto px-8 py-8">
-      <h2 className="text-2xl font-black text-white tracking-tight mb-4">
+    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
+      <h2 className="text-xl md:text-2xl font-black text-white tracking-tight mb-4">
         {title}
       </h2>
-      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-12 flex flex-col items-center justify-center text-center gap-4">
+      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-8 md:p-12 flex flex-col items-center justify-center text-center gap-4">
         <div className="w-16 h-16 rounded-full bg-zinc-800/60 flex items-center justify-center">
           <span className="text-3xl">🎬</span>
         </div>
@@ -831,6 +833,7 @@ function renderPage(activeNav, onNavChange, pageProps) {
 export default function Dashboard() {
   const router = useRouter();
   const [activeNav, setActiveNav] = useState("overview");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ── Apply Modal state ────────────────────────────────────────────────────────
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
@@ -857,6 +860,16 @@ export default function Dashboard() {
     } else {
       setActiveNav(id);
     }
+  };
+
+  // Toggle mobile menu
+  const handleMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Close mobile menu
+  const handleMenuClose = () => {
+    setIsMobileMenuOpen(false);
   };
 
   // Open the apply modal for a given opportunity
@@ -921,7 +934,12 @@ export default function Dashboard() {
       />
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
-      <TalentSidebar activeNav={activeNav} onNavChange={handleNavChange} />
+      <TalentSidebar 
+        activeNav={activeNav} 
+        onNavChange={handleNavChange}
+        isOpen={isMobileMenuOpen}
+        onClose={handleMenuClose}
+      />
 
       {/* ── Main content ────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -929,6 +947,7 @@ export default function Dashboard() {
         <TalentNavbar
           onLogout={handleLogout}
           onSubscriptionClick={() => router.push("/dashboard/talent/subscription")}
+          onMenuClick={handleMenuToggle}
         />
 
         {/* Page content — switches based on activeNav */}
