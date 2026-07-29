@@ -734,7 +734,7 @@ export default function TalentLandingPage() {
 
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button 
-              onClick={() => setShowDashboard(true)}
+              onClick={() => router.push('/signup')}
               className="bg-gradient-to-r from-red-650 to-rose-755 hover:from-red-550 hover:to-rose-650 text-white px-8 py-3.5 rounded-full text-xs font-black tracking-wider flex items-center gap-2 transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:shadow-[0_0_30px_rgba(220,38,38,0.7)] hover:scale-[1.02]"
             >
               <User size={14} />
@@ -742,7 +742,7 @@ export default function TalentLandingPage() {
             </button>
 
             <button 
-              onClick={() => setShowDashboard(true)}
+              onClick={handleBrowseTalent}
               className="border border-red-950/80 bg-neutral-950/50 hover:border-red-650 hover:bg-neutral-900/20 text-red-500 px-8 py-3.5 rounded-full text-xs font-black tracking-wider flex items-center gap-2 transition-all duration-300 hover:scale-[1.02]"
             >
               <Globe size={14} />

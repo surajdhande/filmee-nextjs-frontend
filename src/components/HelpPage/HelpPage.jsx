@@ -260,10 +260,12 @@ export default function HelpPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider w-full sm:w-auto">
-              <MessageSquare size={16} />
-              CONTACT SUPPORT
-            </button>
+            <Link href="/contact#our-offices" className="w-full sm:w-auto">
+              <button className="flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider w-full">
+                <MessageSquare size={16} />
+                CONTACT SUPPORT
+              </button>
+            </Link>
             
             <button className="flex items-center justify-center gap-2.5 rounded-full border border-red-650 px-8 py-3.5 text-xs sm:text-sm font-bold text-red-500 hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 w-full sm:w-auto uppercase tracking-wider">
               <BookOpen size={16} />

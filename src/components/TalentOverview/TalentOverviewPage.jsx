@@ -151,11 +151,11 @@ export default function TalentOverviewPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* ── Navbar ── */}
       <nav className="fixed top-0 left-0 z-[999] w-full border-b border-zinc-800 bg-black/95 backdrop-blur-md">
-        <div className="flex h-20 w-full items-center justify-between px-16">
+        <div className="flex h-16 sm:h-20 w-full items-center justify-between px-4 sm:px-8 lg:px-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Filmee Logo" width={60} height={60} priority />
-            <div className="text-3xl font-extrabold tracking-tight leading-none">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <Image src="/logo.png" alt="Filmee Logo" width={40} height={40} className="sm:w-[60px] sm:h-[60px]" priority />
+            <div className="text-xl sm:text-3xl font-extrabold tracking-tight leading-none">
               <span className="text-white">Fil</span>
               <span className="text-red-500">m</span>
               <span className="text-white">ee</span>
@@ -172,21 +172,21 @@ export default function TalentOverviewPage() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link href="/search">
-              <Search size={22} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
+              <Search size={20} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
             </Link>
             <Link href="/notifications">
-              <Bell size={22} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
+              <Bell size={20} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
             </Link>
             <Link href="/login">
-              <button className="group relative overflow-hidden rounded-full border border-red-600 px-8 py-3 text-red-500 transition-all duration-300 hover:scale-105 text-sm font-semibold">
+              <button className="group relative overflow-hidden rounded-full border border-red-600 px-4 sm:px-8 py-2 sm:py-3 text-red-500 transition-all duration-300 hover:scale-105 text-xs sm:text-sm font-semibold">
                 <span className="absolute inset-0 -translate-x-full bg-red-600 transition-transform duration-300 group-hover:translate-x-0" />
                 <span className="relative z-10 group-hover:text-white">SIGN IN</span>
               </button>
             </Link>
-            <Link href="/signup">
-              <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(229,9,20,0.5)]">
+            <Link href="/signup" className="hidden xs:block">
+              <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-4 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(229,9,20,0.5)]">
                 JOIN NOW
               </button>
             </Link>
@@ -195,7 +195,7 @@ export default function TalentOverviewPage() {
       </nav>
 
       {/* ── Main Content ── */}
-      <main className="pt-28 pb-20 px-16 max-w-7xl mx-auto">
+      <main className="pt-24 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto">
 
         {/* ── Hero Section ── */}
         <div className="mb-10">
@@ -206,36 +206,36 @@ export default function TalentOverviewPage() {
             <ArrowLeft size={16} />
           </button>
 
-          <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
             Find Your Next{" "}
             <span className="text-red-500">Creative Role</span>
           </h1>
-          <p className="mt-4 max-w-xl text-zinc-400 leading-relaxed">
+          <p className="mt-4 max-w-xl text-zinc-400 text-sm sm:text-base leading-relaxed">
             Discover exciting opportunities to work with talented filmmakers on groundbreaking
             projects. From acting to technical roles, find your perfect match.
           </p>
         </div>
 
         {/* ── Search & Filters ── */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-10">
+        <div className="flex flex-col md:flex-row gap-3 mb-10">
           {/* Search bar */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
               placeholder="Search roles, projects, or skills..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#141414] border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 outline-none focus:border-red-600 transition-colors duration-200"
+              className="w-full bg-[#141414] border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 outline-none focus:border-red-660 transition-colors duration-200"
             />
           </div>
 
           {/* Role filter */}
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
+              className="appearance-none w-full md:w-auto bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-660 transition-colors duration-200 cursor-pointer"
             >
               {ROLE_OPTIONS.map((o) => (
                 <option key={o} value={o}>{o}</option>
@@ -245,11 +245,11 @@ export default function TalentOverviewPage() {
           </div>
 
           {/* Location filter */}
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <select
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
-              className="appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
+              className="appearance-none w-full md:w-auto bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-660 transition-colors duration-200 cursor-pointer"
             >
               {LOCATION_OPTIONS.map((o) => (
                 <option key={o} value={o}>{o}</option>
@@ -260,14 +260,14 @@ export default function TalentOverviewPage() {
         </div>
 
         {/* ── Stats Row ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-14">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-14">
           {STATS.map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="flex flex-col items-center gap-2">
+              <div key={s.label} className="flex flex-col items-center gap-2 text-center">
                 <Icon size={28} className="text-red-500" />
-                <span className="text-2xl font-extrabold text-white">{s.value}</span>
-                <span className="text-xs text-zinc-400">{s.label}</span>
+                <span className="text-xl sm:text-2xl font-extrabold text-white">{s.value}</span>
+                <span className="text-[10px] sm:text-xs text-zinc-400">{s.label}</span>
               </div>
             );
           })}
@@ -283,15 +283,15 @@ export default function TalentOverviewPage() {
               return (
                 <div
                   key={role.id}
-                  className="bg-[#111111] border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4 hover:border-red-700 transition-colors duration-300"
+                  className="bg-[#111111] border border-zinc-800 rounded-2xl p-5 sm:p-6 flex flex-col gap-4 hover:border-red-750 transition-colors duration-300"
                 >
                   {/* Card header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <Icon size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
-                      <h2 className="text-lg font-bold text-white">{role.title}</h2>
+                      <h2 className="text-base sm:text-lg font-bold text-white">{role.title}</h2>
                     </div>
-                    <span className={`${role.priorityColor} text-white text-xs font-bold px-3 py-1 rounded-full flex-shrink-0`}>
+                    <span className={`${role.priorityColor} text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full flex-shrink-0`}>
                       {role.priority}
                     </span>
                   </div>
@@ -306,19 +306,19 @@ export default function TalentOverviewPage() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex items-center gap-2 text-white">
                       <DollarSign size={14} className="text-red-500" />
-                      <span className="font-semibold">{role.pay}</span>
+                      <span className="font-semibold text-xs sm:text-sm">{role.pay}</span>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-300">
                       <Clock size={14} className="text-zinc-500" />
-                      <span>{role.duration}</span>
+                      <span className="text-xs sm:text-sm">{role.duration}</span>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-300">
                       <MapPin size={14} className="text-zinc-500" />
-                      <span>{role.location}</span>
+                      <span className="text-xs sm:text-sm">{role.location}</span>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-300">
                       <Users size={14} className="text-zinc-500" />
-                      <span>{role.applied} applied</span>
+                      <span className="text-xs sm:text-sm">{role.applied} applied</span>
                     </div>
                   </div>
 
@@ -329,7 +329,7 @@ export default function TalentOverviewPage() {
                       {role.requirements.map((req) => (
                         <span
                           key={req}
-                          className="border border-zinc-700 text-zinc-300 text-xs px-3 py-1 rounded-full"
+                          className="border border-zinc-700 text-zinc-300 text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 rounded-full"
                         >
                           {req}
                         </span>
@@ -338,11 +338,11 @@ export default function TalentOverviewPage() {
                   </div>
 
                   {/* Footer: deadline + apply */}
-                  <div className="flex items-center justify-between mt-auto pt-2">
-                    <p className="text-xs text-zinc-500">Deadline: {role.deadline}</p>
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-800/40">
+                    <p className="text-[10px] sm:text-xs text-zinc-500">Deadline: {role.deadline}</p>
                     <button
                       onClick={() => router.push("/login?redirect=second_section")}
-                      className="bg-gradient-to-r from-red-700 to-red-500 hover:brightness-110 text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all duration-200 hover:scale-105"
+                      className="bg-gradient-to-r from-red-700 to-red-500 hover:brightness-110 text-white text-xs sm:text-sm font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full transition-all duration-200 hover:scale-105"
                     >
                       APPLY NOW
                     </button>

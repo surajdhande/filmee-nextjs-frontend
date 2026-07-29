@@ -116,23 +116,23 @@ const SignupPageInner = () => {
     {/* Dark Overlay */}
     <div className="absolute inset-0 bg-black/80" />
 
-    <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+    <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
       {/* Brand */}
-      <div className="mb-10 text-center">
+      <div className="mb-6 sm:mb-10 text-center">
 
-        <h2 className="text-4xl font-bold tracking-tight text-white">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
           Create Your Account
         </h2>
 
-        <p className="mt-4 text-zinc-400 leading-7">
+        <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
           Join filmmakers, investors and talent on one powerful
           platform to bring creative ideas to life.
         </p>
 
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
@@ -143,7 +143,7 @@ const SignupPageInner = () => {
             value={formData.first_name}
             onChange={handleChange}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
           />
 
           <input
@@ -153,7 +153,7 @@ const SignupPageInner = () => {
             value={formData.last_name}
             onChange={handleChange}
             required
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
           />
 
         </div>
@@ -165,7 +165,7 @@ const SignupPageInner = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
         <input
@@ -175,7 +175,7 @@ const SignupPageInner = () => {
           value={formData.phone_number}
           onChange={handleChange}
           required
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
         <select
@@ -183,7 +183,7 @@ const SignupPageInner = () => {
           value={formData.user_role}
           onChange={handleChange}
           required
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         >
           <option value="" disabled>
             Choose your role
@@ -209,7 +209,7 @@ const SignupPageInner = () => {
           value={formData.password}
           onChange={handleChange}
           required
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
         <input
@@ -219,7 +219,7 @@ const SignupPageInner = () => {
           value={formData.confirm_password}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-white outline-none focus:border-red-500"
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
         <button

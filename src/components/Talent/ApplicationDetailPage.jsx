@@ -227,14 +227,14 @@ export default function ApplicationDetailPage({ id }) {
       <ApplicationDetailNavbar />
 
       {/* ── Two-Column Main Layout ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-[1fr_340px] gap-6 max-w-[1400px] mx-auto px-8 py-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 max-w-[1400px] mx-auto px-4 sm:px-8 py-6 sm:py-8 items-start">
 
         {/* ─── LEFT COLUMN ─────────────────────────────────────────────────── */}
         <div className="space-y-6 min-w-0">
 
           {/* Hero Images — full width if 1 image, split if 2 */}
           {data.images.length === 1 ? (
-            <div className="relative h-[340px] rounded-2xl overflow-hidden">
+            <div className="relative h-[200px] sm:h-[280px] lg:h-[340px] rounded-2xl overflow-hidden">
               <img
                 src={data.images[0]}
                 alt={`${data.project} still`}
@@ -243,7 +243,7 @@ export default function ApplicationDetailPage({ id }) {
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-1.5 h-[340px] rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-2 gap-1.5 h-[200px] sm:h-[280px] lg:h-[340px] rounded-2xl overflow-hidden">
               {data.images.map((src, i) => (
                 <div key={i} className="relative overflow-hidden">
                   <img
@@ -260,7 +260,7 @@ export default function ApplicationDetailPage({ id }) {
           {/* Project Title & Meta */}
           <div className="space-y-2">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-4xl font-black text-white tracking-tight leading-none">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
                 {data.project}
               </h1>
               <span className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wide">
@@ -292,7 +292,7 @@ export default function ApplicationDetailPage({ id }) {
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center bg-[#141414] border border-zinc-800/70 rounded-xl p-1 gap-0.5">
+          <div className="flex items-center bg-[#141414] border border-zinc-800/70 rounded-xl p-1 gap-0.5 overflow-x-auto">
             {TABS.map((tab) => (
               <button
                 key={tab}
@@ -311,16 +311,16 @@ export default function ApplicationDetailPage({ id }) {
           {/* ── Overview Tab ── */}
           {activeTab === "Overview" && (
             <div className="space-y-5">
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
                 <h3 className="text-sm font-black text-white mb-3">Synopsis</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">
                   {data.synopsis}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Project Details */}
-                <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+                <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
                   <h3 className="text-sm font-black text-white mb-4">
                     Project Details
                   </h3>
@@ -350,7 +350,7 @@ export default function ApplicationDetailPage({ id }) {
                 </div>
 
                 {/* Documents */}
-                <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+                <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
                   <h3 className="text-sm font-black text-white mb-4">
                     Documents
                   </h3>
@@ -362,8 +362,8 @@ export default function ApplicationDetailPage({ id }) {
                       >
                         {doc.icon === "play" ? (
                           <Play
-                            size={12}
-                            className="flex-shrink-0 fill-red-500"
+                             size={12}
+                             className="flex-shrink-0 fill-red-500"
                           />
                         ) : (
                           <Download size={12} className="flex-shrink-0" />
@@ -376,11 +376,11 @@ export default function ApplicationDetailPage({ id }) {
               </div>
 
               {/* Your Application */}
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-5">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 space-y-5">
                 <h3 className="text-sm font-black text-white">
                   Your Application
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     { label: "Applied Date", value: data.appliedDate, highlight: false },
                     { label: "Director", value: data.director, highlight: false },
@@ -415,9 +415,9 @@ export default function ApplicationDetailPage({ id }) {
 
           {/* ── Financials Tab ── */}
           {activeTab === "Financials" && (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Budget Breakdown */}
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
                 <h3 className="text-sm font-black text-white mb-5">
                   Budget Breakdown
                 </h3>
@@ -445,7 +445,7 @@ export default function ApplicationDetailPage({ id }) {
               </div>
 
               {/* Projections */}
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
                 <h3 className="text-sm font-black text-white mb-5">
                   Projections
                 </h3>
@@ -472,9 +472,9 @@ export default function ApplicationDetailPage({ id }) {
 
           {/* ── Team Tab ── */}
           {activeTab === "Team" && (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Filmmaker card */}
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-4">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 space-y-4">
                 <h3 className="text-sm font-black text-white">Filmmaker</h3>
                 <div className="space-y-2">
                   <p className="text-sm font-black text-white">{data.team.filmmaker.name}</p>
@@ -494,7 +494,7 @@ export default function ApplicationDetailPage({ id }) {
               </div>
 
               {/* Cast & Crew card */}
-              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-5">
+              <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 space-y-5">
                 <h3 className="text-sm font-black text-white">Cast &amp; Crew</h3>
                 <div className="space-y-2">
                   <p className="text-xs font-black text-white">Cast:</p>
@@ -518,7 +518,7 @@ export default function ApplicationDetailPage({ id }) {
 
           {/* ── Open Roles Tab ── */}
           {activeTab === "Open Roles" && (
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {data.openRoles.map((role) => (
                 <div
                   key={role.title}
@@ -545,7 +545,7 @@ export default function ApplicationDetailPage({ id }) {
 
           {/* ── Media placeholder ── */}
           {activeTab === "Media" && (
-            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-14 flex flex-col items-center justify-center text-center gap-3">
+            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-8 sm:p-14 flex flex-col items-center justify-center text-center gap-3">
               <span className="text-4xl">🎬</span>
               <p className="text-zinc-400 text-sm font-semibold">Media — Coming Soon</p>
               <p className="text-zinc-600 text-xs max-w-xs">
@@ -555,8 +555,8 @@ export default function ApplicationDetailPage({ id }) {
           )}
         </div>
 
-        {/* ─── RIGHT SIDEBAR (sticky) ──────────────────────────────────────── */}
-        <div className="sticky top-24 space-y-4">
+        {/* ─── RIGHT SIDEBAR ──────────────────────────────────────── */}
+        <div className="space-y-4 lg:sticky lg:top-24 w-full">
           {/* Project Information Card */}
           <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-5 space-y-5">
             <h3 className="text-sm font-black text-white">

@@ -26,20 +26,20 @@ export default function SubscriptionPage({ onBack }) {
   ];
 
   return (
-    <main className="flex-1 overflow-y-auto px-8 py-8 space-y-8 bg-[#0a0a0a]">
+    <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6 sm:space-y-8 bg-[#0a0a0a]">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-white uppercase tracking-wider transition-colors border border-zinc-800 rounded-full px-4 py-2 hover:bg-zinc-900"
+            className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-white uppercase tracking-wider transition-colors border border-zinc-800 rounded-full px-4 py-2 hover:bg-zinc-900 w-fit"
           >
             <ArrowLeft size={14} />
             BACK
           </button>
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-black text-white tracking-tight">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 Subscription Management
               </h2>
               <span className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
@@ -55,7 +55,7 @@ export default function SubscriptionPage({ onBack }) {
 
         <button
   onClick={() => router.push("/pricing")}
-  className="flex items-center gap-2 border border-red-700/60 hover:border-red-650 hover:bg-red-950/20 text-red-500 text-xs font-black px-5 py-2.5 rounded-full transition-all duration-200 tracking-wider uppercase"
+  className="flex items-center gap-2 border border-red-700/60 hover:border-red-650 hover:bg-red-950/20 text-red-500 text-xs font-black px-5 py-2.5 rounded-full transition-all duration-200 tracking-wider uppercase w-fit"
 >
           VIEW ALL PLANS
           <span className="text-[10px]">↗</span>
@@ -63,13 +63,13 @@ export default function SubscriptionPage({ onBack }) {
       </div>
 
       {/* ── Sub Navigation Tabs ────────────────────────────────────────────── */}
-      <div className="bg-[#111] border border-zinc-900 rounded-xl p-1.5 flex gap-2">
+      <div className="bg-[#111] border border-zinc-900 rounded-xl p-1.5 flex gap-1 sm:gap-2 overflow-x-auto scrollbar-none">
         {["overview", "billing-history", "payment-methods", "change-plan"].map(
           (tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 px-4 text-xs font-black uppercase tracking-wider rounded-lg transition-all duration-200 ${
+              className={`flex-shrink-0 sm:flex-1 py-2 px-4 text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-lg transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab
                   ? "bg-zinc-800/80 text-white shadow-sm"
                   : "text-zinc-500 hover:text-zinc-300"
@@ -84,22 +84,22 @@ export default function SubscriptionPage({ onBack }) {
       {/* ── Tab Content ────────────────────────────────────────────────────── */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Current Plan Card */}
-            <div className="col-span-2 bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 flex flex-col justify-between min-h-[220px]">
+            <div className="lg:col-span-2 bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[220px]">
               <div>
                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
                   Current Plan
                 </p>
-                <div className="flex justify-between items-start mt-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mt-4 gap-2">
                   <div>
-                    <h3 className="text-3xl font-black text-white">Free</h3>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white">Free</h3>
                     <p className="text-xs text-zinc-400 font-semibold mt-1">
                       Talent Plan
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-black text-white">
+                  <div className="sm:text-right">
+                    <p className="text-2xl sm:text-3xl font-black text-white">
                       $0<span className="text-sm font-semibold text-zinc-500">/monthly</span>
                     </p>
                   </div>
@@ -131,7 +131,7 @@ export default function SubscriptionPage({ onBack }) {
             </div>
 
             {/* Usage Stats Card */}
-            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 flex flex-col justify-between min-h-[220px]">
+            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[220px]">
               <div>
                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
                   Usage Stats
@@ -177,7 +177,7 @@ export default function SubscriptionPage({ onBack }) {
           </div>
 
           {/* Current Plan Features */}
-          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6">
+          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6">
             <p className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
               Current Plan Features
             </p>
@@ -185,7 +185,7 @@ export default function SubscriptionPage({ onBack }) {
               Features included in your Free plan
             </p>
 
-            <div className="grid grid-cols-3 gap-y-4 gap-x-6 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6 mt-6">
               {planFeatures.map((feature, i) => (
                 <div key={i} className="flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
@@ -200,7 +200,7 @@ export default function SubscriptionPage({ onBack }) {
       )}
 
       {activeTab === "billing-history" && (
-        <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-6">
+        <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 space-y-6">
           <div>
             <h3 className="text-lg font-black text-white">Billing History</h3>
             <p className="text-xs text-zinc-500 mt-1">Your past invoices and payments</p>
@@ -214,10 +214,10 @@ export default function SubscriptionPage({ onBack }) {
             ].map((invoice) => (
               <div
                 key={invoice.id}
-                className="flex items-center justify-between border border-zinc-800/60 rounded-xl p-4 bg-[#111] hover:border-zinc-700 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between border border-zinc-800/60 rounded-xl p-4 bg-[#111] hover:border-zinc-700 transition-colors gap-3"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-red-950/40 border border-red-800/50 flex items-center justify-center text-red-500">
+                  <div className="w-10 h-10 rounded-lg bg-red-950/40 border border-red-800/50 flex items-center justify-center text-red-500 flex-shrink-0">
                     <CreditCard size={18} />
                   </div>
                   <div>
@@ -244,13 +244,13 @@ export default function SubscriptionPage({ onBack }) {
       )}
 
       {activeTab === "payment-methods" && (
-        <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-black text-white">Payment Methods</h3>
               <p className="text-xs text-zinc-500 mt-1">Manage your payment methods</p>
             </div>
-            <button className="flex items-center gap-2 border border-red-700/60 hover:bg-red-955/20 text-red-500 text-xs font-black px-4 py-2.5 rounded-xl transition-all uppercase tracking-wider">
+            <button className="flex items-center gap-2 border border-red-700/60 hover:bg-red-955/20 text-red-500 text-xs font-black px-4 py-2.5 rounded-xl transition-all uppercase tracking-wider w-fit">
               <Plus size={14} className="text-red-500" />
               ADD METHOD
             </button>
@@ -263,17 +263,17 @@ export default function SubscriptionPage({ onBack }) {
             ].map((method) => (
               <div
                 key={method.id}
-                className="flex items-center justify-between border border-zinc-800/60 rounded-xl p-4 bg-[#111] hover:border-zinc-700 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between border border-zinc-800/60 rounded-xl p-4 bg-[#111] hover:border-zinc-700 transition-colors gap-3"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-red-950/40 border border-red-800/50 flex items-center justify-center text-red-500">
+                  <div className="w-10 h-10 rounded-lg bg-red-950/40 border border-red-800/50 flex items-center justify-center text-red-500 flex-shrink-0">
                     <CreditCard size={18} />
                   </div>
                   <div>
                     <h4 className="text-sm font-black text-white">
                       {method.type} •••• {method.last4}
                     </h4>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <p className="text-xs text-zinc-500">Expires {method.expires}</p>
                       {method.isDefault && (
                         <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -299,9 +299,9 @@ export default function SubscriptionPage({ onBack }) {
       )}
 
       {activeTab === "change-plan" && (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Free Plan Card */}
-          <div className="bg-[#141414] border-2 border-red-650 rounded-2xl p-6 flex flex-col justify-between min-h-[480px] relative">
+          <div className="bg-[#141414] border-2 border-red-650 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[400px] sm:min-h-[480px] relative">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
                 <div>
@@ -344,7 +344,7 @@ export default function SubscriptionPage({ onBack }) {
           </div>
 
           {/* Professional Plan Card */}
-          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 flex flex-col justify-between min-h-[480px] relative hover:border-zinc-750 transition-colors">
+          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[400px] sm:min-h-[480px] relative hover:border-zinc-750 transition-colors">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
                 <div>
@@ -387,7 +387,7 @@ export default function SubscriptionPage({ onBack }) {
           </div>
 
           {/* Premium Plan Card */}
-          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 flex flex-col justify-between min-h-[480px] relative hover:border-zinc-750 transition-colors">
+          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 sm:p-6 flex flex-col justify-between min-h-[400px] sm:min-h-[480px] relative hover:border-zinc-750 transition-colors">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
                 <div>

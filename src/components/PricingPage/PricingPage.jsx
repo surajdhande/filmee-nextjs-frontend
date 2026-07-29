@@ -269,7 +269,7 @@ export default function PricingPage() {
 
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <div className="fixed top-0 left-0 z-[999] w-full bg-black/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="flex h-16 items-center justify-between px-10">
+        <div className="flex h-16 items-center justify-between px-4 sm:px-10">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors text-sm font-semibold"
@@ -278,21 +278,21 @@ export default function PricingPage() {
             BACK
           </button>
           <span className="text-white font-semibold text-base">Pricing Plans</span>
-          <div className="w-20" />
+          <div className="w-12 sm:w-20" />
         </div>
       </div>
 
       {/* ── Main ─────────────────────────────────────────────────────────── */}
-      <main className="pt-24 pb-24 px-6 max-w-5xl mx-auto">
+      <main className="pt-24 pb-24 px-4 sm:px-6 max-w-5xl mx-auto">
 
         {/* Hero */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
             Choose Your{" "}
             <span className="text-red-500">FilmConnect</span>{" "}
             Plan
           </h1>
-          <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed">
+          <p className="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
             Whether you&apos;re a filmmaker, investor, or talent, we have the perfect plan to help you
             succeed in the film industry.
           </p>
@@ -300,59 +300,59 @@ export default function PricingPage() {
 
         {/* Monthly / Yearly toggle */}
         <div className="flex items-center justify-center gap-4 mb-8">
-  <span
-    className={`text-sm font-semibold transition-colors ${
-      !yearly ? "text-white" : "text-zinc-500"
-    }`}
-  >
-    Monthly
-  </span>
+          <span
+            className={`text-sm font-semibold transition-colors ${
+              !yearly ? "text-white" : "text-zinc-500"
+            }`}
+          >
+            Monthly
+          </span>
 
-  <button
-    type="button"
-    onClick={() => setYearly((prev) => !prev)}
-    className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
-      yearly ? "bg-red-600" : "bg-zinc-700"
-    }`}
-  >
-    <span
-      className={`absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
-        yearly ? "translate-x-7" : "translate-x-0"
-      }`}
-    />
-  </button>
+          <button
+            type="button"
+            onClick={() => setYearly((prev) => !prev)}
+            className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
+              yearly ? "bg-red-600" : "bg-zinc-700"
+            }`}
+          >
+            <span
+              className={`absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
+                yearly ? "translate-x-7" : "translate-x-0"
+              }`}
+            />
+          </button>
 
-  <span
-    className={`text-sm font-semibold transition-colors ${
-      yearly ? "text-white" : "text-zinc-500"
-    }`}
-  >
-    Yearly
-  </span>
+          <span
+            className={`text-sm font-semibold transition-colors ${
+              yearly ? "text-white" : "text-zinc-500"
+            }`}
+          >
+            Yearly
+          </span>
 
-  {yearly && (
-    <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
-      Save 20%
-    </span>
-  )}
-</div>
+          {yearly && (
+            <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">
+              Save 20%
+            </span>
+          )}
+        </div>
 
         {/* Tab switcher */}
         <div className="flex justify-center mb-10">
-          <div className="flex bg-[#141414] border border-zinc-800 rounded-full p-1 gap-1">
+          <div className="flex bg-[#141414] border border-zinc-800 rounded-full p-1 gap-1 max-w-full overflow-x-auto scrollbar-none">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                  className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 ${
                     activeTab === tab.key
                       ? "bg-white text-black"
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
-                  <Icon size={15} />
+                  <Icon size={14} />
                   {tab.label}
                 </button>
               );
@@ -362,12 +362,12 @@ export default function PricingPage() {
 
         {/* Section heading */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white">{plan.heading}</h2>
-          <p className="text-zinc-400 text-sm mt-1">{plan.sub}</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">{plan.heading}</h2>
+          <p className="text-zinc-400 text-xs sm:text-sm mt-1">{plan.sub}</p>
         </div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {plan.cards.map((card) => (
             <div
               key={card.name}
@@ -433,16 +433,16 @@ export default function PricingPage() {
 
         {/* ── Why Choose FilmConnect ── */}
         <div className="mb-20">
-          <h2 className="text-2xl font-bold text-center text-white mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-white mb-8">
             Why Choose FilmConnect?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {WHY_CARDS.map((w) => {
               const Icon = w.icon;
               return (
                 <div
                   key={w.title}
-                  className="bg-[#111111] border border-zinc-800 rounded-2xl p-8 flex flex-col items-center text-center gap-4 hover:border-zinc-600 transition-colors duration-200"
+                  className="bg-[#111111] border border-zinc-800 rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center gap-4 hover:border-zinc-600 transition-colors duration-200"
                 >
                   <Icon size={36} className="text-red-500" />
                   <h3 className="text-lg font-bold text-white">{w.title}</h3>
@@ -455,7 +455,7 @@ export default function PricingPage() {
 
         {/* ── FAQ ── */}
         <div className="mb-20">
-          <h2 className="text-2xl font-bold text-center text-white mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-white mb-8">
             Frequently Asked Questions
           </h2>
           <div className="flex flex-col divide-y divide-zinc-800">
@@ -463,9 +463,9 @@ export default function PricingPage() {
               <div key={i} className="py-5">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between text-left text-white font-semibold text-sm hover:text-red-400 transition-colors duration-200"
+                  className="w-full flex items-center justify-between text-left text-white font-semibold text-sm hover:text-red-400 transition-colors duration-200 gap-3"
                 >
-                  {faq.q}
+                  <span>{faq.q}</span>
                   <ChevronDown
                     size={18}
                     className={`flex-shrink-0 text-zinc-500 transition-transform duration-300 ${
@@ -484,8 +484,8 @@ export default function PricingPage() {
         </div>
 
         {/* ── CTA Banner ── */}
-        <div className="rounded-2xl bg-gradient-to-br from-[#2a0a0a] to-[#1a0505] border border-red-900/40 p-12 flex flex-col items-center text-center gap-5">
-          <h2 className="text-2xl font-bold text-white">Ready to Get Started?</h2>
+        <div className="rounded-2xl bg-gradient-to-br from-[#2a0a0a] to-[#1a0505] border border-red-900/40 p-6 sm:p-12 flex flex-col items-center text-center gap-5">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Ready to Get Started?</h2>
           <p className="text-zinc-400 text-sm max-w-md leading-relaxed">
             Join thousands of filmmakers, investors, and talent already using FilmConnect to create
             amazing projects.

@@ -278,7 +278,7 @@ export default function ContactPage() {
         </div>
 
         {/* Our Offices */}
-        <div className="mb-24">
+        <div id="our-offices" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white text-center mb-12 tracking-wide">
             Our Offices
           </h2>

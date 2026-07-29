@@ -110,6 +110,33 @@ const PROJECTS = [
     image: "https://images.unsplash.com/photo-1475070929565-c985b496cb9f?auto=format&fit=crop&w=800&q=80",
     size: "normal",
   },
+  {
+    id: 10,
+    title: "Forgotten Horizon",
+    genre: "Romance",
+    budget: 120000,
+    fundedPct: 72,
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    size: "normal",
+  },
+  {
+    id: 11,
+    title: "Steel & Shadows",
+    genre: "Action",
+    budget: 380000,
+    fundedPct: 54,
+    image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=800&q=80",
+    size: "normal",
+  },
+  {
+    id: 12,
+    title: "Voices Unheard",
+    genre: "Documentary",
+    budget: 85000,
+    fundedPct: 88,
+    image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=800&q=80",
+    size: "normal",
+  },
 ];
 
 const formatBudget = (n) => {
