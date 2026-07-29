@@ -30,20 +30,20 @@ export default function MyOffersPage() {
 
   return (
     <InvestorLayout>
-      <div className="p-8">
+      <div className="p-4 lg:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col gap-4 mb-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-[28px] font-bold text-white tracking-tight">
+            <h2 className="text-[22px] font-bold text-white tracking-tight lg:text-[28px]">
               My Investment Offers
             </h2>
-            <p className="text-s text-zinc-500 mt-1">
+            <p className="text-xs text-zinc-500 mt-1 lg:text-sm">
               Track negotiations with filmmakers
             </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/investor/browse")}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] px-5 py-2.5 text-[13px] font-bold uppercase tracking-wider text-white shadow-[0_0_14px_rgba(229,9,20,0.35)] hover:brightness-110 transition duration-200"
+            className="self-start flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_0_14px_rgba(229,9,20,0.35)] hover:brightness-110 transition duration-200 lg:px-5 lg:py-2.5 lg:text-[13px]"
           >
             <Search size={14} />
             Browse Projects

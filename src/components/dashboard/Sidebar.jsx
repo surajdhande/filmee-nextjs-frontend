@@ -85,14 +85,14 @@ const MENU_CONFIG = {
   ],
 };
 
-const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
+const Sidebar = ({ role = "FILMMAKER", userName = "User", onClose }) => {
   const pathname = usePathname();
   const menuItems = MENU_CONFIG[role] || [];
 
   return (
-    <div className="flex h-full w-[240px] flex-col px-6 pt-4">
+    <div className="flex h-full w-full flex-col px-4 pt-4 lg:w-[240px] lg:px-6">
       <nav className="flex-1">
-        <div className="flex w-full flex-col space-y-2 rounded-[24px] border border-[#2A2A2A] bg-[#141414] pt-5 pb-6">
+        <div className="flex w-full flex-col space-y-1 rounded-[24px] border border-[#2A2A2A] bg-[#141414] pt-5 pb-6">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -100,6 +100,7 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={onClose}
                 className={`group flex h-12 w-full items-center justify-between rounded-full px-4 transition-all duration-200 ${
                   isActive
                     ? "bg-[#232323] text-white py-3"
