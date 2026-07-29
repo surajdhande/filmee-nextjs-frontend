@@ -61,10 +61,10 @@ export default function PortfolioPage() {
 
   return (
     <InvestorLayout>
-      <div className="px-8 py-8 bg-black min-h-screen">
+      <div className="px-4 py-4 bg-black min-h-screen lg:px-8 lg:py-8">
         {/* Outer Card */}
-        <div className="bg-[#171717] border border-zinc-800 rounded-3xl p-8">
-          <h2 className="text-[22px] font-bold text-white tracking-tight mb-8">
+        <div className="bg-[#171717] border border-zinc-800 rounded-3xl p-4 lg:p-8">
+          <h2 className="text-[20px] font-bold text-white tracking-tight mb-6 lg:text-[22px] lg:mb-8">
             My Investment Portfolio
           </h2>
 
@@ -93,7 +93,7 @@ export default function PortfolioPage() {
 
           {/* Cards */}
           {!loading && !error && mapped.length > 0 && (
-            <div className="flex flex-wrap justify-between gap-9">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-between gap-6 lg:gap-9">
               {mapped.map((item) => (
                 <PortfolioCard key={`${item.id}-${item.invested}`} item={item} />
               ))}

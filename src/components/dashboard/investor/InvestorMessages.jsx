@@ -88,6 +88,8 @@ export default function InvestorMessages() {
   const [currentUser, setCurrentUser]       = useState(null);
   const [autoOpenDone, setAutoOpenDone]     = useState(false);
   const [isSending, setIsSending]           = useState(false);
+  // Mobile: track whether to show chat panel (true) or conversation list (false)
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const bottomRef = useRef(null);
 
   const getCurrentUserId = useCallback(() => {
@@ -164,6 +166,7 @@ export default function InvestorMessages() {
   // ── Open a conversation ────────────────────────────────────────────────────
   const openConversation = useCallback(async (conv) => {
     setSelectedConv(conv);
+    setShowChatOnMobile(true);
     await loadMessages(conv.id);
     if (conv.unread > 0) {
       try {
@@ -305,15 +308,24 @@ export default function InvestorMessages() {
 
       {/* ── Top nav bar ── */}
       <header className="shrink-0 w-full border-b border-[#1A1A1A] bg-[#0B0B0B]">
-        <div className="flex items-center gap-3 px-6 py-4">
+        <div className="flex items-center gap-3 px-4 sm:px-6 py-4">
+          {/* On mobile inside chat view, show back-to-list button; otherwise go to dashboard */}
+          {showChatOnMobile && selectedConv ? (
+            <button
+              onClick={() => setShowChatOnMobile(false)}
+              className="text-zinc-400 hover:text-white transition md:hidden"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          ) : null}
           <button
             onClick={() => router.push("/dashboard/investor")}
-            className="text-zinc-400 hover:text-white transition"
+            className={`text-zinc-400 hover:text-white transition ${showChatOnMobile && selectedConv ? "hidden md:block" : ""}`}
           >
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-[16px] font-bold leading-none text-white tracking-tight">Messages</h1>
+            <h1 className="text-[15px] sm:text-[16px] font-bold leading-none text-white tracking-tight">Messages</h1>
             <p className="mt-1 text-[11px] text-zinc-500">Secure communication platform</p>
           </div>
         </div>
@@ -323,7 +335,10 @@ export default function InvestorMessages() {
       <div className="flex flex-1 overflow-hidden bg-[#0B0B0B]">
 
         {/* ── LEFT PANEL: Conversation List ── */}
-        <div className="w-[380px] shrink-0 flex flex-col border-r border-[#1A1A1A] bg-[#0B0B0B]">
+        {/* On mobile: hide when chat is open. On md+: always visible side-by-side */}
+        <div className={`${
+          showChatOnMobile && selectedConv ? "hidden" : "flex"
+        } md:flex w-full md:w-[340px] lg:w-[380px] shrink-0 flex-col border-r border-[#1A1A1A] bg-[#0B0B0B]`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
             <h2 className="text-[17px] font-bold text-white">Messages</h2>
@@ -427,29 +442,42 @@ export default function InvestorMessages() {
         </div>
 
         {/* ── RIGHT PANEL: Chat or Welcome ── */}
-        <div className="flex flex-1 flex-col bg-[#0B0B0B]">
+        {/* On mobile: only show when chat is active or no conv selected (welcome screen). On md+: always show */}
+        <div className={`${
+          showChatOnMobile || !selectedConv ? "flex" : "hidden"
+        } md:flex flex-1 flex-col bg-[#0B0B0B]`}>
           {selectedConv ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A] bg-[#0B0B0B]">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[#1A1A1A] bg-[#0B0B0B]">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  {/* Mobile back button inside chat header */}
+                  <button
+                    onClick={() => setShowChatOnMobile(false)}
+                    className="text-zinc-400 hover:text-white transition md:hidden shrink-0"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
                   <div
-                    className="h-9 w-9 rounded-full flex items-center justify-center text-[14px] font-bold text-white"
+                    className="h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center text-[13px] sm:text-[14px] font-bold text-white shrink-0"
                     style={{ backgroundColor: selectedConv.avatarColor }}
                   >
                     {selectedConv.avatar}
                   </div>
-                  <div>
-                    <h3 className="text-[14px] font-bold text-white leading-tight">{selectedConv.name}</h3>
-                    <p className="text-[11px] text-zinc-550 mt-0.5">{selectedConv.project}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-[13px] sm:text-[14px] font-bold text-white leading-tight truncate">{selectedConv.name}</h3>
+                    <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{selectedConv.project}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-1.5 rounded-full border border-[#E50914] px-4 py-1.5 text-[12px] font-bold text-[#E50914] hover:bg-[#E50914]/10 transition">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                  <button className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#E50914] px-4 py-1.5 text-[12px] font-bold text-[#E50914] hover:bg-[#E50914]/10 transition">
                     <Video size={13} />
                     VIDEO CALL
                   </button>
-                  <div className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-black px-3 py-1.5 text-xs font-medium text-white">
+                  <button className="sm:hidden flex items-center justify-center h-8 w-8 rounded-full border border-[#E50914] text-[#E50914] hover:bg-[#E50914]/10 transition">
+                    <Video size={14} />
+                  </button>
+                  <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-zinc-800 bg-black px-3 py-1.5 text-xs font-medium text-white">
                     <User size={12} className="text-zinc-400" />
                     <span className="capitalize">{selectedConv.role}</span>
                   </div>
@@ -457,7 +485,7 @@ export default function InvestorMessages() {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-[#0B0B0B]">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 bg-[#0B0B0B]">
                 {/* System message */}
                 <div className="flex justify-center my-2">
                   <div className="rounded-full bg-[#161616] border border-[#222] px-5 py-1.5 text-[11px] text-zinc-350 text-center">
@@ -474,7 +502,7 @@ export default function InvestorMessages() {
                     key={msg.id}
                     className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="max-w-[65%] space-y-1">
+                    <div className="max-w-[85%] sm:max-w-[65%] space-y-1">
                       <div
                         className={`rounded-2xl px-5 py-3 text-[13px] leading-relaxed ${
                           msg.sender === "me"
@@ -498,7 +526,7 @@ export default function InvestorMessages() {
               </div>
 
               {/* Input Area */}
-              <div className="px-6 py-4 border-t border-[#1A1A1A] bg-[#0B0B0B]">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-[#1A1A1A] bg-[#0B0B0B]">
                 <div className="flex items-center gap-3 rounded-full bg-[#121212] border border-[#222] px-4 py-2.5">
                   <input
                     type="text"
