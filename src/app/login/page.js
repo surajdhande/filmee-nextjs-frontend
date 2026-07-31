@@ -82,13 +82,13 @@ const LoginPage = () => {
   {/* Dark Overlay */}
   <div className="absolute inset-0 bg-black/80" />
 
-      <div className="relative z-10 w-full max-w-lg rounded-3xl border border-white/10 bg-zinc-950/90 p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/90 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
-        <h1 className="mb-2 text-center text-3xl font-bold text-white">
+        <h1 className="mb-2 text-center text-2xl sm:text-3xl font-bold text-white">
           Welcome Back
         </h1>
 
-        <p className="mb-8 text-center text-zinc-400">
+        <p className="mb-6 sm:mb-8 text-center text-sm sm:text-base text-zinc-400">
           Sign in to your Filmee account
         </p>
 
@@ -104,7 +104,7 @@ const LoginPage = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-white outline-none focus:border-red-500"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-red-500 transition-all duration-300 focus:ring-2 focus:ring-red-500/20"
           />
 
           <input
@@ -114,13 +114,13 @@ const LoginPage = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-white outline-none focus:border-red-500"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none focus:border-red-500 transition-all duration-300 focus:ring-2 focus:ring-red-500/20"
           />
 
           <div className="text-right">
             <button
               type="button"
-              className="text-sm text-red-500 hover:text-red-400"
+              className="text-xs sm:text-sm text-red-500 hover:text-red-400 font-medium"
             >
               Forgot Password?
             </button>
@@ -129,7 +129,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-r from-red-700 to-red-500 py-3 font-semibold text-white transition hover:scale-[1.02] disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-red-700 to-red-500 py-3.5 text-base font-semibold text-white transition hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 hover:shadow-[0_0_20px_rgba(239,68,68,0.25)]"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>

@@ -162,9 +162,9 @@ export default function FilmmakerProfilePage() {
   <div className="min-h-screen bg-[#0B0B0B] text-white">
 
     {/* Header */}
-    <div className="flex items-center justify-between border-b border-[#2B2B2B] px-10 py-6">
+    <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#2B2B2B] px-4 sm:px-6 md:px-10 py-6 gap-4">
 
-      <div className="flex items-start gap-5">
+      <div className="flex items-start gap-3 sm:gap-5">
 
         <button
           onClick={() => router.back()}
@@ -174,18 +174,18 @@ export default function FilmmakerProfilePage() {
         </button>
 
         <div>
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
             Profile Settings
           </h1>
 
-          <p className="mt-1 text-gray-400">
+          <p className="mt-1 text-xs sm:text-sm text-gray-400">
             Manage your profile and preferences
           </p>
         </div>
 
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-end">
 
         {editMode && (
           <button
@@ -193,7 +193,7 @@ export default function FilmmakerProfilePage() {
               setFormData(profile);
               setEditMode(false);
             }}
-            className="rounded-full border border-[#2A2A2A] px-8 py-3 font-semibold hover:bg-[#1B1B1B]"
+            className="flex-1 md:flex-none text-center rounded-full border border-[#2A2A2A] px-5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold hover:bg-[#1B1B1B] text-white"
           >
             CANCEL
           </button>
@@ -207,7 +207,7 @@ export default function FilmmakerProfilePage() {
               setEditMode(true);
             }
           }}
-          className="rounded-full bg-[#E50914] px-8 py-3 font-semibold transition hover:bg-red-700"
+          className="flex-1 md:flex-none text-center rounded-full bg-[#E50914] px-5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition hover:bg-red-700 text-white"
         >
           {editMode ? "SAVE PROFILE" : "EDIT PROFILE"}
         </button>
@@ -216,9 +216,9 @@ export default function FilmmakerProfilePage() {
 
     </div>
         {/* Tabs */}
-        <div className="px-10 py-8">
-          <div className="inline-flex rounded-full border border-[#2A2A2A] bg-[#171717] p-1">
-            <button className="rounded-full bg-[#2B2B2B] px-5 py-2 text-sm font-semibold">
+        <div className="px-4 sm:px-6 md:px-10 py-6 sm:py-8 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <div className="inline-flex rounded-full border border-[#2A2A2A] bg-[#171717] p-1 whitespace-nowrap">
+            <button className="rounded-full bg-[#2B2B2B] px-5 py-2 text-sm font-semibold text-white">
               Profile
             </button>
             <button className="px-5 py-2 text-sm text-gray-300">
@@ -234,7 +234,7 @@ export default function FilmmakerProfilePage() {
         </div>
 
         {/* Main Section */}
-        <div className="px-10 pb-10">
+        <div className="px-4 sm:px-6 md:px-10 pb-10">
           <div className="grid grid-cols-12 items-start gap-6">
 
             {/* Left Profile Card */}

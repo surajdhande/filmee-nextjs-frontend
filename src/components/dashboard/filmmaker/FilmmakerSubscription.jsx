@@ -12,29 +12,29 @@ export default function FilmmakerSubscription() {
   // Render: Header
   // =====================================================
   const renderHeader = () => (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-      <div className="flex items-center gap-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
         <button
           onClick={() => router.push("/dashboard/filmmaker")}
-          className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors"
+          className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors self-start sm:self-auto"
         >
           <ArrowLeft size={16} />
           Back
         </button>
-        <div className="h-8 w-px bg-[#2A2A2A] hidden md:block" />
+        <div className="h-8 w-px bg-[#2A2A2A] hidden sm:block" />
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Subscription Management</h1>
-          <p className="mt-1 text-sm text-zinc-400">Manage your plan, billing, and payment methods</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Subscription Management</h1>
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400">Manage your plan, billing, and payment methods</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <div className="flex items-center gap-2 rounded-full bg-blue-600 px-3 py-1.5">
           <ZapIcon />
           <span className="text-xs font-bold text-white uppercase tracking-wider">Trial</span>
         </div>
-        <button className="flex items-center gap-2 rounded-full border border-red-600/70 px-5 py-2 text-red-500 transition hover:bg-red-600/10 hover:shadow-[0_0_15px_rgba(229,9,20,0.2)]">
+        <button className="flex items-center gap-2 rounded-full border border-red-600/70 px-5 py-2 text-red-500 transition hover:bg-red-600/10 hover:shadow-[0_0_15px_rgba(229,9,20,0.25)] text-xs sm:text-sm">
           <ArrowUpRight size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">View All Plans</span>
+          <span className="font-bold uppercase tracking-wider">View All Plans</span>
         </button>
       </div>
     </div>
@@ -53,12 +53,12 @@ export default function FilmmakerSubscription() {
   const renderTabs = () => {
     const tabs = ["Overview", "Billing History", "Payment Methods", "Change Plan"];
     return (
-      <div className="mb-6 rounded-full border border-[#2A2A2A] bg-[#141414] p-1 flex">
+      <div className="mb-6 rounded-xl sm:rounded-full border border-[#2A2A2A] bg-[#141414] p-1 flex overflow-x-auto whitespace-nowrap scrollbar-none">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`relative flex-1 rounded-full py-2 text-sm font-semibold transition-all ${
+            className={`relative flex-1 min-w-[120px] sm:min-w-0 rounded-full py-2 text-sm font-semibold transition-all ${
               activeTab === tab
                 ? "text-white bg-[#1E1E1E]"
                 : "text-zinc-500 hover:text-white"
@@ -82,14 +82,14 @@ export default function FilmmakerSubscription() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Current Plan Card */}
         <div className="lg:col-span-2 flex flex-col rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6 relative">
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0 mb-6">
             <div>
               <p className="text-sm font-medium text-zinc-400 mb-4">Current Plan</p>
-              <h2 className="text-3xl font-bold text-white leading-none">Professional</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white leading-none">Professional</h2>
               <p className="mt-2 text-sm text-zinc-400">Filmmaker Plan</p>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white mb-4">
+            <div className="flex flex-col items-start sm:items-end">
+              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white mb-3 sm:mb-4">
                 7 days left
               </span>
               <div className="flex items-baseline gap-1 mt-1">
@@ -109,18 +109,18 @@ export default function FilmmakerSubscription() {
             </div>
           </div>
 
-          <div className="flex justify-between items-end mb-8">
+          <div className="flex justify-between items-center mb-8">
             <div>
               <p className="text-sm text-zinc-400 mb-1">Next billing date</p>
-              <p className="text-base font-bold text-white">12/31/2024</p>
+              <p className="text-sm sm:text-base font-bold text-white">12/31/2024</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-zinc-400 mb-1">Days until renewal</p>
-              <p className="text-base font-bold text-white">-562 days</p>
+              <p className="text-sm sm:text-base font-bold text-white">-562 days</p>
             </div>
           </div>
 
-          <div className="flex gap-4 mt-auto">
+          <div className="flex flex-col sm:flex-row gap-4 mt-auto">
             <button className="flex-1 flex items-center justify-center gap-2 rounded-full border border-red-600/70 py-2.5 text-sm font-bold uppercase tracking-widest text-red-500 transition hover:bg-red-600/10 hover:shadow-[0_0_15px_rgba(229,9,20,0.2)]">
               <Crown size={16} />
               Upgrade Plan
@@ -239,18 +239,18 @@ export default function FilmmakerSubscription() {
   const renderPaymentMethods = () => (
     <div className="flex flex-col gap-4">
       <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-bold text-white">Saved Payment Methods</h3>
             <p className="text-sm text-zinc-400 mt-1">Manage your connected credit cards and payment options.</p>
           </div>
-          <button className="flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-zinc-200">
+          <button className="flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-zinc-200 w-full sm:w-auto self-start sm:self-auto">
             <Plus size={16} />
             Add Method
           </button>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-5">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-16 items-center justify-center rounded-xl bg-[#222]">
               <CreditCard size={24} className="text-zinc-400" />
@@ -265,7 +265,7 @@ export default function FilmmakerSubscription() {
               <p className="text-xs text-zinc-400 mt-1">Expires 12/25</p>
             </div>
           </div>
-          <button className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-red-500 transition-colors">
+          <button className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-red-500 transition-colors self-start sm:self-auto">
             <Trash2 size={16} />
             Remove
           </button>
@@ -360,7 +360,7 @@ export default function FilmmakerSubscription() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white px-6 py-8 md:px-8 md:py-10">
+    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
       {renderHeader()}
       {renderTabs()}
       
