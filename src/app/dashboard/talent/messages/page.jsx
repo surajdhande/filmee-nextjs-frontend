@@ -1,36 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import MessagesPage from "@/components/Talent/MessagesPage";
-
-export default function TalentMessagesRoutePage() {
-  const router = useRouter();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-
-    if (!storedUser || !token) {
-      router.replace("/login");
-      return;
-    }
-
-    setReady(true);
-  }, [router]);
-
-  if (!ready) {
+export default function MessagesPage() {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        Loading...
-      </div>
-    );
-  }
+        <div className="h-[calc(100vh-64px)] flex">
+            <div className="w-1/3 border-r border-gray-300">
+                Conversation List
+            </div>
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <MessagesPage onBack={() => router.push("/dashboard/talent")} />
-    </div>
-  );
+            <div className="flex-1">
+                Chat Window
+            </div>
+        </div>
+    );
 }

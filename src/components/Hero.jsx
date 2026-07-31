@@ -1,11 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
 import AuthButton from "./AuthButton";
 
 export default function Hero() {
-  const router = useRouter();
-
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden">
       {/* Background Video */}
@@ -41,19 +36,11 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 flex gap-6">
-          <AuthButton onClick={() => router.push("/login")}>
+          <AuthButton>
             START CREATING
           </AuthButton>
 
-          <AuthButton
-            variant="outline"
-            onClick={() => {
-              const el = document.getElementById("choose-path");
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-          >
+          <AuthButton variant="outline">
             LEARN MORE
           </AuthButton>
         </div>

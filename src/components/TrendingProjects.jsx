@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 import { getProjects } from "@/services/projectService";
 
 const formatCurrencyK = (value) => {

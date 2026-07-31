@@ -15,7 +15,6 @@ const paths = [
         "Connect with talent",
         ],
     button: "Get Started",
-    cardHref: "/filmmaker",
     image:
         "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80",
 },
@@ -44,7 +43,6 @@ const paths = [
         "Network with creators",
     ],
     button: "Build Profile",
-    cardHref: "/Talent",
     image:
 "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
     },
@@ -54,7 +52,7 @@ export default function ChoosePath() {
   const router = useRouter();
 
   return (
-    <section id="choose-path" className="bg-black py-14 px-6">
+    <section className="bg-black py-14 px-6">
       <div className="mx-auto max-w-7xl">
 
         <div className="mb-12 max-w-2xl">
@@ -72,8 +70,7 @@ export default function ChoosePath() {
           {paths.map((item) => (
             <div
             key={item.role}
-              onClick={() => item.cardHref && router.push(item.cardHref)}
-              className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600${item.cardHref ? " cursor-pointer" : ""}`}>
+              className="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600">
 
               <img
                 src={item.image}
@@ -106,10 +103,11 @@ export default function ChoosePath() {
 
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/signup?role=${item.role}`);
-                  }}
+                  onClick={() =>
+                    item.href
+                      ? router.push(item.href)
+                      : router.push(`/signup?role=${item.role}`)
+                  }
                   className="mt-8 w-full rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 py-3 font-semibold text-white transition duration-300 hover:brightness-110"
                 >
                   {item.button}

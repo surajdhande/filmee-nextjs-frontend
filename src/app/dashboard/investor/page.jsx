@@ -2,6 +2,6 @@
 
 import InvestorDashboard from "@/components/dashboard/InvestorDashboard";
 
-export default function InvestorDashboardPage() {
+export default function InvestorDashboardRoute() {
   return <InvestorDashboard />;
 }

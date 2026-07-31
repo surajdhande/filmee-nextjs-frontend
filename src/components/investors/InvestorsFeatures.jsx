@@ -23,13 +23,13 @@ const features = [
 
 export default function InvestorsFeatures() {
   return (
-    <section className="bg-black px-4 pt-6 pb-6 sm:px-8 sm:pb-8 lg:px-16">
+    <section className="bg-black px-8 pt-6 pb-8 sm:px-16">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:gap-6">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex flex-col items-center rounded-2xl border border-zinc-900 px-6 py-8 sm:px-8 sm:py-10 text-center"
+              className="flex flex-col items-center rounded-2xl border border-zinc-900 px-8 py-10 text-center"
               style={{ backgroundColor: "rgb(16, 24, 40)" }}
             >
               <feature.icon

@@ -27,7 +27,7 @@ const Footer = () => {
             <ul className="mt-6 space-y-4">
               <li>
                 <Link
-                  href="/create-project"
+                  href="/creators/projects"
                   className="text-sm text-zinc-400 transition-colors duration-300 hover:text-red-600"
                 >
                   Create Projects

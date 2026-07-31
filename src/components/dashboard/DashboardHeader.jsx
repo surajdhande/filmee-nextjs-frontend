@@ -73,7 +73,7 @@ const DashboardHeader = ({
         <button
           onClick={() => {
             localStorage.clear();
-            router.replace("/");
+            router.replace("/login");
           }}
           className="text-sm font-semibold text-zinc-400 hover:text-white transition duration-300 uppercase px-2"
         >

@@ -22,10 +22,7 @@ const SubscriptionCard = () => {
               7 days left in trial
             </p>
 
-            <button
-              onClick={() => router.push("/dashboard/talent/subscription")}
-              className="mt-6 rounded-full border border-red-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600/10"
-            >
+            <button className="mt-5 rounded-full border border-red-600 px-5 py-2 text-sm font-bold uppercase tracking-widest text-red-500 transition hover:bg-red-600/10">
               Manage Subscription
             </button>
           </div>

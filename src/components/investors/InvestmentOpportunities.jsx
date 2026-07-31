@@ -24,9 +24,9 @@ export default function InvestmentOpportunities() {
   }, []);
 
   return (
-    <section className="bg-black px-4 py-10 sm:px-8 sm:py-14 lg:px-16">
+    <section className="bg-black px-6 py-14 sm:px-16">
       <div className="mx-auto max-w-7xl">
-        <h2 className="mb-8 sm:mb-10 text-2xl sm:text-3xl font-extrabold tracking-tight text-white lg:text-4xl">
+        <h2 className="mb-10 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
           Current Investment Opportunities
         </h2>
 
@@ -42,10 +42,10 @@ export default function InvestmentOpportunities() {
             No investment opportunities available at the moment.
           </p>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 md:gap-10">
-            {opportunities.map((opportunity, index) => (
+          <div className="grid gap-15 md:grid-cols-2">
+            {opportunities.map((opportunity) => (
               <InvestmentOpportunityCard
-                key={opportunity.id || opportunity._id || opportunity.project_id || index}
+                key={opportunity.id}
                 opportunity={opportunity}
               />
             ))}

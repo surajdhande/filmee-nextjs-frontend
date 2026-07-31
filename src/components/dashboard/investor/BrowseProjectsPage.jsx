@@ -58,14 +58,14 @@ export default function BrowseProjectsPage() {
 
   return (
     <InvestorLayout>
-      <div className="p-4 lg:p-8">
+      <div className="p-8">
         {/* Header Row */}
-        <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
-          <h2 className="text-[20px] font-bold text-white tracking-tight lg:text-[22px]">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-[22px] font-bold text-white tracking-tight">
             Browse Projects
           </h2>
           {/* Search */}
-          <div className="relative w-full sm:w-auto">
+          <div className="relative">
             <Search
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
@@ -75,7 +75,7 @@ export default function BrowseProjectsPage() {
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-full pl-9 pr-4 py-2 text-[13px] text-white placeholder-zinc-500 focus:outline-none focus:border-[#E50914]/50 sm:w-[220px] transition duration-200"
+              className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-full pl-9 pr-4 py-2 text-[13px] text-white placeholder-zinc-500 focus:outline-none focus:border-[#E50914]/50 w-[220px] transition duration-200"
             />
           </div>
         </div>

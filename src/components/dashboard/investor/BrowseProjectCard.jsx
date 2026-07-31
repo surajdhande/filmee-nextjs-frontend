@@ -74,8 +74,8 @@ export default function BrowseProjectCard({ project }) {
             View Details
           </button>
           <button
-            onClick={() => router.push(`/dashboard/investor/film/${project.id}?apply=true`)}
-            className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-[15px] font-bold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(229,9,20,0.35)] hover:brightness-110 transition duration-200">
+            onClick={() => setShowOfferModal(true)}
+            className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-[15px] font-bold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(229,9,20,0.3)] hover:brightness-110 transition duration-200">
             Submit Offer
           </button>
         </div>
