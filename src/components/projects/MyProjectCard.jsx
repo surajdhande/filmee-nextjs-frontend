@@ -22,17 +22,17 @@ export default function MyProjectCard({ project }) {
   return (
     <div className="rounded-3xl border border-[#2A2A2A] bg-[#171717] p-5 transition hover:border-[#E50914]/40">
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
 
         {/* Project Image */}
         {project.image ? (
           <img
             src={project.image}
             alt={project.title}
-            className="h-[120px] w-[235px] rounded-2xl object-cover"
+            className="h-[180px] w-full md:h-[120px] md:w-[235px] rounded-2xl object-cover shrink-0"
           />
         ) : (
-          <div className="flex h-[120px] w-[235px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#5A5A5A] bg-gradient-to-br from-[#232323] to-[#171717]">
+          <div className="flex h-[180px] w-full md:h-[120px] md:w-[235px] shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[#5A5A5A] bg-gradient-to-br from-[#232323] to-[#171717]">
             <ImageOff
               size={36}
               className="text-gray-500"
@@ -50,25 +50,25 @@ export default function MyProjectCard({ project }) {
 
         {/* Right Side */}
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col justify-between">
 
           {/* Header */}
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-6">
 
             <div>
 
-              <h2 className="text-[22px] font-bold text-white">
+              <h2 className="text-[20px] sm:text-[22px] font-bold text-white">
                 {project.title}
               </h2>
 
-              <p className="mt-1 text-base text-gray-400">
+              <p className="mt-1 text-sm sm:text-base text-gray-400">
                 {project.genre}
               </p>
 
             </div>
 
-            <span className="rounded-full bg-[#E50914] px-4 py-1 text-sm font-semibold text-white">
+            <span className="self-start sm:self-auto rounded-full bg-[#E50914] px-4 py-1 text-xs sm:text-sm font-semibold text-white">
               {projectStatusMap[project.project_status] || project.project_status}
             </span>
 
@@ -76,44 +76,44 @@ export default function MyProjectCard({ project }) {
 
           {/* Stats */}
 
-          <div className="mt-5 grid grid-cols-4 gap-8">
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
 
             <div>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 Budget
               </p>
 
-              <p className="text-lg font-bold text-white">
+              <p className="text-base sm:text-lg font-bold text-white">
                 ${Number(project.funding_target).toLocaleString()}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 Raised
               </p>
 
-              <p className="text-xl font-bold text-white">
+              <p className="text-base sm:text-xl font-bold text-white">
                 ${Number(project.funding_raised).toLocaleString()}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 Investors
               </p>
 
-              <p className="text-xl font-bold text-white">
+              <p className="text-base sm:text-xl font-bold text-white">
                 {project.investors ?? 0}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 Applications
               </p>
 
-              <p className="text-xl font-bold text-white">
+              <p className="text-base sm:text-xl font-bold text-white">
                 {project.applications ?? 0}
               </p>
             </div>
@@ -135,32 +135,32 @@ export default function MyProjectCard({ project }) {
 
           {/* Buttons */}
 
-          <div className="mt-6 flex gap-4">
+          <div className="mt-6 flex flex-wrap gap-3">
 
             <button
-            onClick={() =>
-              router.push(
-                `/dashboard/filmmaker/projects/${project.project_id}`
-              )
-            }
-            className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110"
-          >
-            View Details
-          </button>
+              onClick={() =>
+                router.push(
+                  `/dashboard/filmmaker/projects/${project.project_id}`
+                )
+              }
+              className="flex-1 sm:flex-none text-center rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-6 sm:px-7 py-2.5 font-semibold uppercase text-white shadow-lg shadow-red-600/20 transition hover:brightness-110 text-xs sm:text-sm"
+            >
+              View Details
+            </button>
 
-            <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full border border-[#E50914] px-5 sm:px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white text-xs sm:text-sm">
 
-              <SquarePen size={18} />
+              <SquarePen size={16} />
 
-              Edit Project
+              <span>Edit</span>
 
             </button>
 
-            <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full border border-[#E50914] px-5 sm:px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white text-xs sm:text-sm">
 
-              <MessageSquare size={18} />
+              <MessageSquare size={16} />
 
-              Messages
+              <span>Messages</span>
 
             </button>
 

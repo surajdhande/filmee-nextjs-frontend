@@ -60,11 +60,11 @@ export default function ProjectsPage() {
         />
       }
     >
-    <div className="mx-auto max-w-[1120px] px-8 py-6">
+    <div className="mx-auto max-w-[1120px] px-4 sm:px-6 md:px-8 py-6">
 
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 sm:gap-0 sm:items-center justify-between">
 
-          <h1 className="text-[28px] font-bold text-white">
+          <h1 className="text-[24px] sm:text-[28px] font-bold text-white">
             My Projects
           </h1>
 
@@ -72,7 +72,7 @@ export default function ProjectsPage() {
             onClick={() =>
               router.push("/dashboard/filmmaker/create-project")
             }
-            className="rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-8 py-4 font-bold uppercase tracking-wide text-white shadow-lg shadow-red-700/30 transition hover:brightness-110"
+            className="w-full sm:w-auto text-center rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-7 sm:px-8 py-3.5 sm:py-4 font-bold uppercase tracking-wide text-white shadow-lg shadow-red-700/30 transition hover:brightness-110 text-sm"
           >
             + New Project
           </button>

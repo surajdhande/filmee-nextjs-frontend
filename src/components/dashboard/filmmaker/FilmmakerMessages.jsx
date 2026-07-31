@@ -417,7 +417,7 @@ export default function FilmmakerMessages() {
       <div className="flex flex-1 overflow-hidden bg-[#0B0B0B]">
 
         {/* ── LEFT PANEL: Conversation List ── */}
-        <div className="w-[380px] shrink-0 flex flex-col border-r border-[#1A1A1A] bg-[#0B0B0B]">
+        <div className={`w-full lg:w-[380px] shrink-0 flex flex-col border-r border-[#1A1A1A] bg-[#0B0B0B] ${selectedConv ? "hidden lg:flex" : "flex"}`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
             <h2 className="text-[17px] font-bold text-white">Messages</h2>
@@ -529,12 +529,19 @@ export default function FilmmakerMessages() {
         </div>
 
         {/* ── RIGHT PANEL: Chat or Welcome ── */}
-        <div className="flex flex-1 flex-col bg-[#0B0B0B]">
+        <div className={`flex flex-1 flex-col bg-[#0B0B0B] ${selectedConv ? "flex" : "hidden lg:flex"}`}>
           {selectedConv ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A] bg-[#0B0B0B]">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#1A1A1A] bg-[#0B0B0B]">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <button
+                    onClick={() => setSelectedConv(null)}
+                    className="mr-1 text-zinc-400 hover:text-white lg:hidden transition shrink-0"
+                    aria-label="Back to chats"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
                   <div
                     className="h-9 w-9 rounded-full flex items-center justify-center text-[14px] font-bold text-white"
                     style={{ backgroundColor: selectedConv.avatarColor || '#E50914' }}

@@ -11,7 +11,7 @@ export default function ViewProjectHeader() {
   return (
     <header className="border-b border-[#2A2A2A] bg-[#111111]">
 
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-5">
+      <div className="mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between px-4 sm:px-6 md:px-8 py-4 sm:py-5">
 
         {/* Back Button */}
 
@@ -31,23 +31,25 @@ export default function ViewProjectHeader() {
 
         {/* Action Buttons */}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-center sm:justify-end">
 
           {/* Share */}
 
           <AnimatedOutlineButton
-        icon={<Share2 size={18} />}
-        >
-        Share
-        </AnimatedOutlineButton>
+            icon={<Share2 size={18} />}
+            className="flex-1 sm:flex-none justify-center"
+          >
+            Share
+          </AnimatedOutlineButton>
 
           {/* Edit */}
 
           <AnimatedPrimaryButton
-        icon={<SquarePen size={18} />}
-        >
-        Edit Project
-        </AnimatedPrimaryButton>
+            icon={<SquarePen size={18} />}
+            className="flex-1 sm:flex-none justify-center"
+          >
+            Edit Project
+          </AnimatedPrimaryButton>
 
         </div>
 

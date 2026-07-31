@@ -23,21 +23,21 @@ export default function ProjectHero({ project }) {
         <img
           src={project.image}
           alt={project.title}
-          className="h-[380px] w-full object-cover"
+          className="h-[220px] sm:h-[300px] md:h-[380px] w-full object-cover"
         />
       ) : (
-        <div className="flex h-[380px] flex-col items-center justify-center bg-gradient-to-br from-[#232323] to-[#171717]">
+        <div className="flex h-[220px] sm:h-[300px] md:h-[380px] flex-col items-center justify-center bg-gradient-to-br from-[#232323] to-[#171717]">
 
           <ImageOff
-            size={70}
+            size={48}
             className="text-gray-500"
           />
 
-          <p className="mt-5 text-lg font-semibold text-gray-400">
+          <p className="mt-4 text-base sm:text-lg font-semibold text-gray-400">
             Project Poster
           </p>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             Coming Soon
           </p>
 
@@ -46,21 +46,21 @@ export default function ProjectHero({ project }) {
 
       {/* Details */}
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
 
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
 
           <div className="flex-1">
 
-            <h1 className="text-4xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
               {project.title}
             </h1>
 
-            <p className="mt-3 max-w-3xl text-lg leading-8 text-gray-300">
+            <p className="mt-3 max-w-3xl text-sm sm:text-base md:text-lg leading-relaxed sm:leading-8 text-gray-300">
               {project.logline}
             </p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-4 text-gray-400">
+            <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
 
               <span className="font-medium">
                 {project.genre}
@@ -82,7 +82,7 @@ export default function ProjectHero({ project }) {
 
           </div>
 
-          <span className="rounded-full bg-[#E50914] px-5 py-2 text-sm font-semibold text-white">
+          <span className="self-start sm:self-auto rounded-full bg-[#E50914] px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white">
             {formattedStatus}
           </span>
 

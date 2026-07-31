@@ -69,16 +69,16 @@ export default function DashboardPage() {
   {/* =========================================================
       Dashboard Actions
       ========================================================= */}
-  <div className="flex justify-end gap-4">
+  <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4">
 
-    <button className="flex items-center gap-2 rounded-full border border-red-600 px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-red-500 transition hover:bg-red-600/10">
+    <button className="flex items-center justify-center gap-2 rounded-full border border-red-600 px-6 py-3.5 text-[12px] font-bold uppercase tracking-wider text-red-500 transition hover:bg-red-600/10 w-full sm:w-auto">
       <BarChart2 size={14} />
       View Analytics
     </button>
 
     <button
       onClick={() => router.push("/dashboard/filmmaker/create-project")}
-      className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-6 py-3 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] transition hover:brightness-110"
+      className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-6 py-3.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] transition hover:brightness-110 w-full sm:w-auto"
     >
       <Plus size={15} />
       Create Project

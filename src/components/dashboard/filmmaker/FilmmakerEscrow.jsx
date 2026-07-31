@@ -17,29 +17,29 @@ export default function FilmmakerEscrow() {
   // Render: Header
   // =====================================================
   const renderHeader = () => (
-  <div className="mb-10 border-b border-[#262626] pb-6">
+  <div className="mb-6 md:mb-10 border-b border-[#262626] pb-6">
 
-    <div className="flex items-center">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-0">
 
       {/* Back Button */}
       <button
         onClick={() => router.push("/dashboard/filmmaker")}
-        className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors"
+        className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors self-start sm:self-auto"
       >
         <ArrowLeft size={16} />
         Back
       </button>
 
       {/* Divider */}
-      <div className="mx-12 h-12 w-px bg-[#2A2A2A]" />
+      <div className="hidden sm:block mx-6 md:mx-12 h-12 w-px bg-[#2A2A2A]" />
 
       {/* Title */}
-      <div>
-        <h1 className="text-[20px] font-bold text-white">
+      <div className="mt-2 sm:mt-0">
+        <h1 className="text-[18px] sm:text-[20px] font-bold text-white leading-tight">
           Escrow Management
         </h1>
 
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="mt-1 text-xs sm:text-sm text-zinc-400">
           Manage your secured investments and project milestones
         </p>
       </div>
@@ -242,7 +242,7 @@ export default function FilmmakerEscrow() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white px-6 py-8 md:px-8 md:py-10">
+    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
       {renderHeader()}
       {hasEscrowAccounts ? renderPopulatedState() : renderEmptyState()}
     </div>
