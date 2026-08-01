@@ -15,7 +15,6 @@ export default function ProjectsPage() {
     const [projects, setProjects] = useState([]);
 
 
-    useEffect(() => {
   const loadProjects = async () => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -37,8 +36,9 @@ export default function ProjectsPage() {
     }
   };
 
-  loadProjects();
-}, [router]);
+  useEffect(() => {
+    loadProjects();
+  }, [router]);
 
     if (!user) {
     return (
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
 
         </div>
 
-        <ProjectsGrid projects={projects} />
+        <ProjectsGrid projects={projects} onUpdated={loadProjects} />
 
       </div>
 

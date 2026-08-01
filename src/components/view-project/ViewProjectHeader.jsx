@@ -5,7 +5,7 @@ import AnimatedOutlineButton from "@/components/ui/AnimatedOutlineButton";
 import AnimatedPrimaryButton from "@/components/ui/AnimatedPrimaryButton";
 import { useRouter } from "next/navigation";
 
-export default function ViewProjectHeader() {
+export default function ViewProjectHeader({ onEditClick }) {
   const router = useRouter();
 
   return (
@@ -36,18 +36,23 @@ export default function ViewProjectHeader() {
           {/* Share */}
 
           <AnimatedOutlineButton
-        icon={<Share2 size={18} />}
-        >
-        Share
-        </AnimatedOutlineButton>
+            icon={<Share2 size={18} />}
+            onClick={() => {
+              navigator.clipboard?.writeText(window.location.href);
+              alert("Project link copied to clipboard!");
+            }}
+          >
+            Share
+          </AnimatedOutlineButton>
 
           {/* Edit */}
 
           <AnimatedPrimaryButton
-        icon={<SquarePen size={18} />}
-        >
-        Edit Project
-        </AnimatedPrimaryButton>
+            icon={<SquarePen size={18} />}
+            onClick={onEditClick}
+          >
+            Edit Project
+          </AnimatedPrimaryButton>
 
         </div>
 

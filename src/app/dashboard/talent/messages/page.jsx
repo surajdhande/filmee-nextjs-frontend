@@ -1,13 +1,10 @@
-export default function MessagesPage() {
-    return (
-        <div className="h-[calc(100vh-64px)] flex">
-            <div className="w-1/3 border-r border-gray-300">
-                Conversation List
-            </div>
+import { Suspense } from "react";
+import TalentMessages from "@/components/dashboard/talent/TalentMessages";
 
-            <div className="flex-1">
-                Chat Window
-            </div>
-        </div>
-    );
+export default function TalentMessagesPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] text-zinc-400 text-sm">Loading messages…</div>}>
+      <TalentMessages />
+    </Suspense>
+  );
 }

@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  getOpportunities,
+  getTalentData,
+  applyToProject,
+  withdrawApplication,
+} from "@/services/talentService";
 import {
   Eye,
   Search,
@@ -143,7 +149,10 @@ const RECENT_APPS = [
 ];
 
 // ─── Overview Page ────────────────────────────────────────────────────────────
-function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
+function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp, opportunities, appliedProjectIds = [] }) {
+  const rawList = opportunities && opportunities.length > 0 ? opportunities : OPPORTUNITIES;
+  const displayOpportunities = rawList.filter((opp) => !appliedProjectIds.includes(opp.id));
+  const recentApps = (applications || []).slice(0, 5);
   return (
     <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8">
       {/* ── Section title + Find Opportunities ── */}
@@ -241,7 +250,7 @@ function OverviewPage({ onNavChange, recentApps, onApplyClick, onViewApp }) {
       <div>
         <h3 className="text-lg md:text-xl font-black text-white mb-4 md:mb-5">Hot Opportunities</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
-          {OPPORTUNITIES.map((opp) => (
+          {displayOpportunities.map((opp) => (
             <div
               key={opp.id}
               className="bg-[#141414] border border-zinc-800/70 rounded-2xl overflow-hidden group transition-all duration-300 hover:border-zinc-700"
@@ -426,14 +435,17 @@ const ROLES = [
   },
 ];
 
-function FindRolesPage({ onApplyClick }) {
+function FindRolesPage({ onApplyClick, opportunities, appliedProjectIds = [], onViewDetails }) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRoles = ROLES.filter(
+  const rolesList = opportunities && opportunities.length > 0 ? opportunities : ROLES;
+
+  const filteredRoles = rolesList.filter(
     (item) =>
-      item.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      !appliedProjectIds.includes(item.id) &&
+      (item.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       item.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       item.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -518,7 +530,10 @@ function FindRolesPage({ onApplyClick }) {
             </div>
 
             <div className="p-4 md:p-6 pt-0 flex flex-col sm:flex-row gap-2 md:gap-3">
-              <button className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2.5 md:py-3 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
+              <button
+                onClick={() => onViewDetails && onViewDetails(opp.id)}
+                className="flex-1 border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2.5 md:py-3 rounded-xl uppercase tracking-wider transition-all duration-200 text-center"
+              >
                 VIEW DETAILS
               </button>
               <button
@@ -536,46 +551,11 @@ function FindRolesPage({ onApplyClick }) {
 }
 
 // ─── My Applications Page ─────────────────────────────────────────────────────
-const APPLICATIONS_DATA = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=200&q=80",
-    role: "Director of Photography",
-    project: "Midnight Runner",
-    director: "Alex Thompson",
-    appliedDate: "Applied on 1/15/2025",
-    status: "Shortlisted",
-    statusColor: "bg-blue-600 text-white",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=200&q=80",
-    role: "Cinematographer",
-    project: "Ocean Deep",
-    director: "Maria Santos",
-    appliedDate: "Applied on 1/10/2025",
-    status: "Hired",
-    statusColor: "bg-green-600 text-white",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=200&q=80",
-    role: "Camera Operator",
-    project: "City Lights",
-    director: "by David Kim",
-    appliedDate: "Applied on 1/20/2025",
-    status: "Under Review",
-    statusColor: "bg-yellow-600 text-white",
-  },
-];
-
-function MyApplicationsPage({ applications }) {
+// ─── My Applications Page ─────────────────────────────────────────────────────
+function MyApplicationsPage({ applications, onWithdraw, onNavChange, onViewApplication, onMessageFilmmaker }) {
   const [filterStatus, setFilterStatus] = useState("All");
 
-  const filteredApps = applications.filter((app) => {
+  const filteredApps = (applications || []).filter((app) => {
     if (filterStatus === "All") return true;
     return app.status.toLowerCase() === filterStatus.toLowerCase();
   });
@@ -594,9 +574,9 @@ function MyApplicationsPage({ applications }) {
             className="bg-[#141414] border border-zinc-800 text-zinc-300 rounded-lg px-4 py-2.5 text-sm w-full sm:w-44 focus:outline-none focus:border-red-650 transition-colors cursor-pointer appearance-none pr-10"
           >
             <option value="All">All Status</option>
-            <option value="Shortlisted">Shortlisted</option>
-            <option value="Hired">Hired</option>
             <option value="Under Review">Under Review</option>
+            <option value="Hired">Hired</option>
+            <option value="Declined">Declined</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
             <svg
@@ -612,59 +592,75 @@ function MyApplicationsPage({ applications }) {
 
       {/* ── Applications List ── */}
       <div className="space-y-4 md:space-y-6">
-        {filteredApps.map((app) => (
-          <div
-            key={app.id}
-            className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center justify-between group hover:border-zinc-700 transition-all duration-300"
-          >
-            <div className="flex gap-4 md:gap-6 items-start md:items-center w-full md:w-auto">
-              {/* Thumbnail */}
-              <img
-                src={app.image}
-                alt={app.role}
-                className="w-24 h-16 sm:w-32 sm:h-20 md:w-40 md:h-24 rounded-xl object-cover flex-shrink-0"
-              />
-
-              {/* Details */}
-              <div className="space-y-1 md:space-y-2 flex-1">
-                <div>
-                  <h4 className="text-base md:text-xl font-black text-white">{app.role}</h4>
-                  <p className="text-xs md:text-sm text-zinc-400 font-semibold">{app.project}</p>
-                  <p className="text-[10px] md:text-xs text-zinc-500">by {app.director}</p>
-                </div>
-                <p className="text-[10px] md:text-xs text-zinc-500 flex items-center gap-1.5">
-                  <Calendar size={12} className="text-zinc-500" />
-                  {app.appliedDate}
-                </p>
-              </div>
-            </div>
-
-            {/* Actions + Status */}
-            <div className="flex flex-col items-start md:items-end gap-3 md:gap-6 justify-between w-full md:w-auto md:self-stretch">
-              {/* Status Badge */}
-              <span
-                className={`${app.statusColor} text-[9px] md:text-[10px] font-black px-3 md:px-3.5 py-1 rounded-full uppercase tracking-wider`}
-              >
-                {app.status}
-              </span>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto">
-                <button className="bg-red-650 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.2)] text-center">
-                  VIEW APPLICATION
-                </button>
-                <button className="border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
-                  MESSAGE
-                </button>
-                {app.status === "Under Review" && (
-                  <button className="border border-zinc-800 hover:bg-zinc-800/40 text-zinc-500 hover:text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center">
-                    WITHDRAW
-                  </button>
-                )}
-              </div>
-            </div>
+        {filteredApps.length === 0 ? (
+          <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-8 text-center text-zinc-400">
+            <p className="text-sm font-semibold">No applications submitted yet.</p>
+            <p className="text-xs text-zinc-500 mt-1">Browse open roles to apply for active projects!</p>
           </div>
-        ))}
+        ) : (
+          filteredApps.map((app) => (
+            <div
+              key={app.id}
+              className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center justify-between group hover:border-zinc-700 transition-all duration-300"
+            >
+              <div className="flex gap-4 md:gap-6 items-start md:items-center w-full md:w-auto">
+                {/* Thumbnail */}
+                <img
+                  src={app.image}
+                  alt={app.role}
+                  className="w-24 h-16 sm:w-32 sm:h-20 md:w-40 md:h-24 rounded-xl object-cover flex-shrink-0"
+                />
+
+                {/* Details */}
+                <div className="space-y-1 md:space-y-2 flex-1">
+                  <div>
+                    <h4 className="text-base md:text-xl font-black text-white">{app.role}</h4>
+                    <p className="text-xs md:text-sm text-zinc-400 font-semibold">{app.project}</p>
+                    <p className="text-[10px] md:text-xs text-zinc-500">by {app.director}</p>
+                  </div>
+                  <p className="text-[10px] md:text-xs text-zinc-500 flex items-center gap-1.5">
+                    <Calendar size={12} className="text-zinc-500" />
+                    {app.appliedDate}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions + Status */}
+              <div className="flex flex-col items-start md:items-end gap-3 md:gap-6 justify-between w-full md:w-auto md:self-stretch">
+                {/* Status Badge */}
+                <span
+                  className={`${app.statusColor} text-[9px] md:text-[10px] font-black px-3 md:px-3.5 py-1 rounded-full uppercase tracking-wider`}
+                >
+                  {app.status}
+                </span>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto">
+                  <button
+                    onClick={() => onViewApplication && onViewApplication(app.id)}
+                    className="bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.2)] text-center"
+                  >
+                    VIEW APPLICATION
+                  </button>
+                  <button 
+                    onClick={() => onMessageFilmmaker && onMessageFilmmaker(app.filmakerId)}
+                    className="border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center"
+                  >
+                    MESSAGE
+                  </button>
+                  {app.status === "Under Review" && (
+                    <button 
+                      onClick={() => onWithdraw && onWithdraw(app.id)}
+                      className="border border-zinc-800 hover:bg-zinc-800/40 text-zinc-500 hover:text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center"
+                    >
+                      WITHDRAW
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </main>
   );
@@ -806,27 +802,68 @@ function renderPage(activeNav, onNavChange, pageProps) {
       return (
         <OverviewPage
           onNavChange={onNavChange}
-          recentApps={pageProps.recentApps}
+          applications={pageProps.applications}
           onApplyClick={pageProps.onApplyClick}
           onViewApp={pageProps.onViewApp}
+          opportunities={pageProps.opportunities}
+          appliedProjectIds={pageProps.appliedProjectIds}
         />
       );
     case "find-roles":
-      return <FindRolesPage onApplyClick={pageProps.onApplyClick} />;
+      return (
+        <FindRolesPage
+          onApplyClick={pageProps.onApplyClick}
+          opportunities={pageProps.opportunities}
+          appliedProjectIds={pageProps.appliedProjectIds}
+          onViewDetails={pageProps.onViewDetails}
+        />
+      );
     case "applications":
-      return <MyApplicationsPage applications={pageProps.applications} />;
+      return (
+        <MyApplicationsPage
+          applications={pageProps.applications}
+          onWithdraw={pageProps.onWithdraw}
+          onNavChange={onNavChange}
+          onViewApplication={pageProps.onViewApplication}
+          onMessageFilmmaker={pageProps.onMessageFilmmaker}
+        />
+      );
     case "portfolio":
       return <PlaceholderPage title="Portfolio" />;
     default:
       return (
         <OverviewPage
           onNavChange={onNavChange}
-          recentApps={pageProps.recentApps}
+          applications={pageProps.applications}
           onApplyClick={pageProps.onApplyClick}
           onViewApp={pageProps.onViewApp}
+          opportunities={pageProps.opportunities}
+          appliedProjectIds={pageProps.appliedProjectIds}
         />
       );
   }
+}
+
+function formatOpenRoles(rawRoles) {
+  if (!rawRoles) return "Talent Role Needed";
+  let roles = rawRoles;
+  if (typeof roles === "string") {
+    try {
+      roles = JSON.parse(roles);
+    } catch {
+      return roles;
+    }
+  }
+  if (Array.isArray(roles)) {
+    if (roles.length === 0) return "Talent Role Needed";
+    const list = roles.map((r) => {
+      if (typeof r === "string") return r;
+      if (typeof r === "object" && r !== null) return r.role_title || r.title || r.name || String(r);
+      return String(r);
+    });
+    return list.join(", ");
+  }
+  return String(roles);
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
@@ -835,20 +872,99 @@ export default function Dashboard() {
   const [activeNav, setActiveNav] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // ── Toast notification state ────────────────────────────────────────────────
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: "", type: "success" });
+    }, 4000);
+  };
+
   // ── Apply Modal state ────────────────────────────────────────────────────────
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
-  // ── Shared application state (drives both Overview & My Applications) ────────
-  const today = new Date().toLocaleDateString("en-US");
-  const [applications, setApplications] = useState(APPLICATIONS_DATA);
-  const [recentApps, setRecentApps] = useState(RECENT_APPS);
+  // ── Dynamic state loaded from backend ────────────────────────────────────────
+  const [applications, setApplications] = useState([]);
+  const [dbOpportunities, setDbOpportunities] = useState([]);
+  const [userName, setUserName] = useState("User");
+
+  const loadDashboardData = async () => {
+    try {
+      // Load user info from localStorage
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setUserName(userData.first_name || "User");
+      }
+
+      // 1. Fetch live user data & applications
+      const talentData = await getTalentData();
+      if (talentData && Array.isArray(talentData.applications)) {
+        const mappedApps = talentData.applications.map((a) => {
+          let statusText = "Under Review";
+          let statusColor = "bg-yellow-600 text-white";
+
+          if (a.status === "ACCEPTED" || a.status === "HIRED") {
+            statusText = "Hired";
+            statusColor = "bg-green-600 text-white";
+          } else if (a.status === "DECLINED") {
+            statusText = "Declined";
+            statusColor = "bg-red-600 text-white";
+          }
+
+          return {
+            id: a.application_id,
+            projectId: a.project_id,
+            filmakerId: a.filmmaker_id, // Add filmmaker ID for messaging
+            image: a.lookbook_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=200&q=80",
+            role: a.applied_role_title || formatOpenRoles(a.open_talent_roles),
+            project: a.project_title,
+            director: a.filmmaker_first_name ? `${a.filmmaker_first_name} ${a.filmmaker_last_name}` : "Filmmaker",
+            appliedDate: `Applied on ${a.created_at ? new Date(a.created_at).toLocaleDateString() : new Date().toLocaleDateString()}`,
+            status: statusText,
+            statusColor: statusColor,
+          };
+        });
+        setApplications(mappedApps);
+      }
+
+      // 2. Fetch live project opportunities
+      const oppData = await getOpportunities();
+      if (Array.isArray(oppData)) {
+        const mappedOpp = oppData.map((p) => ({
+          id: p.project_id,
+          filmakerId: p.filmmaker_id, // Add filmmaker ID for messaging
+          priority: p.project_status || "Active Project",
+          priorityColor: "bg-red-600",
+          image: p.lookbook_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80",
+          role: formatOpenRoles(p.open_talent_roles),
+          project: p.title,
+          director: p.filmmaker_first_name ? `${p.filmmaker_first_name} ${p.filmmaker_last_name}` : "Filmmaker",
+          directorName: p.filmmaker_first_name && p.filmmaker_last_name ? `${p.filmmaker_first_name} ${p.filmmaker_last_name}` : "Filmmaker",
+          budget: p.funding_target ? `$${Number(p.funding_target).toLocaleString()}` : "$0",
+          duration: p.production_timeline || "Flexible",
+          location: p.primary_location || "Not Specified",
+          applications: p.total_applications || 0,
+          deadline: p.created_at ? new Date(p.created_at).toLocaleDateString() : "Open",
+          description: p.logline || p.synopsis || "Opportunity open for talent applications.",
+        }));
+        setDbOpportunities(mappedOpp);
+      }
+    } catch (err) {
+      console.error("Failed to load talent dashboard data:", err);
+      showToast("Failed to load dashboard data. Please try refreshing.", "error");
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   const handleLogout = () => {
-    // Remove login information
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-
-    // Redirect to home page
     router.push("/");
   };
 
@@ -862,70 +978,109 @@ export default function Dashboard() {
     }
   };
 
-  // Toggle mobile menu
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Close mobile menu
   const handleMenuClose = () => {
     setIsMobileMenuOpen(false);
   };
 
-  // Open the apply modal for a given opportunity
   const handleApplyClick = (opportunity) => {
     setSelectedOpportunity(opportunity);
   };
 
-  // Close the modal without submitting
   const handleModalClose = () => {
     setSelectedOpportunity(null);
   };
 
-  // Handle form submission — opportunity is passed from the modal to avoid stale closure reads
-  const handleApplySubmit = (opportunity, formData) => {
+  const handleApplySubmit = async (opportunity, formData) => {
     if (!opportunity) return;
 
-    const newApp = {
-      id: Date.now(),
-      image: opportunity.image,
-      role: opportunity.role,
-      project: opportunity.project,
-      director: opportunity.director,
-      appliedDate: `Applied on ${today}`,
-      status: "Under Review",
-      statusColor: "bg-yellow-600 text-white",
-    };
-
-    const newRecentApp = {
-      id: Date.now(),
-      image: opportunity.image,
-      role: opportunity.role,
-      project: opportunity.project,
-      applied: today,
-      status: "Under Review",
-      statusColor: "bg-yellow-600",
-    };
-
-    setApplications((prev) => [newApp, ...prev]);
-    setRecentApps((prev) => [newRecentApp, ...prev]);
-    setSelectedOpportunity(null);
+    try {
+      console.log("Submitting application for project:", opportunity.id);
+      console.log("Role:", opportunity.role);
+      console.log("Cover Letter:", formData.coverLetter);
+      
+      const result = await applyToProject(
+        opportunity.id,
+        opportunity.role,
+        formData.coverLetter
+      );
+      
+      console.log("Application submitted successfully:", result);
+      showToast(`Successfully applied to ${opportunity.project}!`, "success");
+      setSelectedOpportunity(null);
+      await loadDashboardData();
+      setActiveNav("applications"); // auto-navigate to My Applications
+    } catch (err) {
+      console.error("Error submitting application:", err);
+      const message = err.response?.data?.message || err.message || "Failed to submit application";
+      showToast(message, "error");
+      setSelectedOpportunity(null);
+    }
   };
 
-  // Navigate to the full application detail page
+  const handleWithdrawApp = async (applicationId) => {
+    try {
+      await withdrawApplication(applicationId);
+      showToast("Application withdrawn successfully", "success");
+      await loadDashboardData();
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to withdraw application";
+      showToast(message, "error");
+    }
+  };
+
   const handleViewApp = (appId) => {
     router.push(`/dashboard/talent/application/${appId}`);
   };
 
-  const pageProps = {
-    applications,
-    recentApps,
-    onApplyClick: handleApplyClick,
-    onViewApp: handleViewApp,
+  const handleViewProjectDetails = (projectId) => {
+    router.push(`/dashboard/talent/application/${projectId}`);
   };
 
+  const handleMessageFilmmaker = (filmakerId) => {
+    // Navigate to messages page with the correct parameters
+    if (filmakerId) {
+      router.push(`/dashboard/talent/messages?receiverId=${filmakerId}`);
+    } else {
+      router.push(`/dashboard/talent/messages`);
+    }
+  };
+
+  // Create a Set of project IDs that the user has already applied to
+  const appliedProjectIds = applications.map((a) => a.projectId);
+
+  const pageProps = {
+    applications,
+    opportunities: dbOpportunities,
+    appliedProjectIds,
+    onApplyClick: handleApplyClick,
+    onViewApp: handleViewApp,
+    onWithdraw: handleWithdrawApp,
+    onViewDetails: handleViewProjectDetails,
+    onViewApplication: handleViewApp,
+    onMessageFilmmaker: handleMessageFilmmaker,
+  };
+
+  // Overview page also needs applications for the Recent Applications section
+
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans">
+    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans relative">
+      {/* ── Toast Notification ───────────────────────────────────────────── */}
+      {toast.show && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border font-bold text-sm transition-all duration-300 ${
+            toast.type === "success"
+              ? "bg-green-950/90 border-green-700/80 text-green-300"
+              : "bg-red-950/90 border-red-700/80 text-red-300"
+          }`}
+        >
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       {/* ── Apply Modal ──────────────────────────────────────────────────────── */}
       <ApplyModal
         opportunity={selectedOpportunity}
@@ -948,6 +1103,7 @@ export default function Dashboard() {
           onLogout={handleLogout}
           onSubscriptionClick={() => router.push("/dashboard/talent/subscription")}
           onMenuClick={handleMenuToggle}
+          username={userName}
         />
 
         {/* Page content — switches based on activeNav */}

@@ -1,12 +1,15 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ImageOff,
   MessageSquare,
   SquarePen,
 } from "lucide-react";
+import EditProjectModal from "./EditProjectModal";
 
-export default function MyProjectCard({ project }) {
+export default function MyProjectCard({ project, onUpdated }) {
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const router = useRouter();
   const progress =
     project.funding_target > 0
@@ -148,7 +151,10 @@ export default function MyProjectCard({ project }) {
             View Details
           </button>
 
-            <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white"
+            >
 
               <SquarePen size={18} />
 
@@ -156,7 +162,10 @@ export default function MyProjectCard({ project }) {
 
             </button>
 
-            <button className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white">
+            <button
+              onClick={() => router.push('/dashboard/filmmaker/messages')}
+              className="flex items-center gap-2 rounded-full border border-[#E50914] px-6 py-2.5 font-semibold uppercase text-[#E50914] transition hover:bg-[#E50914] hover:text-white"
+            >
 
               <MessageSquare size={18} />
 
@@ -169,6 +178,13 @@ export default function MyProjectCard({ project }) {
         </div>
 
       </div>
+
+      <EditProjectModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        project={project}
+        onUpdated={onUpdated}
+      />
 
     </div>
   );

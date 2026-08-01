@@ -69,4 +69,20 @@ export const getProjectDetail = async (projectId) => {
   );
 
   return response.data.project;
+};
+
+export const updateProject = async (projectId, projectData) => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.put(
+    `${API_BASE_URL}${projectId}`,
+    projectData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
 };
