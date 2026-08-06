@@ -10,7 +10,7 @@ export const signupUser = async (userData) => {
     email: userData.email,
     phone_number: userData.phone_number,
     password: userData.password,
-    role: userData.user_role,
+    user_role: userData.user_role,
   };
 
   const response = await axios.post(
