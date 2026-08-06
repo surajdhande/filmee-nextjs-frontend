@@ -109,8 +109,7 @@ return ( <div
   {/* Dark Overlay */}
   <div className="absolute inset-0 bg-black/80" />
 
-  <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
-    <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+  <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
       {/* Brand */}
       <div className="mb-6 sm:mb-10 text-center">
