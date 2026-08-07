@@ -93,7 +93,7 @@ export default function PortfolioPage() {
 
           {/* Cards */}
           {!loading && !error && mapped.length > 0 && (
-            <div className="flex flex-wrap justify-between gap-9">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mapped.map((item) => (
                 <PortfolioCard key={`${item.id}-${item.invested}`} item={item} />
               ))}

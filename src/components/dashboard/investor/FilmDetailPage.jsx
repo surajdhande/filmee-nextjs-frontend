@@ -275,7 +275,7 @@ function MediaTab({ film }) {
 }
 
 // ── Apply to Invest Modal ─────────────────────────────────────────────────────
-function ApplyToInvestModal({ film, onClose }) {
+function ApplyToInvestModal({ film, onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -293,6 +293,12 @@ function ApplyToInvestModal({ film, onClose }) {
     try {
       await createInvestment(film.id, parseFloat(amount));
       setSubmitted(true);
+      // Call success callback after short delay to show success message
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess();
+        }
+      }, 1500);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -335,7 +341,13 @@ function ApplyToInvestModal({ film, onClose }) {
               sent. The filmmaker will review it and get back to you soon.
             </p>
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (onSuccess) {
+                  onSuccess();
+                } else {
+                  onClose();
+                }
+              }}
               className="mt-2 w-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-2xl hover:brightness-110 transition-all duration-200"
             >
               Done
@@ -469,7 +481,7 @@ function ApplyToInvestModal({ film, onClose }) {
 }
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
-function InvestmentPanel({ film }) {
+function InvestmentPanel({ film, hasApplied, onApplicationSubmitted }) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -481,6 +493,17 @@ function InvestmentPanel({ film }) {
       projectTitle: film.title ?? "",
     });
     router.push(`/dashboard/investor/messages?${params.toString()}`);
+  }
+
+  function handleModalClose() {
+    setModalOpen(false);
+  }
+
+  function handleInvestmentSuccess() {
+    setModalOpen(false);
+    if (onApplicationSubmitted) {
+      onApplicationSubmitted();
+    }
   }
 
   return (
@@ -523,13 +546,20 @@ function InvestmentPanel({ film }) {
         </div>
 
         {/* CTA Buttons */}
-        <button
-          onClick={() => setModalOpen(true)}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3.5 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200"
-        >
-          <TrendingUp size={16} />
-          Apply to Invest
-        </button>
+        {!hasApplied ? (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3.5 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200"
+          >
+            <TrendingUp size={16} />
+            Apply to Invest
+          </button>
+        ) : (
+          <div className="w-full flex items-center justify-center gap-2 bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider text-sm py-3.5 rounded-full cursor-not-allowed">
+            <ShieldCheck size={16} />
+            Application Submitted
+          </div>
+        )}
         <button
           onClick={handleContactFilmaker}
           className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm uppercase tracking-wider py-3 rounded-full hover:bg-[#E50914]/10 transition duration-200"
@@ -539,7 +569,13 @@ function InvestmentPanel({ film }) {
         </button>
       </div>
 
-      {modalOpen && <ApplyToInvestModal film={film} onClose={() => setModalOpen(false)} />}
+      {modalOpen && (
+        <ApplyToInvestModal
+          film={film}
+          onClose={handleModalClose}
+          onSuccess={handleInvestmentSuccess}
+        />
+      )}
     </>
   );
 }
@@ -563,6 +599,7 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
   const [activeTab, setActiveTab] = useState("Overview");
   const [heroIdx, setHeroIdx] = useState(0);
   const [user, setUser] = useState(null);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -577,6 +614,9 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
       try {
         const raw = await getProjectDetail(filmId);
         setFilm(mapProjectToFilm(raw));
+        
+        // Check if user already applied to this project
+        await checkIfUserApplied();
       } catch (err) {
         console.error("Failed to load film:", err);
         setFilm(null);
@@ -586,6 +626,34 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
     }
     loadFilm();
   }, [filmId, initialFilm]);
+
+  // Check if the current user has already applied to this project
+  async function checkIfUserApplied() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/v1/investments/my-investments",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const userInvestments = data.projects || [];
+        const applied = userInvestments.some(
+          (inv) => String(inv.project_id) === String(filmId)
+        );
+        setHasApplied(applied);
+      }
+    } catch (err) {
+      console.error("Failed to check application status:", err);
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -710,7 +778,14 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
 
                 {/* Investment Panel — sits beside the image */}
                 <div className="hidden lg:block w-[420px] shrink-0">
-                  <InvestmentPanel film={film} />
+                  <InvestmentPanel
+                    film={film}
+                    hasApplied={hasApplied}
+                    onApplicationSubmitted={() => {
+                      setHasApplied(true);
+                      // Optionally reload film data
+                    }}
+                  />
                 </div>
               </div>
 
@@ -767,7 +842,13 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
 
           {/* Mobile: investment panel below hero */}
           <div className="lg:hidden pb-8">
-            <InvestmentPanel film={film} />
+            <InvestmentPanel
+              film={film}
+              hasApplied={hasApplied}
+              onApplicationSubmitted={() => {
+                setHasApplied(true);
+              }}
+            />
           </div>
 
         </div>

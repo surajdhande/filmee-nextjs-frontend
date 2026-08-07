@@ -11,13 +11,40 @@ export default function BrowseProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userInvestments, setUserInvestments] = useState([]);
 
   useEffect(() => {
-    async function fetchProjects() {
+    async function fetchData() {
       try {
         setLoading(true);
-        const data = await getProjects();
-        setProjects(data || []);
+        
+        // Fetch projects
+        const projectData = await getProjects();
+        setProjects(projectData || []);
+        
+        // Fetch user's investments
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const response = await fetch(
+              "http://127.0.0.1:5000/api/v1/investments/my-investments",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              const investedProjectIds = (data.projects || []).map(
+                (inv) => inv.project_id
+              );
+              setUserInvestments(investedProjectIds);
+            }
+          } catch (err) {
+            console.error("Failed to load user investments:", err);
+          }
+        }
       } catch (err) {
         console.error("Failed to load projects:", err);
         setError("Failed to load projects. Please try again.");
@@ -25,29 +52,31 @@ export default function BrowseProjectsPage() {
         setLoading(false);
       }
     }
-    fetchProjects();
+    fetchData();
   }, []);
 
-  // Map API fields to card-compatible shape
-  const mapped = projects.map((p) => {
-    const target = parseFloat(p.funding_target) || 0;
-    const raised = parseFloat(p.funding_raised) || 0;
-    const progress = target > 0 ? Math.round((raised / target) * 100) : 0;
-    const remaining = target - raised;
+  // Map API fields to card-compatible shape, filtering out projects user already invested in
+  const mapped = projects
+    .filter((p) => !userInvestments.includes(p.project_id))
+    .map((p) => {
+      const target = parseFloat(p.funding_target) || 0;
+      const raised = parseFloat(p.funding_raised) || 0;
+      const progress = target > 0 ? Math.round((raised / target) * 100) : 0;
+      const remaining = target - raised;
 
-    return {
-      id: p.project_id,
-      title: p.title,
-      director: `${p.filmmaker_first_name ?? ""} ${p.filmmaker_last_name ?? ""}`.trim() || "—",
-      genre: p.genre,
-      timeline: p.production_timeline,
-      targetRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
-      remaining: `$${remaining.toLocaleString()}`,
-      progress,
-      status: p.project_status?.replace(/_/g, " ") ?? "N/A",
-      imageUrl: p.lookbook_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=80",
-    };
-  });
+      return {
+        id: p.project_id,
+        title: p.title,
+        director: `${p.filmmaker_first_name ?? ""} ${p.filmmaker_last_name ?? ""}`.trim() || "—",
+        genre: p.genre,
+        timeline: p.production_timeline,
+        targetRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
+        remaining: `$${remaining.toLocaleString()}`,
+        progress,
+        status: p.project_status?.replace(/_/g, " ") ?? "N/A",
+        imageUrl: p.lookbook_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=80",
+      };
+    });
 
   const filtered = mapped.filter(
     (p) =>
