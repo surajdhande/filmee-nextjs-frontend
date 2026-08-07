@@ -34,17 +34,18 @@ const [loading, setLoading] = useState(false);
 useEffect(() => {
   if (!selectedRole) return;
 
+  const roleUpper = selectedRole.toUpperCase();
   const allowedRoles = new Set([
-  "FILMMAKER",
-  "INVESTOR",
-  "TALENT",
-]);
+    "FILMMAKER",
+    "INVESTOR",
+    "TALENT",
+  ]);
 
-if (!allowedRoles.has(selectedRole)) return;
+  if (!allowedRoles.has(roleUpper)) return;
 
   setFormData((prev) => ({
     ...prev,
-    user_role: selectedRole,
+    user_role: roleUpper,
   }));
 
 }, [selectedRole]);

@@ -99,16 +99,8 @@ export function validateStepThree(projectData) {
 export function validateStepFour(projectData) {
   const errors = {};
 
-  if (!projectData.pitchDeck) {
-    errors.pitchDeck = "Pitch deck is required.";
-  }
-
-  if (!projectData.lookbook) {
-    errors.lookbook = "Lookbook is required.";
-  }
-
   return {
-    isValid: Object.keys(errors).length === 0,
+    isValid: true,
     errors,
   };
 }

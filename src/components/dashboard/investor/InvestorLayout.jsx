@@ -28,7 +28,9 @@ export default function InvestorLayout({ children }) {
     router.push("/login");
   };
 
-  const profileName = user?.full_name || user?.name || "Mervin Consultant";
+  const profileName = user 
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Investor"
+    : "Investor";
 
   return (
     <DashboardLayout

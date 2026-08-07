@@ -2,7 +2,7 @@
 
 import MyProjectCard from "./MyProjectCard";
 
-export default function ProjectsGrid({ projects }) {
+export default function ProjectsGrid({ projects, onUpdated }) {
   if (!projects.length) {
     return (
       <div className="rounded-3xl border border-dashed border-[#303030] bg-[#171717] p-16 text-center">
@@ -26,6 +26,7 @@ export default function ProjectsGrid({ projects }) {
         <MyProjectCard
           key={project.project_id}
           project={project}
+          onUpdated={onUpdated}
         />
       ))}
 
