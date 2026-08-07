@@ -71,29 +71,29 @@ export default function FilmmakerAnalytics() {
   // Render: Header
   // =====================================================
   const renderHeader = () => (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-      <div className="flex items-center gap-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
         <button
           onClick={() => router.push("/dashboard/filmmaker")}
-          className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors"
+          className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors self-start sm:self-auto"
         >
           <ArrowLeft size={16} />
           Back
         </button>
-        <div className="h-8 w-px bg-[#2A2A2A] hidden md:block" />
+        <div className="h-8 w-px bg-[#2A2A2A] hidden sm:block" />
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Analytics Dashboard</h1>
-          <p className="mt-1 text-sm text-zinc-400">Monitor your projects, audience growth and funding performance.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Analytics Dashboard</h1>
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400">Monitor your projects, audience growth and funding performance.</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="flex items-center gap-2 rounded-full border border-[#2A2A2A] px-5 py-2 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full border border-[#2A2A2A] px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors">
           <Filter size={16} />
-          Date Filter
+          <span>Date Filter</span>
         </button>
-        <button className="flex items-center gap-2 rounded-full bg-red-600 px-5 py-2 text-sm font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors">
+        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors">
           <Download size={16} />
-          Export Report
+          <span>Export Report</span>
         </button>
       </div>
     </div>
@@ -339,7 +339,7 @@ export default function FilmmakerAnalytics() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white px-6 py-8 md:px-8 md:py-10">
+    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
       {renderHeader()}
       {renderStatCards()}
       {renderFirstRow()}

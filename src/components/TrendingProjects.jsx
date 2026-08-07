@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 import { getProjects } from "@/services/projectService";
 
 const formatCurrencyK = (value) => {
@@ -70,12 +70,12 @@ const TrendingProjects = ({
           </div>
 
           {showViewAll && (
-            <button
-              onClick={() => router.push("/projects")}
+            <Link
+              href="/project-overview"
               className="text-sm font-semibold uppercase tracking-wider text-zinc-400 transition hover:text-white"
             >
               View All
-            </button>
+            </Link>
           )}
 
         </div>

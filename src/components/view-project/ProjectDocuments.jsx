@@ -21,7 +21,7 @@ export default function ProjectDocuments({
   ];
 
   return (
-    <AnimatedCard className="p-8">
+    <AnimatedCard className="p-4 sm:p-6 md:p-8">
 
       <h2 className="text-2xl font-bold text-white">
         Documents
@@ -34,7 +34,7 @@ export default function ProjectDocuments({
           <button
             key={document.title}
             disabled={!document.url}
-            className={`group flex w-full items-center justify-between rounded-2xl border px-6 py-5 transition-all duration-300 ${
+            className={`group flex w-full flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 gap-4 sm:gap-0 ${
               document.url
                 ? "border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white"
                 : "cursor-not-allowed border-[#2A2A2A] bg-[#1F1F1F] text-gray-500"
@@ -84,12 +84,12 @@ export default function ProjectDocuments({
 
               <Download
                 size={22}
-                className="transition-colors duration-300 group-hover:text-white"
+                className="transition-colors duration-300 group-hover:text-white self-end sm:self-auto"
               />
 
             ) : (
 
-              <span className="rounded-full bg-[#2A2A2A] px-4 py-2 text-xs font-semibold uppercase text-gray-500">
+              <span className="rounded-full bg-[#2A2A2A] px-4 py-2 text-xs font-semibold uppercase text-gray-500 self-start sm:self-auto">
                 Pending
               </span>
 

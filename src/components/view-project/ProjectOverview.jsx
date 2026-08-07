@@ -2,7 +2,7 @@
 import AnimatedCard from "@/components/ui/AnimatedCard";
 export default function ProjectOverview({ project }) {
   return (
-    <AnimatedCard className="p-8">
+    <AnimatedCard className="p-4 sm:p-6 md:p-8">
 
       <h2 className="text-2xl font-bold text-white">
         Overview

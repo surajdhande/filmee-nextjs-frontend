@@ -53,14 +53,14 @@ export const getProjectById = async (projectId) => {
 
 /**
  * Fetch full project detail for an investor (no filmmaker restriction).
- * Uses the /api/v1/projects/<id>/details endpoint.
+ * Uses the new /api/v1/projects/<id>/detail endpoint.
  * @param {number|string} projectId
  */
 export const getProjectDetail = async (projectId) => {
   const token = localStorage.getItem("token");
 
   const response = await axios.get(
-    `${API_BASE_URL}${projectId}/details`,
+    `${API_BASE_URL}${projectId}/detail`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -85,4 +85,4 @@ export const updateProject = async (projectId, projectData) => {
   );
 
   return response.data;
-};
+};

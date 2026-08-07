@@ -5,13 +5,13 @@ import AnimatedOutlineButton from "@/components/ui/AnimatedOutlineButton";
 import AnimatedPrimaryButton from "@/components/ui/AnimatedPrimaryButton";
 import { useRouter } from "next/navigation";
 
-export default function ViewProjectHeader({ onEditClick }) {
+export default function ViewProjectHeader() {
   const router = useRouter();
 
   return (
     <header className="border-b border-[#2A2A2A] bg-[#111111]">
 
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-5">
+      <div className="mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between px-4 sm:px-6 md:px-8 py-4 sm:py-5">
 
         {/* Back Button */}
 
@@ -31,16 +31,13 @@ export default function ViewProjectHeader({ onEditClick }) {
 
         {/* Action Buttons */}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-center sm:justify-end">
 
           {/* Share */}
 
           <AnimatedOutlineButton
             icon={<Share2 size={18} />}
-            onClick={() => {
-              navigator.clipboard?.writeText(window.location.href);
-              alert("Project link copied to clipboard!");
-            }}
+            className="flex-1 sm:flex-none justify-center"
           >
             Share
           </AnimatedOutlineButton>
@@ -49,7 +46,7 @@ export default function ViewProjectHeader({ onEditClick }) {
 
           <AnimatedPrimaryButton
             icon={<SquarePen size={18} />}
-            onClick={onEditClick}
+            className="flex-1 sm:flex-none justify-center"
           >
             Edit Project
           </AnimatedPrimaryButton>
