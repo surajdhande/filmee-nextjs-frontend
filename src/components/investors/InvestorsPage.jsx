@@ -12,7 +12,7 @@ export default function InvestorsPage() {
       <InvestorsHero />
       <InvestorsStats />
       <InvestorsFeatures />
-      <InvestmentOpportunities />
+      {/* <InvestmentOpportunities /> */}
       <Footer />
     </>
   );
