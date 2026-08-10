@@ -54,15 +54,15 @@ export default function ChoosePath() {
   const router = useRouter();
 
   return (
-    <section id="choose-path" className="bg-black py-14 px-6">
+    <section id="choose-path" className="bg-black py-14 px-4 sm:px-6">
       <div className="mx-auto max-w-7xl">
 
         <div className="mb-12 max-w-2xl">
-          <h2 className="text-5xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
             Choose Your Path
           </h2>
 
-          <p className="mt-2 text-lg text-zinc-400">
+          <p className="mt-2 text-base sm:text-lg text-zinc-400">
         Join the community that fits your creative journey.
         </p>
         </div>
@@ -73,7 +73,7 @@ export default function ChoosePath() {
             <div
             key={item.role}
               onClick={() => item.cardHref && router.push(item.cardHref)}
-              className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600${item.cardHref ? " cursor-pointer" : ""}`}>
+              className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600 ${item.cardHref ? "cursor-pointer" : ""}`}>
 
               <img
                 src={item.image}

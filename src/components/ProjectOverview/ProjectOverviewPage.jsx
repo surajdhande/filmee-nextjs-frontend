@@ -13,6 +13,8 @@ import {
   Star,
   ChevronDown,
   Play,
+  Menu,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -36,7 +38,7 @@ const PROJECTS = [
     budget: 250000,
     fundedPct: 78,
     image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
-    size: "tall",   // spans 2 rows
+    size: "tall",
   },
   {
     id: 2,
@@ -162,6 +164,7 @@ export default function ProjectOverviewPage() {
   const [genreFilter, setGenreFilter]   = useState("All Genres");
   const [budgetFilter, setBudgetFilter] = useState("All Budgets");
   const [hovered, setHovered]       = useState(null);
+  const [menuOpen, setMenuOpen]     = useState(false);
 
   const filtered = PROJECTS.filter((p) => {
     const q = search.toLowerCase();
@@ -177,73 +180,121 @@ export default function ProjectOverviewPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* ── Navbar ─────────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 z-[999] w-full border-b border-zinc-800 bg-black/95 backdrop-blur-md">
-        <div className="flex h-20 w-full items-center justify-between px-16">
+        <div className="flex h-16 sm:h-20 w-full items-center justify-between px-4 sm:px-8 lg:px-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Filmee Logo" width={60} height={60} priority />
-            <div className="text-3xl font-extrabold tracking-tight leading-none">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <Image src="/logo.png" alt="Filmee Logo" width={44} height={44} className="sm:w-[60px] sm:h-[60px]" priority />
+            <div className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-none">
               <span className="text-white">Fil</span>
               <span className="text-red-500">m</span>
               <span className="text-white">ee</span>
             </div>
           </Link>
 
-          {/* Nav links */}
+          {/* Desktop Nav links */}
           <div className="hidden lg:flex items-center gap-12 text-[15px] font-semibold text-white">
             <Link href="/"                className="transition duration-300 hover:text-red-500">Home</Link>
             <Link href="/project-overview" className="text-red-500">Projects</Link>
             <Link href="/talent-overview" className="transition duration-300 hover:text-red-500">Talent</Link>
-            <Link href="/"                className="transition duration-300 hover:text-red-500">Investors</Link>
-            <Link href="/"                className="transition duration-300 hover:text-red-500">Pricing</Link>
+            <Link href="/investors"       className="transition duration-300 hover:text-red-500">Investors</Link>
+            <Link href="/pricing"         className="transition duration-300 hover:text-red-500">Pricing</Link>
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/search">
-              <Search size={22} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
+              <Search size={20} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
             </Link>
             <Link href="/notifications">
-              <Bell   size={22} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
+              <Bell size={20} className="cursor-pointer text-white transition duration-300 hover:text-red-500" />
             </Link>
-            <Link href="/login">
-              <button className="group relative overflow-hidden rounded-full border border-red-600 px-8 py-3 text-red-500 transition-all duration-300 hover:scale-105 text-sm font-semibold">
-                <span className="absolute inset-0 -translate-x-full bg-red-600 transition-transform duration-300 group-hover:translate-x-0" />
-                <span className="relative z-10 group-hover:text-white">SIGN IN</span>
-              </button>
-            </Link>
-            <Link href="/signup">
-              <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(229,9,20,0.5)]">
-                JOIN NOW
-              </button>
-            </Link>
+
+            {/* Desktop auth buttons */}
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/login">
+                <button className="group relative overflow-hidden rounded-full border border-red-600 px-8 py-3 text-red-500 transition-all duration-300 hover:scale-105 text-sm font-semibold">
+                  <span className="absolute inset-0 -translate-x-full bg-red-600 transition-transform duration-300 group-hover:translate-x-0" />
+                  <span className="relative z-10 group-hover:text-white">SIGN IN</span>
+                </button>
+              </Link>
+              <Link href="/signup">
+                <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(229,9,20,0.5)]">
+                  JOIN NOW
+                </button>
+              </Link>
+            </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="lg:hidden p-1 text-white"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile drawer */}
+        {menuOpen && (
+          <div className="lg:hidden border-t border-zinc-800 bg-black/98 px-6 py-6 flex flex-col gap-5">
+            {[
+              { href: "/", label: "Home" },
+              { href: "/project-overview", label: "Projects" },
+              { href: "/talent-overview", label: "Talent" },
+              { href: "/investors", label: "Investors" },
+              { href: "/pricing", label: "Pricing" },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="text-base font-semibold text-white transition duration-300 hover:text-red-500"
+              >
+                {label}
+              </Link>
+            ))}
+            <div className="mt-2 flex flex-col gap-3 sm:hidden">
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="w-full">
+                <button className="w-full group relative overflow-hidden rounded-full border border-red-600 px-8 py-3 text-red-500 transition-all duration-300 hover:scale-105 text-sm font-semibold">
+                  <span className="absolute inset-0 -translate-x-full bg-red-600 transition-transform duration-300 group-hover:translate-x-0" />
+                  <span className="relative z-10 group-hover:text-white">SIGN IN</span>
+                </button>
+              </Link>
+              <Link href="/signup" onClick={() => setMenuOpen(false)} className="w-full">
+                <button className="w-full rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(229,9,20,0.5)]">
+                  JOIN NOW
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── Main ───────────────────────────────────────────────────────────── */}
-      <main className="pt-28 pb-20 px-16 max-w-7xl mx-auto">
+      <main className="pt-24 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto">
 
         {/* Hero */}
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <button
             onClick={() => router.back()}
-            className="mb-6 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 text-sm"
+            className="mb-4 sm:mb-6 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 text-sm"
           >
             <ArrowLeft size={16} />
           </button>
 
-          <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
             Discover{" "}
             <span className="text-red-500">Amazing Projects</span>
           </h1>
-          <p className="mt-4 max-w-xl text-zinc-400 leading-relaxed">
+          <p className="mt-3 sm:mt-4 max-w-xl text-sm sm:text-base text-zinc-400 leading-relaxed">
             Explore groundbreaking film projects from talented creators worldwide. Find your next
             investment opportunity or collaboration.
           </p>
         </div>
 
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-10">
+        <div className="flex flex-col sm:flex-row gap-3 mb-8 sm:mb-10">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
@@ -255,38 +306,40 @@ export default function ProjectOverviewPage() {
             />
           </div>
 
-          <div className="relative">
-            <select
-              value={genreFilter}
-              onChange={(e) => setGenreFilter(e.target.value)}
-              className="appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
-            >
-              {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-            <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-          </div>
+          <div className="flex gap-3">
+            <div className="relative flex-1 sm:flex-none">
+              <select
+                value={genreFilter}
+                onChange={(e) => setGenreFilter(e.target.value)}
+                className="w-full appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-4 sm:px-5 py-3 pr-9 sm:pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
+              >
+                {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            </div>
 
-          <div className="relative">
-            <select
-              value={budgetFilter}
-              onChange={(e) => setBudgetFilter(e.target.value)}
-              className="appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-5 py-3 pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
-            >
-              {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
-            <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <div className="relative flex-1 sm:flex-none">
+              <select
+                value={budgetFilter}
+                onChange={(e) => setBudgetFilter(e.target.value)}
+                className="w-full appearance-none bg-[#141414] border border-zinc-800 rounded-xl px-4 sm:px-5 py-3 pr-9 sm:pr-10 text-sm text-white outline-none focus:border-red-600 transition-colors duration-200 cursor-pointer"
+              >
+                {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
+              </select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            </div>
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-14">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-14">
           {STATS.map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="flex flex-col items-center gap-2">
-                <Icon size={28} className="text-red-500" />
-                <span className="text-2xl font-extrabold text-white">{s.value}</span>
-                <span className="text-xs text-zinc-400">{s.label}</span>
+              <div key={s.label} className="flex flex-col items-center gap-1.5 sm:gap-2">
+                <Icon size={24} className="text-red-500 sm:w-7 sm:h-7" />
+                <span className="text-xl sm:text-2xl font-extrabold text-white">{s.value}</span>
+                <span className="text-[11px] sm:text-xs text-zinc-400">{s.label}</span>
               </div>
             );
           })}
@@ -296,13 +349,13 @@ export default function ProjectOverviewPage() {
         {filtered.length === 0 ? (
           <p className="text-center text-zinc-500 py-20">No projects match your search.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {filtered.map((project) => (
               <div
                 key={project.id}
                 onMouseEnter={() => setHovered(project.id)}
                 onMouseLeave={() => setHovered(null)}
-                className="relative h-64 overflow-hidden rounded-2xl cursor-pointer group"
+                className="relative h-56 sm:h-64 overflow-hidden rounded-2xl cursor-pointer group"
               >
                 {/* Image */}
                 <img
@@ -330,7 +383,7 @@ export default function ProjectOverviewPage() {
                     hovered === project.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   }`}
                 >
-                  <p className="text-white font-bold text-base mb-2">{project.title}</p>
+                  <p className="text-white font-bold text-sm sm:text-base mb-2">{project.title}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-white text-sm font-semibold">
                       <DollarSign size={14} className="text-red-400" />

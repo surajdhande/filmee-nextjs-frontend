@@ -415,13 +415,13 @@ export default function AdvancedAnalytics() {
         </div>
 
         {/* 3. Tabbed Charts */}
-        <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 bg-[#1A1A1A] rounded-full p-1 w-fit border border-[#2a2a2a]">
+        <div className="bg-[#121212] border border-[#222] rounded-3xl p-4 sm:p-6">
+          <div className="flex items-center gap-1 sm:gap-2 mb-6 bg-[#1A1A1A] rounded-full p-1 border border-[#2a2a2a] max-w-full overflow-x-auto scrollbar-none flex-nowrap whitespace-nowrap">
             {TABS.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-300 ${
+                className={`px-3 py-1.5 sm:px-5 sm:py-1.5 rounded-full text-xs sm:text-[13px] font-semibold transition-all duration-300 flex-shrink-0 ${
                   activeTab === tab
                     ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.3)]"
                     : "text-zinc-500 hover:text-zinc-300"

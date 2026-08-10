@@ -52,18 +52,18 @@ const TrendingProjects = ({
   }, []);
 
   return (
-    <section className="bg-black px-6 py-20">
+    <section className="bg-black px-4 sm:px-6 py-12 md:py-20">
       <div className="mx-auto max-w-7xl">
 
-        <div className="mb-12 flex items-start justify-between">
+        <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
 
           <div>
 
-            <h2 className="text-5xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
               {title}
             </h2>
 
-            <p className="mt-3 text-lg text-zinc-400">
+            <p className="mt-3 text-base sm:text-lg text-zinc-400">
               {subtitle}
             </p>
 
@@ -72,7 +72,7 @@ const TrendingProjects = ({
           {showViewAll && (
             <Link
               href="/project-overview"
-              className="text-sm font-semibold uppercase tracking-wider text-zinc-400 transition hover:text-white"
+              className="text-sm font-semibold uppercase tracking-wider text-zinc-400 transition hover:text-white self-start sm:self-auto"
             >
               View All
             </Link>

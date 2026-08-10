@@ -88,26 +88,26 @@ export default function HelpPage() {
       
       {/* Custom Sticky Header */}
       <header className="fixed top-0 left-0 z-[999] w-full border-b border-zinc-900 bg-black/95 backdrop-blur-md">
-        <div className="flex h-20 w-full items-center justify-between px-6 sm:px-16">
+        <div className="flex h-16 sm:h-20 w-full items-center justify-between px-4 sm:px-16">
           
           {/* Left Actions */}
           <div className="flex items-center">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-black tracking-wider uppercase"
+              className="flex items-center gap-1 text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-black tracking-wider uppercase"
               aria-label="Go back"
             >
               <ArrowLeft size={16} />
-              BACK
+              <span className="hidden sm:inline">BACK</span>
             </button>
             
             {/* Divider */}
-            <div className="h-6 w-px bg-zinc-800 mx-4 sm:mx-6" />
+            <div className="hidden sm:block h-6 w-px bg-zinc-800 mx-4 sm:mx-6" />
             
             {/* Help Center Title */}
-            <div className="flex items-center gap-2.5">
-              <BookOpen size={20} className="text-red-500" />
-              <span className="text-red-500 font-extrabold text-sm sm:text-base tracking-widest uppercase">
+            <div className="flex items-center gap-2">
+              <BookOpen size={18} className="text-red-500 sm:w-[20px] sm:h-[20px]" />
+              <span className="text-red-500 font-extrabold text-xs sm:text-sm sm:text-base tracking-widest uppercase">
                 HELP CENTER
               </span>
             </div>
@@ -115,7 +115,7 @@ export default function HelpPage() {
 
           {/* Right Action */}
           <Link href="/signup">
-            <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider">
+            <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-4 py-2 text-[10px] sm:px-6 sm:py-2.5 sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider">
               Get Started
             </button>
           </Link>
@@ -124,47 +124,47 @@ export default function HelpPage() {
       </header>
 
       {/* Main Section */}
-      <main className="mx-auto max-w-7xl px-6 pt-36 md:px-16 lg:px-24">
+      <main className="mx-auto max-w-7xl px-4 sm:px-16 pt-28 sm:pt-36">
         
         {/* Hero Section */}
-        <div className="text-center mb-16 pt-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
+        <div className="text-center mb-12 sm:mb-16 pt-6">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
             How can we <span className="text-red-500">help you?</span>
           </h1>
-          <p className="text-zinc-400 text-sm sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-zinc-400 text-xs sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             Find answers to your questions or get in touch with our support team
           </p>
           
           {/* Search bar */}
           <div className="relative w-full max-w-2xl mx-auto mt-8">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for help articles..."
-              className="w-full bg-[#0c0d10] border border-zinc-800 rounded-lg py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-red-500/80 transition-colors shadow-lg text-[15px]"
+              className="w-full bg-[#0c0d10] border border-zinc-800 rounded-lg py-2.5 sm:py-3.5 pl-10 sm:pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-red-500/80 transition-colors shadow-lg text-xs sm:text-[15px]"
             />
           </div>
         </div>
 
         {/* Browse by Category */}
-        <div className="mb-24">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white text-center mb-12 tracking-wide">
+        <div className="mb-16 sm:mb-24">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-white text-center mb-8 sm:mb-12 tracking-wide">
             Browse by Category
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((cat, i) => {
               const IconComponent = cat.icon;
               return (
                 <div
                   key={i}
-                  className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-700/80 hover:bg-[#121215]/60 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-md min-h-[190px] relative group"
+                  className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:border-zinc-700/80 hover:bg-[#121215]/60 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-md min-h-[170px] sm:min-h-[190px] relative group"
                 >
                   <div>
-                    <IconComponent size={24} className={`${cat.iconColor} mb-4`} />
-                    <h3 className="text-[17px] font-bold text-white mb-2 leading-snug tracking-wide group-hover:text-red-400 transition-colors">
+                    <IconComponent size={22} className={`${cat.iconColor} mb-4`} />
+                    <h3 className="text-sm sm:text-[17px] font-bold text-white mb-2 leading-snug tracking-wide group-hover:text-red-400 transition-colors">
                       {cat.title}
                     </h3>
                     <p className="text-zinc-400 text-xs sm:text-[13px] leading-relaxed">
@@ -173,10 +173,10 @@ export default function HelpPage() {
                   </div>
                   
                   <div className="flex items-center justify-between mt-6">
-                    <span className="text-zinc-500 text-xs font-semibold">
+                    <span className="text-zinc-500 text-[11px] sm:text-xs font-semibold">
                       {cat.articles}
                     </span>
-                    <ChevronRight size={16} className="text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight size={14} className="text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               );
@@ -185,11 +185,11 @@ export default function HelpPage() {
         </div>
 
         {/* Popular Articles & Contact Support Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 sm:mb-24">
           
           {/* Column 1: Popular Articles */}
           <div>
-            <h2 className="text-2xl font-extrabold text-white mb-8 tracking-wide">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-6 sm:mb-8 tracking-wide">
               Popular Articles
             </h2>
             
@@ -197,12 +197,12 @@ export default function HelpPage() {
               {popularArticles.map((article, i) => (
                 <div
                   key={i}
-                  className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-xl py-4 px-6 flex items-center justify-between cursor-pointer hover:bg-[#121215]/60 hover:border-zinc-700/80 transition-all duration-200 group active:scale-[0.99]"
+                  className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-xl py-3 px-4 sm:py-4 sm:px-6 flex items-center justify-between cursor-pointer hover:bg-[#121215]/60 hover:border-zinc-700/80 transition-all duration-200 group active:scale-[0.99]"
                 >
-                  <span className="text-sm sm:text-[15px] font-semibold text-zinc-300 group-hover:text-white transition-colors leading-relaxed">
+                  <span className="text-xs sm:text-[15px] font-semibold text-zinc-300 group-hover:text-white transition-colors leading-relaxed">
                     {article}
                   </span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight size={14} className="text-zinc-500 group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all" />
                 </div>
               ))}
             </div>
@@ -210,36 +210,36 @@ export default function HelpPage() {
 
           {/* Column 2: Contact Support */}
           <div>
-            <h2 className="text-2xl font-extrabold text-white mb-8 tracking-wide">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-6 sm:mb-8 tracking-wide">
               Contact Support
             </h2>
             
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
               {contactSupport.map((card, i) => {
                 const IconComponent = card.icon;
                 return (
                   <div
                     key={i}
-                    className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-zinc-700/80 transition-colors shadow-sm"
+                    className="bg-[#0b0c10]/40 border border-zinc-800/80 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-zinc-700/80 transition-colors shadow-sm"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-red-950/10 rounded-xl mt-0.5">
-                        <IconComponent size={24} className="text-red-500" />
+                      <div className="p-2.5 sm:p-3 bg-red-950/10 rounded-xl mt-0.5">
+                        <IconComponent size={20} className="text-red-500 sm:w-[24px] sm:h-[24px]" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-white mb-1 tracking-wide">
+                        <h3 className="text-sm sm:text-lg font-bold text-white mb-1 tracking-wide">
                           {card.title}
                         </h3>
                         <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed mb-1">
                           {card.desc}
                         </p>
-                        <span className="text-zinc-500 text-xs font-semibold">
+                        <span className="text-zinc-500 text-[11px] sm:text-xs font-semibold">
                           {card.sub}
                         </span>
                       </div>
                     </div>
                     
-                    <button className="sm:self-center border border-red-600/80 text-red-500 hover:bg-red-600 hover:text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-300 self-start">
+                    <button className="sm:self-center border border-red-600/80 text-red-500 hover:bg-red-600 hover:text-white px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold tracking-wider uppercase transition-all duration-300 self-start">
                       {card.btnText}
                     </button>
                   </div>
@@ -252,22 +252,22 @@ export default function HelpPage() {
 
         {/* Still Need Help? Section */}
         <div className="border-t border-zinc-900 pt-16 text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-3 tracking-wide">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-wide">
             Still Need Help?
           </h2>
-          <p className="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed mb-8">
+          <p className="text-zinc-400 text-xs sm:text-base max-w-lg mx-auto leading-relaxed mb-8">
             Our support team is here to help you succeed with your film projects
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/contact#our-offices" className="w-full sm:w-auto">
-              <button className="flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-3.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider w-full">
+              <button className="flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-6 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider w-full">
                 <MessageSquare size={16} />
                 CONTACT SUPPORT
               </button>
             </Link>
             
-            <button className="flex items-center justify-center gap-2.5 rounded-full border border-red-650 px-8 py-3.5 text-xs sm:text-sm font-bold text-red-500 hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 w-full sm:w-auto uppercase tracking-wider">
+            <button className="flex items-center justify-center gap-2.5 rounded-full border border-red-650 px-6 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-bold text-red-500 hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 w-full sm:w-auto uppercase tracking-wider">
               <BookOpen size={16} />
               BROWSE ALL ARTICLES
             </button>

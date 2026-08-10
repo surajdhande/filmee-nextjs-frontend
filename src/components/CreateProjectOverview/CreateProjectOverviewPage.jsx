@@ -108,20 +108,20 @@ export default function CreateProjectOverviewPage() {
     <div className="min-h-screen bg-black text-white">
       {/* ── Navbar ── */}
       <nav className="fixed top-0 left-0 z-[999] w-full border-b border-zinc-800 bg-black/95 backdrop-blur-md">
-        <div className="flex h-16 w-full items-center justify-between px-8">
+        <div className="flex h-16 w-full items-center justify-between px-4 sm:px-8">
           {/* Back + Logo */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-sm text-zinc-400 transition-colors duration-200 hover:text-white"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400 transition-colors duration-200 hover:text-white"
             >
               <ArrowLeft size={16} />
-              <span className="font-medium">BACK</span>
+              <span className="font-medium hidden sm:inline">BACK</span>
             </button>
 
             <Link href="/" className="flex items-center gap-2">
-              <Film size={22} className="text-red-600" />
-              <span className="text-lg font-extrabold tracking-tight text-white">
+              <Film size={20} className="text-red-600 sm:w-[22px] sm:h-[22px]" />
+              <span className="text-sm sm:text-lg font-extrabold tracking-tight text-white">
                 FILMCONNECT
               </span>
             </Link>
@@ -129,7 +129,7 @@ export default function CreateProjectOverviewPage() {
 
           {/* CTA */}
           <Link href="/dashboard/filmmaker/create-project">
-            <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-6 py-2.5 text-sm font-bold tracking-wider text-white shadow-[0_0_18px_rgba(220,38,38,0.35)] transition-all duration-300 hover:brightness-110 hover:scale-105">
+            <button className="rounded-full bg-gradient-to-r from-red-700 to-red-500 px-4 py-2 text-xs sm:px-6 sm:py-2.5 sm:text-sm font-bold tracking-wider text-white shadow-[0_0_18px_rgba(220,38,38,0.35)] transition-all duration-300 hover:brightness-110 hover:scale-105">
               GET STARTED
             </button>
           </Link>
@@ -137,18 +137,18 @@ export default function CreateProjectOverviewPage() {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="flex min-h-[420px] flex-col items-center justify-center bg-black px-6 pt-20 pb-16 text-center">
-        <h1 className="text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl">
+      <section className="flex min-h-[420px] flex-col items-center justify-center bg-black px-6 pt-28 pb-16 text-center">
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl">
           <span className="text-white">Create Your </span>
           <span className="text-red-500">Film Project</span>
         </h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+        <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base sm:leading-7 md:text-lg">
           Turn your vision into reality. Connect with investors, find talented crew members, and
           bring your story to the world through our comprehensive project creation platform.
         </p>
 
         <Link href="/dashboard/filmmaker/create-project" className="mt-8">
-          <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-8 py-4 text-sm font-bold tracking-widest text-white shadow-[0_0_24px_rgba(220,38,38,0.4)] transition-all duration-300 hover:brightness-110 hover:scale-105">
+          <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-6 py-3 text-xs sm:px-8 sm:py-4 sm:text-sm font-bold tracking-widest text-white shadow-[0_0_24px_rgba(220,38,38,0.4)] transition-all duration-300 hover:brightness-110 hover:scale-105">
             <Plus size={18} />
             START NEW PROJECT
           </button>
@@ -158,7 +158,7 @@ export default function CreateProjectOverviewPage() {
       {/* ── Choose Project Type ── */}
       <section className="bg-[#0d0d0d] px-6 py-20">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-12 text-center text-3xl font-extrabold text-white">
+          <h2 className="mb-12 text-center text-2xl sm:text-3xl font-extrabold text-white">
             Choose Your Project Type
           </h2>
 
@@ -200,7 +200,7 @@ export default function CreateProjectOverviewPage() {
       {/* ── How It Works ── */}
       <section className="bg-black px-6 py-20">
         <div className="mx-auto max-w-5xl text-center">
-          <h2 className="text-3xl font-extrabold text-white">How It Works</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">How It Works</h2>
           <p className="mt-3 text-sm text-red-500 font-medium tracking-wide">
             From concept to completion in four simple steps
           </p>
@@ -222,7 +222,7 @@ export default function CreateProjectOverviewPage() {
       {/* ── Powerful Features ── */}
       <section className="bg-[#0d0d0d] px-6 py-20">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-12 text-center text-3xl font-extrabold text-white">
+          <h2 className="mb-12 text-center text-2xl sm:text-3xl font-extrabold text-white">
             Powerful Features
           </h2>
 
@@ -246,15 +246,15 @@ export default function CreateProjectOverviewPage() {
       {/* ── Ready CTA ── */}
       <section className="bg-black px-6 py-24 text-center">
         <div className="mx-auto max-w-2xl">
-          <h2 className="text-4xl font-extrabold text-white">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
             Ready to Create Your Project?
           </h2>
-          <p className="mt-5 text-base leading-7 text-zinc-400">
+          <p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-400">
             Join thousands of filmmakers who have successfully funded and produced their projects through FilmConnect.
           </p>
 
           <Link href="/dashboard/filmmaker/create-project" className="mt-10 inline-block">
-            <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-10 py-4 text-sm font-bold tracking-widest text-white shadow-[0_0_24px_rgba(220,38,38,0.4)] transition-all duration-300 hover:brightness-110 hover:scale-105">
+            <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-700 to-red-500 px-6 py-3.5 text-xs sm:px-10 sm:py-4 sm:text-sm font-bold tracking-widest text-white shadow-[0_0_24px_rgba(220,38,38,0.4)] transition-all duration-300 hover:brightness-110 hover:scale-105">
               <Plus size={18} />
               START CREATING NOW
             </button>

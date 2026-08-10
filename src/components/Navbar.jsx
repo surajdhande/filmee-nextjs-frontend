@@ -89,10 +89,10 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="mt-2 flex flex-col gap-3 sm:hidden">
-            <Link href="/login" onClick={() => setMenuOpen(false)}>
+            <Link href="/login" onClick={() => setMenuOpen(false)} className="w-full">
               <AuthButton variant="outline" className="w-full">SIGN IN</AuthButton>
             </Link>
-            <Link href="/signup" onClick={() => setMenuOpen(false)}>
+            <Link href="/signup" onClick={() => setMenuOpen(false)} className="w-full">
               <AuthButton className="w-full">JOIN NOW</AuthButton>
             </Link>
           </div>

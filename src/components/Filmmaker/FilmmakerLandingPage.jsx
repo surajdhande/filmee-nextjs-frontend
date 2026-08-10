@@ -58,7 +58,7 @@ export default function FilmmakerLandingPage() {
 
       {/* Main Container */}
       <main className="relative max-w-7xl mx-auto px-6 md:px-16 pt-32 pb-24 z-30">
-        
+
         {/* Back navigation */}
         <Link
           href="/"
@@ -152,11 +152,10 @@ export default function FilmmakerLandingPage() {
             <div className="absolute top-6 right-6 flex items-center gap-2.5 z-20">
               <button
                 onClick={(e) => toggleSave("featured_success", e)}
-                className={`p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${
-                  savedItems["featured_success"]
-                    ? "bg-red-600 border-red-600 text-white"
-                    : "bg-black/40 border-zinc-800 text-zinc-300 hover:text-white hover:bg-black/60"
-                }`}
+                className={`p-2.5 rounded-full backdrop-blur-md border transition-all duration-300 ${savedItems["featured_success"]
+                  ? "bg-red-600 border-red-600 text-white"
+                  : "bg-black/40 border-zinc-800 text-zinc-300 hover:text-white hover:bg-black/60"
+                  }`}
               >
                 <Bookmark size={15} className={savedItems["featured_success"] ? "fill-white" : ""} />
               </button>
@@ -192,7 +191,7 @@ export default function FilmmakerLandingPage() {
           </h2>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            
+
             {/* Card 1: Project Pitch Builder */}
             <div className="group flex flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600 hover:-translate-y-1">
               <div className="relative overflow-hidden h-56">
@@ -205,7 +204,7 @@ export default function FilmmakerLandingPage() {
                   ★ FEATURED
                 </span>
               </div>
-              
+
               <div className="flex flex-1 flex-col p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="bg-zinc-900 border border-zinc-800 text-zinc-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
@@ -363,7 +362,7 @@ export default function FilmmakerLandingPage() {
           </h2>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            
+
             {/* Card 1: Script Analysis AI */}
             <div className="group flex flex-col bg-zinc-950 rounded-2xl border border-zinc-900 overflow-hidden transition-all duration-300 hover:border-red-600">
               <div className="relative h-40 w-full overflow-hidden">
@@ -379,9 +378,8 @@ export default function FilmmakerLandingPage() {
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <button
                     onClick={(e) => toggleSave("script_ai", e)}
-                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
-                      savedItems["script_ai"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
-                    }`}
+                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${savedItems["script_ai"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
+                      }`}
                   >
                     <Bookmark size={11} className={savedItems["script_ai"] ? "fill-white" : ""} />
                   </button>
@@ -393,7 +391,7 @@ export default function FilmmakerLandingPage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="flex flex-1 flex-col p-5">
                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
                   AI Tools
@@ -425,9 +423,8 @@ export default function FilmmakerLandingPage() {
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <button
                     onClick={(e) => toggleSave("budget_calc", e)}
-                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
-                      savedItems["budget_calc"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
-                    }`}
+                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${savedItems["budget_calc"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
+                      }`}
                   >
                     <Bookmark size={11} className={savedItems["budget_calc"] ? "fill-white" : ""} />
                   </button>
@@ -471,9 +468,8 @@ export default function FilmmakerLandingPage() {
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <button
                     onClick={(e) => toggleSave("prod_calendar", e)}
-                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
-                      savedItems["prod_calendar"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
-                    }`}
+                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${savedItems["prod_calendar"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
+                      }`}
                   >
                     <Bookmark size={11} className={savedItems["prod_calendar"] ? "fill-white" : ""} />
                   </button>
@@ -517,9 +513,8 @@ export default function FilmmakerLandingPage() {
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <button
                     onClick={(e) => toggleSave("legal_temps", e)}
-                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
-                      savedItems["legal_temps"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
-                    }`}
+                    className={`p-1.5 rounded-full backdrop-blur-md transition-all ${savedItems["legal_temps"] ? "bg-red-600 text-white" : "bg-black/55 text-zinc-300 hover:text-white"
+                      }`}
                   >
                     <Bookmark size={11} className={savedItems["legal_temps"] ? "fill-white" : ""} />
                   </button>
@@ -559,7 +554,7 @@ export default function FilmmakerLandingPage() {
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
             Ready to Bring Your Vision to Life?
           </h2>
-          
+
           <p className="text-zinc-400 text-sm md:text-base max-w-2xl mx-auto mb-10 leading-relaxed">
             Join thousands of filmmakers who have successfully funded and produced their projects through our platform.
           </p>

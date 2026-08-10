@@ -241,7 +241,10 @@ export default function InvestorDashboard() {
     );
   }
 
-  const profileName = user?.full_name || user?.name || "Investor";
+  const profileName =
+    (user?.first_name && user?.last_name)
+      ? `${user.first_name} ${user.last_name}`
+      : user?.full_name || user?.name || "Investor";
 
   return (
     <DashboardLayout

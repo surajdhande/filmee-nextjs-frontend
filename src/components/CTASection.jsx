@@ -31,11 +31,11 @@ const CTASection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-black px-6 py-24 sm:py-32">
+    <section ref={sectionRef} className="bg-black px-4 sm:px-6 py-16 sm:py-32">
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
         {/* Heading */}
         <h2
-          className={`text-5xl font-extrabold tracking-tight transition-opacity duration-1000 ease-out sm:text-6xl lg:text-7xl ${
+          className={`text-3xl font-extrabold tracking-tight transition-opacity duration-1000 ease-out sm:text-6xl lg:text-7xl ${
             isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -45,7 +45,7 @@ const CTASection = () => {
 
         {/* Description */}
         <p
-          className={`mt-6 max-w-2xl text-xl leading-8 text-zinc-400 transition-opacity delay-300 duration-1000 ease-out ${
+          className={`mt-6 max-w-2xl text-base sm:text-lg lg:text-xl leading-8 text-zinc-400 transition-opacity delay-300 duration-1000 ease-out ${
             isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
