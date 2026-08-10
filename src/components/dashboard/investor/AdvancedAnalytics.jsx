@@ -3,73 +3,44 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Eye, DollarSign, Users, Film, Radio, TrendingUp,
-  Clock, Filter, Download, ArrowUpRight, ArrowDownRight,
+  ArrowLeft,
+  Eye,
+  DollarSign,
+  Users,
+  Film,
+  Radio,
+  TrendingUp,
+  Clock,
+  Filter,
+  Download,
+  ArrowUpRight,
+  ArrowDownRight,
   Activity,
 } from "lucide-react";
 import {
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ComposedChart,
 } from "recharts";
-import Image from "next/image";
 
 // ─── API ENDPOINT PLACEHOLDERS ───────────────────────────────────────────────
-// Replace BASE_URL with your backend base URL when ready.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-
-// async function fetchAnalyticsSummary() {
-//   // GET /analytics/investor/summary
-//   const res = await fetch(`${BASE_URL}/analytics/investor/summary`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-//   if (!res.ok) throw new Error("Failed to fetch summary");
-//   return res.json();
-// }
-
-// async function fetchPerformanceChart() {
-//   // GET /analytics/investor/performance?range=30d
-//   const res = await fetch(`${BASE_URL}/analytics/investor/performance?range=30d`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-//   if (!res.ok) throw new Error("Failed");
-//   return res.json();
-// }
-
-// async function fetchInvestmentFlow() {
-//   // GET /analytics/investor/investment-flow?range=30d
-//   const res = await fetch(`${BASE_URL}/analytics/investor/investment-flow?range=30d`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-//   if (!res.ok) throw new Error("Failed");
-//   return res.json();
-// }
-
-// async function fetchLiveStreams() {
-//   // GET /analytics/investor/live-streams
-//   // Returns: { viewsPerMinute:[...], investmentFlow:[...], engagementRate:[...], activeUsers:[...] }
-//   const res = await fetch(`${BASE_URL}/analytics/investor/live-streams`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-//   if (!res.ok) throw new Error("Failed");
-//   return res.json();
-// }
-
-// async function fetchActivityFeed() {
-//   // GET /analytics/investor/activity-feed
-//   const res = await fetch(`${BASE_URL}/analytics/investor/activity-feed`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-//   if (!res.ok) throw new Error("Failed");
-//   return res.json();
-// }
 
 // ─── STATIC DATA ─────────────────────────────────────────────────────────────
 const STATIC_SUMMARY = {
-  totalViews:     { value: 24660, delta: "+2.9%", label: "Project page views", positive: true },
+  totalViews:     { value: "24,660", delta: "+2.9%", label: "Project page views", positive: true },
   revenue:        { value: "$89,250", delta: "+4.7%", label: "Total revenue generated", positive: true },
-  activeUsers:    { value: 367, delta: "+7.5%", label: "Currently active users", positive: true },
-  projects:       { value: 28, delta: "+7.1%", label: "Active projects on platform", positive: true },
+  activeUsers:    { value: "367", delta: "+7.5%", label: "Currently active users", positive: true },
+  projects:       { value: "28", delta: "+7.1%", label: "Active projects on platform", positive: true },
   engagementRate: { value: "85%", delta: "+3.7%", label: "User engagement rate", positive: true },
   avgSession:     { value: "8m 24s", delta: "+1.5%", label: "Average user session time", positive: true },
 };
@@ -93,7 +64,6 @@ const STATIC_INVESTMENT_FLOW_DATA = [
   { time: "Now",    value: 26 },
 ];
 
-// Live Engagement — area chart (blue tones matching screenshot)
 const STATIC_ENGAGEMENT_RATE = [
   { time: "5m ago", value: 60 },
   { time: "4m ago", value: 65 },
@@ -103,7 +73,6 @@ const STATIC_ENGAGEMENT_RATE = [
   { time: "Now",    value: 80 },
 ];
 
-// Active Users — bar chart (purple tones matching screenshot)
 const STATIC_ACTIVE_USERS = [
   { time: "6m ago", users: 280 },
   { time: "5m ago", users: 310 },
@@ -122,15 +91,18 @@ const STATIC_ACTIVITY_FEED = [
 const TABS = ["Performance", "Projects", "Audience", "Revenue"];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload }) => {
+const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-[#2A2A2A] bg-[#171717] px-3 py-2 shadow-lg">
-        <p className="text-sm font-semibold text-white">
-          {typeof payload[0].value === "number"
-            ? payload[0].value.toLocaleString()
-            : payload[0].value}
-        </p>
+      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-3 shadow-xl">
+        {label && <p className="text-zinc-400 text-xs mb-1">{label}</p>}
+        {payload.map((entry, index) => (
+          <p key={index} className="text-sm font-bold text-white">
+            {entry.name || "Value"}: <span style={{ color: entry.color || "#E50914" }}>
+              {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
+            </span>
+          </p>
+        ))}
       </div>
     );
   }
@@ -138,39 +110,19 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const LiveBadge = ({ offline = false }) => (
-  <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+  <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
     offline
-      ? "bg-red-500/20 border-red-500/30 text-red-400"
-      : "bg-green-500/10 border-green-500/20 text-green-400"
+      ? "bg-zinc-800 text-zinc-400"
+      : "bg-[#18C964]/10 text-[#18C964]"
   }`}>
-    <span className={`relative flex h-1.5 w-1.5 rounded-full ${offline ? "bg-red-400" : "bg-green-400"}`}>
+    <span className="relative flex h-2 w-2">
       {!offline && (
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#18C964] opacity-75" />
       )}
+      <span className={`relative inline-flex rounded-full h-2 w-2 ${offline ? "bg-zinc-500" : "bg-[#18C964]"}`} />
     </span>
     {offline ? "Offline" : "Live"}
   </div>
-);
-
-const SummaryCard = ({ icon: Icon, label, value, delta, positive, color, sublabel, onClick }) => (
-  <button
-    onClick={onClick}
-    className="text-left bg-[#0E0E0E] border border-[#222] rounded-2xl p-4 hover:border-[#E50914]/30 hover:shadow-[0_4px_20px_rgba(229,9,20,0.08)] transition-all duration-300 w-full"
-  >
-    <div className="flex items-start justify-between mb-3">
-      <div className={`h-9 w-9 flex items-center justify-center rounded-xl ${color}`}>
-        <Icon size={17} />
-      </div>
-      <LiveBadge />
-    </div>
-    <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">{label}</p>
-    <h3 className="text-[22px] font-extrabold text-white mt-1 leading-none">{value}</h3>
-    <div className={`flex items-center gap-1 mt-1.5 text-[11px] font-semibold ${positive ? "text-green-400" : "text-red-400"}`}>
-      {positive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-      {delta}
-    </div>
-    {sublabel && <p className="text-[10px] text-zinc-600 mt-1">{sublabel}</p>}
-  </button>
 );
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
@@ -193,26 +145,11 @@ export default function AdvancedAnalytics() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     setUser(stored ? JSON.parse(stored) : { full_name: "Investor" });
-
-    // ── Uncomment to wire up real backend data ──────────────────────────────
-    // Promise.allSettled([
-    //   fetchAnalyticsSummary().then(setSummary),
-    //   fetchPerformanceChart().then(setPerformanceData),
-    //   fetchInvestmentFlow().then(setInvestmentFlow),
-    //   fetchActivityFeed().then(setActivityFeed),
-    // ]);
   }, []);
 
-  // Live mode polling every 5 s
   useEffect(() => {
     if (liveMode) {
-      liveIntervalRef.current = setInterval(() => {
-        // fetchLiveStreams().then(data => {
-        //   setInvestmentFlow(data.investmentFlow);
-        //   setEngagementRate(data.engagementRate);
-        //   setActiveUsers(data.activeUsers);
-        // });
-      }, 5000);
+      liveIntervalRef.current = setInterval(() => {}, 5000);
     } else {
       clearInterval(liveIntervalRef.current);
     }
@@ -227,297 +164,365 @@ export default function AdvancedAnalytics() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white flex flex-col">
-
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="w-full border-b border-[#262626] bg-[#0E0E0E] shrink-0">
-        <div className="flex items-center justify-between px-6 py-4 gap-2 flex-wrap">
+  // ── HEADER ──────────────────────────────────────────────────────────────────
+  const renderHeader = () => (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+        <button
+          onClick={() => router.push("/dashboard/investor")}
+          className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white hover:text-red-500 transition-colors self-start sm:self-auto"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </button>
+        <div className="h-8 w-px bg-[#2A2A2A] hidden sm:block" />
+        <div>
           <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Advanced Analytics</h1>
+            <LiveBadge offline={!liveMode} />
+          </div>
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400">Real-time insights and performance metrics.</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        <button
+          onClick={() => setLiveMode((v) => !v)}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-colors ${
+            liveMode
+              ? "bg-red-600 text-white hover:bg-red-700 shadow-[0_0_15px_rgba(229,9,20,0.4)]"
+              : "border border-[#2A2A2A] text-white hover:bg-[#1E1E1E]"
+          }`}
+        >
+          <Radio size={16} />
+          <span>Live Mode</span>
+        </button>
+
+        <select className="flex-1 sm:flex-none rounded-full border border-[#2A2A2A] bg-[#141414] px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white outline-none cursor-pointer hover:bg-[#1E1E1E] transition-colors">
+          <option className="bg-[#141414] text-white">Last 30 days</option>
+          <option className="bg-[#141414] text-white">Last 7 days</option>
+          <option className="bg-[#141414] text-white">Last 90 days</option>
+        </select>
+
+        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full border border-[#2A2A2A] px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors">
+          <Filter size={16} />
+          <span>Filter</span>
+        </button>
+
+        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors">
+          <Download size={16} />
+          <span>Export</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── SUMMARY CARDS ───────────────────────────────────────────────────────────
+  const renderSummaryCards = () => {
+    const cards = [
+      { key: "totalViews", icon: Eye, label: "Total Views", data: summary.totalViews, color: "text-blue-500", bg: "bg-blue-500/10", tab: "Performance" },
+      { key: "revenue", icon: DollarSign, label: "Revenue", data: summary.revenue, color: "text-[#18C964]", bg: "bg-[#18C964]/10", tab: "Revenue" },
+      { key: "activeUsers", icon: Users, label: "Active Users", data: summary.activeUsers, color: "text-purple-500", bg: "bg-purple-500/10", tab: "Audience" },
+      { key: "projects", icon: Film, label: "Projects", data: summary.projects, color: "text-red-500", bg: "bg-red-500/10", tab: "Projects" },
+      { key: "engagementRate", icon: TrendingUp, label: "Engagement Rate", data: summary.engagementRate, color: "text-[#F5A524]", bg: "bg-[#F5A524]/10", tab: "Audience" },
+      { key: "avgSession", icon: Clock, label: "Avg Session", data: summary.avgSession, color: "text-pink-500", bg: "bg-pink-500/10", tab: "Audience" },
+    ];
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        {cards.map((c) => {
+          const Icon = c.icon;
+          return (
             <button
-              onClick={() => router.back()}
-              className="text-zinc-400 hover:text-white transition"
-              aria-label="Go back"
+              key={c.key}
+              onClick={() => setActiveTab(c.tab)}
+              className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-5 flex flex-col justify-between hover:border-red-600/50 transition-all text-left w-full cursor-pointer group"
             >
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <Image src="/logo.png" alt="Filmee" width={32} height={32} className="rounded-lg object-contain" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-[18px] font-bold text-white tracking-tight">Advanced Analytics</h1>
-                <LiveBadge offline={!liveMode} />
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{c.label}</p>
+                <div className={`p-2 rounded-full ${c.bg}`}>
+                  <Icon size={16} className={c.color} />
+                </div>
               </div>
-              <p className="text-xs text-zinc-500 mt-0.5">Real-time insights and performance metrics</p>
+              <div>
+                <p className="text-2xl font-bold text-white mb-1.5 tracking-tight group-hover:text-red-500 transition-colors">
+                  {c.data.value}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  {c.data.positive ? (
+                    <TrendingUp size={14} className="text-[#18C964]" />
+                  ) : (
+                    <ArrowDownRight size={14} className="text-red-500" />
+                  )}
+                  <span className={`text-xs font-bold tracking-wider ${c.data.positive ? "text-[#18C964]" : "text-red-500"}`}>
+                    {c.data.delta}
+                  </span>
+                  <span className="text-xs text-zinc-500 ml-1">vs last month</span>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ── LIVE DATA STREAMS ───────────────────────────────────────────────────────
+  const renderLiveDataStreams = () => (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Activity size={18} className="text-red-500" />
+        <h3 className="text-lg font-bold text-white tracking-tight">Live Data Streams</h3>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#18C964] bg-[#18C964]/10">
+          Real-time
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* Views per Minute */}
+        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-white">Live Views</h3>
+              <p className="text-xs text-zinc-400 mt-1">Views per Minute</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <LiveBadge offline={!liveMode} />
+              <Eye size={16} className="text-zinc-500" />
             </div>
           </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => setLiveMode((v) => !v)}
-              className={`flex items-center gap-2 rounded-full px-5 py-2 text-[12px] font-bold uppercase tracking-wider transition-all duration-300 ${
-                liveMode
-                  ? "bg-[#E50914] text-white shadow-[0_0_18px_rgba(229,9,20,0.4)]"
-                  : "border border-[#E50914]/50 text-[#E50914] hover:bg-[#E50914]/10"
-              }`}
-            >
-              <Radio size={13} /> Live Mode
-            </button>
-            <select className="bg-[#1A1A1A] border border-[#333] text-zinc-300 text-xs rounded-full px-3 py-2 outline-none cursor-pointer">
-              <option>Last 30 days</option>
-              <option>Last 7 days</option>
-              <option>Last 90 days</option>
-            </select>
-            <button className="flex items-center gap-1.5 border border-[#333] text-zinc-400 hover:text-white rounded-full px-4 py-2 text-xs transition">
-              <Filter size={13} /> Filter
-            </button>
-            <button className="flex items-center gap-1.5 border border-[#333] text-zinc-400 hover:text-white rounded-full px-4 py-2 text-xs transition">
-              <Download size={13} /> Export
-            </button>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={investmentFlow}>
+                <defs>
+                  <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#E50914" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="value" name="Views" stroke="#E50914" strokeWidth={3} fill="url(#viewsGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
-      </header>
 
-      {/* ── PAGE BODY ──────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-8">
+        {/* Investment Flow */}
+        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-white">Live Investments</h3>
+              <p className="text-xs text-zinc-400 mt-1">Investment Flow</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <LiveBadge offline={!liveMode} />
+              <DollarSign size={16} className="text-zinc-500" />
+            </div>
+          </div>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={investmentFlow}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line type="monotone" dataKey="value" name="Amount" stroke="#18C964" strokeWidth={3} dot={{ fill: '#18C964', r: 4 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
-        {/* 1. Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <SummaryCard icon={Eye}        label="Total Views"     value={summary.totalViews.value}     delta={summary.totalViews.delta}     positive sublabel={summary.totalViews.label}     color="bg-green-500/10 text-green-500"    onClick={() => setActiveTab("Performance")} />
-          <SummaryCard icon={DollarSign} label="Revenue"         value={summary.revenue.value}         delta={summary.revenue.delta}         positive sublabel={summary.revenue.label}         color="bg-emerald-500/10 text-emerald-400" onClick={() => setActiveTab("Revenue")} />
-          <SummaryCard icon={Users}      label="Active Users"    value={summary.activeUsers.value}    delta={summary.activeUsers.delta}    positive sublabel={summary.activeUsers.label}    color="bg-blue-500/10 text-blue-400"      onClick={() => setActiveTab("Audience")} />
-          <SummaryCard icon={Film}       label="Projects"        value={summary.projects.value}        delta={summary.projects.delta}        positive sublabel={summary.projects.label}        color="bg-purple-500/10 text-purple-400"  onClick={() => setActiveTab("Projects")} />
-          <SummaryCard icon={TrendingUp} label="Engagement Rate" value={summary.engagementRate.value} delta={summary.engagementRate.delta} positive sublabel={summary.engagementRate.label} color="bg-yellow-500/10 text-yellow-500"  onClick={() => setActiveTab("Audience")} />
-          <SummaryCard icon={Clock}      label="Avg Session"     value={summary.avgSession.value}     delta={summary.avgSession.delta}     positive sublabel={summary.avgSession.label}     color="bg-pink-500/10 text-pink-400"      onClick={() => setActiveTab("Audience")} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Live Engagement Rate */}
+        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-white">Live Engagement</h3>
+              <p className="text-xs text-zinc-400 mt-1">Engagement Rate (%)</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <LiveBadge offline={!liveMode} />
+              <TrendingUp size={16} className="text-zinc-500" />
+            </div>
+          </div>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={engagementRate}>
+                <defs>
+                  <linearGradient id="engagGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="value" name="Engagement" stroke="#3B82F6" strokeWidth={3} fill="url(#engagGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* 2. Live Data Streams — row 1: Views per Minute + Investment Flow */}
+        {/* Active Users */}
+        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-white">Live Users</h3>
+              <p className="text-xs text-zinc-400 mt-1">Active Users</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <LiveBadge offline={!liveMode} />
+              <Users size={16} className="text-zinc-500" />
+            </div>
+          </div>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={activeUsers}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="users" name="Users" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={24} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── TABBED CHARTS ───────────────────────────────────────────────────────────
+  const renderTabbedCharts = () => (
+    <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6 mb-6">
+      <div className="mb-6 rounded-full border border-[#2A2A2A] bg-[#1A1A1A] p-1 flex overflow-x-auto whitespace-nowrap scrollbar-none w-fit">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
+              activeTab === tab
+                ? "bg-red-600 text-white shadow-[0_0_12px_rgba(229,9,20,0.4)]"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Chart */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <Activity size={15} className="text-[#E50914]" />
-            <h3 className="text-[16px] font-bold text-white">Live Data Streams</h3>
-            <span className="rounded-full bg-green-500/10 border border-green-500/20 px-2 py-0.5 text-[9px] font-bold text-green-400 uppercase tracking-wider">
-              Real-time
-            </span>
+            <Activity size={16} className="text-red-500" />
+            <h3 className="text-lg font-bold text-white">
+              {activeTab === "Performance" && "Multi Metric Performance"}
+              {activeTab === "Projects" && "Project Activity"}
+              {activeTab === "Audience" && "Engagement Rate"}
+              {activeTab === "Revenue" && "Revenue Trend"}
+            </h3>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-            {/* Views per Minute */}
-            <div className="bg-[#121212] border border-[#222] rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-white">Live Views</h4>
-                  <p className="text-xs text-zinc-500 mt-0.5">Views per Minute</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <LiveBadge offline={!liveMode} />
-                  <Eye size={15} className="text-zinc-500" />
-                </div>
-              </div>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={investmentFlow}>
-                    <defs>
-                      <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#E50914" stopOpacity={0.5} />
-                        <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="value" stroke="#E50914" strokeWidth={2} fill="url(#viewsGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Investment Flow */}
-            <div className="bg-[#121212] border border-[#222] rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-white">Live Investments</h4>
-                  <p className="text-xs text-zinc-500 mt-0.5">Investment Flow</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <LiveBadge offline={!liveMode} />
-                  <DollarSign size={15} className="text-zinc-500" />
-                </div>
-              </div>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={investmentFlow}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" vertical={false} />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line type="monotone" dataKey="value" stroke="#18C964" strokeWidth={2} dot={{ fill: "#18C964", r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Live Data Streams — row 2: Live Engagement + Active Users */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Live Engagement Rate */}
-            <div className="bg-[#121212] border border-[#222] rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-white">Live Engagement</h4>
-                  <p className="text-xs text-zinc-500 mt-0.5">Engagement Rate</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <LiveBadge offline={!liveMode} />
-                  <TrendingUp size={15} className="text-zinc-500" />
-                </div>
-              </div>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={engagementRate}>
-                    <defs>
-                      <linearGradient id="engagGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#3B82F6" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} fill="url(#engagGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Active Users */}
-            <div className="bg-[#121212] border border-[#222] rounded-3xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-white">Live Users</h4>
-                  <p className="text-xs text-zinc-500 mt-0.5">Active Users</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <LiveBadge offline={!liveMode} />
-                  <Users size={15} className="text-zinc-500" />
-                </div>
-              </div>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={activeUsers}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" vertical={false} />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="users" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={24} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="h-[260px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={performanceData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="month" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="left" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="right" orientation="right" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar yAxisId="left" dataKey="views" name="Views" fill="#E50914" radius={[6, 6, 0, 0]} barSize={32} />
+                <Line yAxisId="right" dataKey="engagement" name="Engagement" type="monotone" stroke="#3B82F6" strokeWidth={3} dot={{ fill: '#3B82F6', r: 4 }} />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* 3. Tabbed Charts */}
-        <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 bg-[#1A1A1A] rounded-full p-1 w-fit border border-[#2a2a2a]">
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-300 ${
-                  activeTab === tab
-                    ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.3)]"
-                    : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left — Multi Metric */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Activity size={13} className="text-[#E50914]" />
-                <h4 className="text-[14px] font-bold text-white">
-                  {activeTab === "Performance" && "Multi Metric Performance"}
-                  {activeTab === "Projects"    && "Project Activity"}
-                  {activeTab === "Audience"    && "Engagement Rate"}
-                  {activeTab === "Revenue"     && "Revenue Trend"}
-                </h4>
-              </div>
-              <div className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" vertical={false} />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 11 }} />
-                    <YAxis yAxisId="left"  axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar  yAxisId="left"  dataKey="views"      fill="#E50914" radius={[4,4,0,0]} barSize={36} />
-                    <Line yAxisId="right" dataKey="engagement" type="monotone" stroke="#ffffff" strokeWidth={2} dot={{ fill: "#fff", r: 3 }} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Right — Investment Flow Analysis */}
-            <div>
-              <h4 className="text-[14px] font-bold text-white mb-4">
-                {activeTab === "Performance" && "Investment Flow Analysis"}
-                {activeTab === "Projects"    && "Projects by Stage"}
-                {activeTab === "Audience"    && "Active Users"}
-                {activeTab === "Revenue"     && "Revenue Distribution"}
-              </h4>
-              <div className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={[
-                    { time: "Jan", value: 8  }, { time: "Feb", value: 12 },
-                    { time: "Mar", value: 16 }, { time: "Apr", value: 20 },
-                    { time: "May", value: 22 }, { time: "Jun", value: 26 },
-                    { time: "Jul", value: 32 },
-                  ]}>
-                    <defs>
-                      <linearGradient id="flowGrad2" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#E50914" stopOpacity={0.6} />
-                        <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" vertical={false} />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 11 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#555", fontSize: 10 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="value" stroke="#E50914" strokeWidth={2.5} fill="url(#flowGrad2)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+        {/* Right Chart */}
+        <div>
+          <h3 className="text-lg font-bold text-white mb-4">
+            {activeTab === "Performance" && "Investment Flow Analysis"}
+            {activeTab === "Projects" && "Projects by Stage"}
+            {activeTab === "Audience" && "Active Users"}
+            {activeTab === "Revenue" && "Revenue Distribution"}
+          </h3>
+          <div className="h-[260px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={[
+                { time: "Jan", value: 8 }, { time: "Feb", value: 12 },
+                { time: "Mar", value: 16 }, { time: "Apr", value: 20 },
+                { time: "May", value: 22 }, { time: "Jun", value: 26 },
+                { time: "Jul", value: 32 },
+              ]}>
+                <defs>
+                  <linearGradient id="flowGrad2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#E50914" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="value" name="Flow" stroke="#E50914" strokeWidth={3} fill="url(#flowGrad2)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
+      </div>
+    </div>
+  );
 
-        {/* 4. Live Activity Feed */}
-        <div className="bg-[#121212] border border-[#222] rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Activity size={14} className="text-[#E50914]" />
-            <h3 className="text-[15px] font-bold text-white">Live Activity Feed</h3>
-            <span className="rounded-full bg-[#E50914] px-2.5 py-0.5 text-[10px] font-bold text-white">
-              {activityFeed.length} new
-            </span>
-          </div>
-          <div className="space-y-1">
-            {activityFeed.map((item) => (
-              <div key={item.id} className="flex items-start gap-3 py-3 border-b border-[#1e1e1e] last:border-0">
-                <span className={`mt-1.5 flex h-2 w-2 shrink-0 rounded-full ${
-                  item.type === "investment" ? "bg-green-400" : "bg-blue-400"
-                }`} />
-                <div>
-                  <p className="text-sm text-zinc-300">{item.message}</p>
-                  <p className="text-[10px] text-zinc-600 mt-0.5">{item.time}</p>
+  // ── LIVE ACTIVITY FEED ──────────────────────────────────────────────────────
+  const renderActivityFeed = () => (
+    <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Activity size={18} className="text-red-500" />
+          <h3 className="text-lg font-bold text-white">Live Activity Feed</h3>
+        </div>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-red-500 bg-red-500/10">
+          {activityFeed.length} new
+        </span>
+      </div>
+      <div className="relative pl-3">
+        <div className="absolute left-6 top-4 bottom-4 w-px bg-[#2A2A2A]" />
+        <div className="flex flex-col gap-6">
+          {activityFeed.map((item) => (
+            <div key={item.id} className="relative flex items-start gap-6">
+              <div className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                item.type === "investment" ? "bg-[#18C964]/10" : "bg-blue-500/10"
+              }`}>
+                {item.type === "investment" ? (
+                  <DollarSign size={18} className="text-[#18C964]" />
+                ) : (
+                  <Activity size={18} className="text-blue-500" />
+                )}
+              </div>
+              <div className="flex-1 pt-1">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-sm font-bold text-white">{item.message}</h4>
+                  <span className="text-xs text-zinc-500">{item.time}</span>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
+    </div>
+  );
 
-      </div>{/* end page body */}
-    </div> /* end root */
+  return (
+    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
+      {renderHeader()}
+      {renderSummaryCards()}
+      {renderLiveDataStreams()}
+      {renderTabbedCharts()}
+      {renderActivityFeed()}
+    </div>
   );
 }
