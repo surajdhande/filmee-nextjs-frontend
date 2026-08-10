@@ -98,6 +98,8 @@ export default function CreateProjectLayout({
 
     if (!result.isValid) {
       setErrors(result.errors);
+      const errorMsg = Object.values(result.errors).join("\n• ");
+      alert(`Please fill in all required fields:\n• ${errorMsg}`);
       return;
     }
 
@@ -123,10 +125,9 @@ export default function CreateProjectLayout({
       expected_roi_percentage: projectData.expected_roi_percentage,
       distribution_strategy: projectData.distribution_strategy,
 
-      open_talent_roles: [
-        ...projectData.castRequirements,
-        ...projectData.crewRequirements,
-      ],
+      open_talent_roles: (projectData.castRequirements?.length || projectData.crewRequirements?.length)
+        ? [...(projectData.castRequirements || []), ...(projectData.crewRequirements || [])]
+        : ["General Role"],
     };
 
     const response = await createProject(payload);

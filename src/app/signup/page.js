@@ -5,7 +5,6 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signupUser } from "@/services/authService";
-import Toast from "@/components/ui/Toast";
 import {
   User,
   Mail,
@@ -15,108 +14,103 @@ import {
 } from "lucide-react";
 
 const SignupPageInner = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const selectedRole = useMemo(
-    () => searchParams.get("role"),
-    [searchParams]
-  );
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-    password: "",
-    confirm_password: "",
-    user_role: "",
-  });
+const router = useRouter();
+const searchParams = useSearchParams();
+const selectedRole = useMemo(
+  () => searchParams.get("role"),
+  [searchParams]
+);
+const [formData, setFormData] = useState({
+first_name: "",
+last_name: "",
+email: "",
+phone_number: "",
+password: "",
+confirm_password: "",
+user_role: "",
+});
 
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null); // { message, type }
+const [loading, setLoading] = useState(false);
+useEffect(() => {
+  if (!selectedRole) return;
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-  };
-  useEffect(() => {
-    if (!selectedRole) return;
+  const roleUpper = selectedRole.toUpperCase();
+  const allowedRoles = new Set([
+    "FILMMAKER",
+    "INVESTOR",
+    "TALENT",
+  ]);
 
-    const allowedRoles = new Set([
-      "FILMMAKER",
-      "INVESTOR",
-      "TALENT",
-    ]);
+  if (!allowedRoles.has(roleUpper)) return;
 
-    if (!allowedRoles.has(selectedRole)) return;
+  setFormData((prev) => ({
+    ...prev,
+    user_role: roleUpper,
+  }));
 
-    setFormData((prev) => ({
-      ...prev,
-      user_role: selectedRole,
-    }));
+}, [selectedRole]);
+const handleChange = (e) => {
+setFormData({
+...formData,
+[e.target.name]: e.target.value,
+});
+};
 
-  }, [selectedRole]);
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (formData.password !== formData.confirm_password) {
+    alert("Passwords do not match");
+    return;
+  }
 
-    if (formData.password !== formData.confirm_password) {
-      alert("Passwords do not match");
-      return;
+  setLoading(true);
+
+  try {
+    const payload = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      password: formData.password,
+      user_role: formData.user_role,
+    };
+
+    const response = await signupUser(payload);
+
+    alert(response.message);
+
+    if (formData.user_role === "TALENT") {
+      router.push("/talent/dashboard");
+    } else {
+      router.push("/login");
     }
 
-    setLoading(true);
+  } catch (error) {
+    console.error(error);
 
-    try {
-      const payload = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone_number: formData.phone_number,
-        password: formData.password,
-        user_role: formData.user_role,
-      };
+    alert(
+      error.response?.data?.message ||
+      "Signup failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const response = await signupUser(payload);
+return ( <div
+  className="relative flex min-h-screen items-center justify-center overflow-hidden px-4"
+  style={{
+    backgroundImage:
+      "url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Dark Overlay */}
+  <div className="absolute inset-0 bg-black/80" />
 
-      showToast(response.message || "Account created successfully!", "success");
-
-      const redirectParam = searchParams.get("redirect");
-      if (formData.user_role === "TALENT" && !redirectParam) {
-        router.push("/talent/dashboard");
-      } else {
-        router.push(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login");
-      }
-
-    } catch (error) {
-      console.error(error);
-
-      showToast(
-        error.response?.data?.message || "Signup failed",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (<div
-    className="relative flex min-h-screen items-center justify-center overflow-hidden px-4"
-    style={{
-      backgroundImage:
-        "url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
-  >
-    {/* Dark Overlay */}
-    <div className="absolute inset-0 bg-black/80" />
-
-    <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+  <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
       {/* Brand */}
       <div className="mb-6 sm:mb-10 text-center">
@@ -130,11 +124,11 @@ const SignupPageInner = () => {
           platform to bring creative ideas to life.
         </p>
 
-      </div>
+  </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
           <input
             type="text"
@@ -156,7 +150,7 @@ const SignupPageInner = () => {
             className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
           />
 
-        </div>
+  </div>
 
         <input
           type="email"
@@ -189,18 +183,18 @@ const SignupPageInner = () => {
             Choose your role
           </option>
 
-          <option value="FILMMAKER">
-            Filmmaker
-          </option>
+      <option value="FILMMAKER">
+        Filmmaker
+      </option>
 
-          <option value="INVESTOR">
-            Investor
-          </option>
+      <option value="INVESTOR">
+        Investor
+      </option>
 
-          <option value="TALENT">
-            Talent
-          </option>
-        </select>
+      <option value="TALENT">
+        Talent
+      </option>
+    </select>
 
         <input
           type="password"
@@ -222,48 +216,35 @@ const SignupPageInner = () => {
           className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition-all duration-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
         />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(239,68,68,0.35)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"      >
-          {loading ? "Creating Account..." : "Create Account"}
-        </button>
+      <button
+        type="submit"
+        disabled={loading}
+      className="w-full rounded-xl bg-gradient-to-r from-red-700 via-red-600 to-red-500 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(239,68,68,0.35)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"      >
+        {loading ? "Creating Account..." : "Create Account"}
+      </button>
 
-        <div className="text-center text-sm text-zinc-400">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-red-500 hover:text-red-400"
-          >
-            Sign In
-          </Link>
-        </div>
+      <div className="text-center text-sm text-zinc-400">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-medium text-red-500 hover:text-red-400"
+        >
+          Sign In
+        </Link>
+      </div>
 
-      </form>
-
-    </div>
-
-    {/* Custom Toast */}
-    {toast && (
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast(null)}
-      />
-    )}
+    </form>
 
   </div>
 
-  );
+</div>
+
+);
 };
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        Loading...
-      </div>
-    }>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black text-white">Loading...</div>}>
       <SignupPageInner />
     </Suspense>
   );

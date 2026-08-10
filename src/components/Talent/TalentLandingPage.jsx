@@ -34,22 +34,13 @@ export default function TalentLandingPage() {
     try {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (token && user?.role) {
-        const role = user.role;
-        if (role === 'FILMMAKER') {
-          router.push('/dashboard/filmmaker');
-        } else if (role === 'INVESTOR') {
-          router.push('/dashboard/investor');
-        } else if (role === 'TALENT') {
-          router.push('/dashboard/talent');
-        } else {
-          router.push('/');
-        }
+      if (token && user?.role === 'TALENT') {
+        router.push('/talent/dashboard');
       } else {
-        router.push('/login');
+        router.push('/signup?role=TALENT');
       }
     } catch {
-      router.push('/login');
+      router.push('/signup?role=TALENT');
     }
   };
 
@@ -90,18 +81,14 @@ export default function TalentLandingPage() {
 
         {/* Right Actions */}
         <div className="flex items-center space-x-5">
-          <Link href="/search">
-            <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all">
-              <Search size={20} />
-            </button>
-          </Link>
+          <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all">
+            <Search size={20} />
+          </button>
           
-          <Link href="/notifications">
-            <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all relative">
-              <Bell size={20} />
-              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-red-500" />
-            </button>
-          </Link>
+          <button className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-900/50 transition-all relative">
+            <Bell size={20} />
+            <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-red-500" />
+          </button>
 
           <button className="hidden sm:inline-block border border-red-950/80 hover:border-red-655 bg-transparent text-red-500 text-[11px] font-bold px-6 py-2.5 rounded-full uppercase tracking-wider transition-all duration-300 hover:bg-red-950/10">
             Sign In
@@ -166,7 +153,7 @@ export default function TalentLandingPage() {
             {/* Hero CTAs */}
             <div className="flex flex-wrap gap-4 mt-8">
               <button 
-                onClick={() => router.push('/signup')}
+                onClick={() => setShowDashboard(true)}
                 className="bg-gradient-to-r from-red-650 to-rose-750 hover:from-red-550 hover:to-rose-650 text-white px-8 py-3.5 rounded-full text-xs font-black tracking-wider flex items-center gap-2 transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:shadow-[0_0_30px_rgba(220,38,38,0.7)] hover:scale-[1.02]"
               >
                 <User size={14} />

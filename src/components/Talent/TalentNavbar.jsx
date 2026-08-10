@@ -40,7 +40,8 @@ export default function TalentNavbar({ onLogout, onSubscriptionClick, onSettings
           <Settings size={13} className="text-red-500" />
           <span className="hidden sm:inline">SETTINGS</span>
         </button>
-        {/* LOGOUT */}
+
+        {/* LOGOUT - hide text on small screens */}
         <button
           onClick={onLogout}
           className="flex items-center gap-1.5 sm:gap-2 text-sm font-black text-white hover:text-red-400 transition-colors ml-1 sm:ml-2"

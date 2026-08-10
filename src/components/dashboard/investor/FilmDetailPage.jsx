@@ -275,7 +275,7 @@ function MediaTab({ film }) {
 }
 
 // ── Apply to Invest Modal ─────────────────────────────────────────────────────
-function ApplyToInvestModal({ film, onClose }) {
+function ApplyToInvestModal({ film, onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -293,6 +293,12 @@ function ApplyToInvestModal({ film, onClose }) {
     try {
       await createInvestment(film.id, parseFloat(amount));
       setSubmitted(true);
+      // Call success callback after short delay to show success message
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess();
+        }
+      }, 1500);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -310,181 +316,174 @@ function ApplyToInvestModal({ film, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 "
       onClick={handleBackdrop}
     >
-      {/* Modal shell — fixed height, scroll inside */}
-      <div className="relative w-full max-w-[480px] bg-[#111] border border-[#2a2a2a] rounded-3xl shadow-2xl animate-fadeIn flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-[480px] max-h-[700px] bg-[#111] border border-[#2a2a2a] rounded-3xl p-7 shadow-2xl animate-fadeIn">
 
-        {/* ── Sticky close button ── */}
+        {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 text-zinc-500 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
         >
           <X size={18} />
         </button>
 
-        {/* ── Scrollable body ── */}
-        <div className="overflow-y-auto flex-1 p-7 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-700">
-          {submitted ? (
-            /* ── Success state ── */
-            <div className="flex flex-col items-center text-center py-6 gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#E50914]/10 flex items-center justify-center">
-                <ShieldCheck size={28} className="text-[#E50914]" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Application Submitted!</h2>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Your investment application for <span className="text-white font-semibold">"{film.title}"</span> has been
-                sent. The filmmaker will review it and get back to you soon.
-              </p>
-              <button
-                onClick={onClose}
-                className="mt-2 w-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-2xl hover:brightness-110 transition-all duration-200"
-              >
-                Done
-              </button>
+        {submitted ? (
+          /* ── Success state ── */
+          <div className="flex flex-col items-center text-center py-6 gap-4">
+            <div className="w-14 h-14 rounded-full bg-[#E50914]/10 flex items-center justify-center">
+              <ShieldCheck size={28} className="text-[#E50914]" />
             </div>
-          ) : (
-            <>
-              {/* Header */}
-              <h2 className="text-xl font-bold text-white mb-1 pr-6">Apply to Invest</h2>
-              <p className="text-zinc-400 text-sm mb-5">
-                Submit your investment application for{" "}
-                <span className="text-white font-semibold">"{film.title}"</span>
-              </p>
+            <h2 className="text-xl font-bold text-white">Application Submitted!</h2>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              Your investment application for <span className="text-white font-semibold">"{film.title}"</span> has been
+              sent. The filmmaker will review it and get back to you soon.
+            </p>
+            <button
+              onClick={() => {
+                if (onSuccess) {
+                  onSuccess();
+                } else {
+                  onClose();
+                }
+              }}
+              className="mt-2 w-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-2xl hover:brightness-110 transition-all duration-200"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Header */}
+            <h2 className="text-xl font-bold text-white mb-1">Apply to Invest</h2>
+            <p className="text-zinc-400 text-sm mb-5">
+              Submit your investment application for{" "}
+              <span className="text-white font-semibold">"{film.title}"</span>
+            </p>
 
-              {/* Project summary */}
-              <div className="bg-[#1A1A1A] border border-[#2a2a2a] rounded-2xl p-4 mb-5 space-y-2">
-                {/* Badges */}
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="bg-[#222] text-white text-[11px] font-bold px-3 py-1 rounded-full">{film.genre}</span>
-                  <span className="bg-[#E50914] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase">
-                    {film.status}
-                  </span>
+            {/* Project summary */}
+            <div className="bg-[#1A1A1A] border border-[#2a2a2a] rounded-2xl p-4 mb-5 space-y-2">
+              {/* Badges */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-[#222] text-white text-[11px] font-bold px-3 py-1 rounded-full">{film.genre}</span>
+                <span className="bg-[#E50914] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase">
+                  {film.status}
+                </span>
+              </div>
+
+              {[
+                { label: "Total Budget:", value: fmt(film.goal), color: "text-white" },
+                { label: "Raised:", value: fmt(film.raised), color: "text-white" },
+                { label: "Remaining:", value: fmt(film.remaining), color: "text-[#E50914]" },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="flex justify-between text-sm">
+                  <span className="text-zinc-400">{label}</span>
+                  <span className={`font-semibold ${color}`}>{value}</span>
                 </div>
+              ))}
 
-                {[
-                  { label: "Total Budget:", value: fmt(film.goal), color: "text-white" },
-                  { label: "Raised:", value: fmt(film.raised), color: "text-white" },
-                  { label: "Remaining:", value: fmt(film.remaining), color: "text-[#E50914]" },
-                ].map(({ label, value, color }) => (
-                  <div key={label} className="flex justify-between text-sm">
-                    <span className="text-zinc-400">{label}</span>
-                    <span className={`font-semibold ${color}`}>{value}</span>
-                  </div>
-                ))}
+              {/* Progress bar */}
+              <div>
+                <div className="flex justify-between text-xs text-zinc-500 mb-1 mt-1">
+                  <span>Funding Progress</span>
+                  <span>{film.fundingProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#E50914] to-[#FF4444] rounded-full"
+                    style={{ width: `${film.fundingProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
 
-                {/* Progress bar */}
-                <div>
-                  <div className="flex justify-between text-xs text-zinc-500 mb-1 mt-1">
-                    <span>Funding Progress</span>
-                    <span>{film.fundingProgress}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#E50914] to-[#FF4444] rounded-full"
-                      style={{ width: `${film.fundingProgress}%` }}
-                    />
-                  </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Investment Amount */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-bold text-white mb-2">
+                  <DollarSign size={14} className="text-[#E50914]" />
+                  Investment Amount
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={maxAmount}
+                  placeholder="50,000"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className="w-full bg-[#0D0D0D] border border-[#E50914]/60 focus:border-[#E50914] outline-none rounded-xl px-4 py-3 text-white text-base placeholder-zinc-600 transition-colors"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Maximum: {fmt(maxAmount)}</p>
+              </div>
+
+              {/* Interest message */}
+              <div>
+                <label className="block text-sm font-bold text-white mb-2">
+                  Why are you interested in this project?
+                </label>
+                <textarea
+                  rows={4}
+                  maxLength={charLimit}
+                  placeholder="Tell the filmmaker why you want to invest in their project..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  className="w-full bg-[#0D0D0D] border border-[#2a2a2a] focus:border-[#E50914]/60 outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 resize-none transition-colors"
+                />
+                <div className="flex justify-between text-xs text-zinc-500 mt-1">
+                  <span>Be specific about your investment goals and experience</span>
+                  <span>{message.length}/{charLimit}</span>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Investment Amount */}
+              {/* Escrow notice */}
+              <div className="flex items-start gap-3 bg-[#1A0A0A] border border-[#E50914]/25 rounded-2xl p-4">
+                <ShieldCheck size={18} className="text-[#E50914] shrink-0 mt-0.5" />
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm font-bold text-white mb-2">
-                    <DollarSign size={14} className="text-[#E50914]" />
-                    Investment Amount
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={maxAmount}
-                    placeholder="50,000"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                    className="w-full bg-[#0D0D0D] border border-[#E50914]/60 focus:border-[#E50914] outline-none rounded-xl px-4 py-3 text-white text-base placeholder-zinc-600 transition-colors"
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">Maximum: {fmt(maxAmount)}</p>
+                  <p className="text-sm font-bold text-white mb-1">Protected by Escrow</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    After filmmaker approval, you'll make a secure escrow payment. Funds are only released when you
+                    approve completed project milestones.
+                  </p>
                 </div>
+              </div>
 
-                {/* Interest message */}
-                <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    Why are you interested in this project?
-                  </label>
-                  <textarea
-                    rows={4}
-                    maxLength={charLimit}
-                    placeholder="Tell the filmmaker why you want to invest in their project..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    required
-                    className="w-full bg-[#0D0D0D] border border-[#2a2a2a] focus:border-[#E50914]/60 outline-none rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 resize-none transition-colors"
-                  />
-                  <div className="flex justify-between text-xs text-zinc-500 mt-1">
-                    <span>Be specific about your investment goals and experience</span>
-                    <span>{message.length}/{charLimit}</span>
-                  </div>
-                </div>
+              {/* Invest error */}
+              {investError && (
+                <p className="text-red-400 text-xs text-center -mt-2">{investError}</p>
+              )}
 
-                {/* Escrow notice */}
-                <div className="flex items-start gap-3 bg-[#1A0A0A] border border-[#E50914]/25 rounded-2xl p-4">
-                  <ShieldCheck size={18} className="text-[#E50914] shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-white mb-1">Protected by Escrow</p>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      After filmmaker approval, you'll make a secure escrow payment. Funds are only released when you
-                      approve completed project milestones.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Invest error */}
-                {investError && (
-                  <p className="text-red-400 text-xs text-center -mt-2">{investError}</p>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-3 pt-1 pb-2">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="flex-1 border border-red-700 text-[#E50914] font-bold uppercase tracking-wider text-sm py-3 rounded-full hover:bg-zinc-800 transition-all duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={investing}
-                    className="flex-1 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {investing ? "Submitting…" : "Submit Application"}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
-        </div>
+              {/* Actions */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 border border-red-700 text-[#E50914] font-bold uppercase tracking-wider text-sm py-3 rounded-full hover:bg-zinc-800 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={investing}
+                  className="flex-1 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {investing ? "Submitting…" : "Submit Application"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
-function InvestmentPanel({ film }) {
+function InvestmentPanel({ film, hasApplied, onApplicationSubmitted }) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (searchParams.get("apply") === "true") {
-        setModalOpen(true);
-      }
-    }
-  }, []);
 
   function handleContactFilmaker() {
     const params = new URLSearchParams({
@@ -494,6 +493,17 @@ function InvestmentPanel({ film }) {
       projectTitle: film.title ?? "",
     });
     router.push(`/dashboard/investor/messages?${params.toString()}`);
+  }
+
+  function handleModalClose() {
+    setModalOpen(false);
+  }
+
+  function handleInvestmentSuccess() {
+    setModalOpen(false);
+    if (onApplicationSubmitted) {
+      onApplicationSubmitted();
+    }
   }
 
   return (
@@ -536,13 +546,20 @@ function InvestmentPanel({ film }) {
         </div>
 
         {/* CTA Buttons */}
-        <button
-          onClick={() => setModalOpen(true)}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3.5 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200"
-        >
-          <TrendingUp size={16} />
-          Apply to Invest
-        </button>
+        {!hasApplied ? (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3.5 rounded-full shadow-[0_4px_20px_rgba(229,9,20,0.35)] hover:brightness-110 transition-all duration-200"
+          >
+            <TrendingUp size={16} />
+            Apply to Invest
+          </button>
+        ) : (
+          <div className="w-full flex items-center justify-center gap-2 bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider text-sm py-3.5 rounded-full cursor-not-allowed">
+            <ShieldCheck size={16} />
+            Application Submitted
+          </div>
+        )}
         <button
           onClick={handleContactFilmaker}
           className="w-full flex items-center justify-center gap-2 border border-red-600 text-red-600 text-sm uppercase tracking-wider py-3 rounded-full hover:bg-[#E50914]/10 transition duration-200"
@@ -552,7 +569,13 @@ function InvestmentPanel({ film }) {
         </button>
       </div>
 
-      {modalOpen && <ApplyToInvestModal film={film} onClose={() => setModalOpen(false)} />}
+      {modalOpen && (
+        <ApplyToInvestModal
+          film={film}
+          onClose={handleModalClose}
+          onSuccess={handleInvestmentSuccess}
+        />
+      )}
     </>
   );
 }
@@ -576,6 +599,7 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
   const [activeTab, setActiveTab] = useState("Overview");
   const [heroIdx, setHeroIdx] = useState(0);
   const [user, setUser] = useState(null);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -590,6 +614,9 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
       try {
         const raw = await getProjectDetail(filmId);
         setFilm(mapProjectToFilm(raw));
+        
+        // Check if user already applied to this project
+        await checkIfUserApplied();
       } catch (err) {
         console.error("Failed to load film:", err);
         setFilm(null);
@@ -600,10 +627,38 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
     loadFilm();
   }, [filmId, initialFilm]);
 
+  // Check if the current user has already applied to this project
+  async function checkIfUserApplied() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/v1/investments/my-investments",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const userInvestments = data.projects || [];
+        const applied = userInvestments.some(
+          (inv) => String(inv.project_id) === String(filmId)
+        );
+        setHasApplied(applied);
+      }
+    } catch (err) {
+      console.error("Failed to check application status:", err);
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    router.push("/");
+    router.push("/login");
   };
 
   const profileName = user?.full_name || user?.name || "Investor";
@@ -723,7 +778,14 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
 
                 {/* Investment Panel — sits beside the image */}
                 <div className="hidden lg:block w-[420px] shrink-0">
-                  <InvestmentPanel film={film} />
+                  <InvestmentPanel
+                    film={film}
+                    hasApplied={hasApplied}
+                    onApplicationSubmitted={() => {
+                      setHasApplied(true);
+                      // Optionally reload film data
+                    }}
+                  />
                 </div>
               </div>
 
@@ -780,7 +842,13 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
 
           {/* Mobile: investment panel below hero */}
           <div className="lg:hidden pb-8">
-            <InvestmentPanel film={film} />
+            <InvestmentPanel
+              film={film}
+              hasApplied={hasApplied}
+              onApplicationSubmitted={() => {
+                setHasApplied(true);
+              }}
+            />
           </div>
 
         </div>

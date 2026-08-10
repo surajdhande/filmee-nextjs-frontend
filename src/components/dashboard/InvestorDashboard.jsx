@@ -13,7 +13,6 @@ import {
   Eye,
   Users,
   ArrowUpRight,
-  Menu,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -230,7 +229,7 @@ export default function InvestorDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    router.push("/");
+    router.push("/login");
   };
 
   if (!user) {
@@ -251,67 +250,56 @@ export default function InvestorDashboard() {
       role="INVESTOR"
       header={
         <header className="w-full border-b border-[#262626] bg-[#0E0E0E]">
-          <div className="flex items-center justify-between px-4 py-3 gap-2 lg:px-6 lg:py-4">
-            <div className="flex items-center gap-2 lg:gap-3">
-              {/* Hamburger — mobile only */}
-              <button
-                id="investor-hamburger"
-                onClick={() => window.dispatchEvent(new CustomEvent('dashboard:openSidebar'))}
-                aria-label="Open menu"
-                className="lg:hidden flex h-9 w-9 items-center justify-center rounded-full border border-[#2A2A2A] bg-[#141414] text-zinc-400 hover:border-[#E50914]/40 hover:text-white transition-all duration-200 shrink-0"
-              >
-                <Menu size={16} strokeWidth={2.5} />
-              </button>
-
+          <div className="flex items-center justify-between px-6 py-4 gap-2">
+            <div className="flex items-center gap-3">
               <Image
                 src="/logo.png"
                 alt="Filmee Logo"
-                width={32}
-                height={32}
-                className="rounded-lg object-contain lg:w-[36px] lg:h-[36px]"
+                width={36}
+                height={36}
+                className="rounded-lg object-contain"
               />
               <div>
-                <h1 className="text-[15px] font-bold leading-none text-white tracking-tight lg:text-[18px]">
+                <h1 className="text-[18px] font-bold leading-none text-white tracking-tight">
                   Investor Dashboard
                 </h1>
-                <p className="mt-1 text-[11px] text-zinc-400 lg:mt-1.5 lg:text-xs">
+                <p className="mt-1.5 text-xs text-zinc-400">
                   Welcome back, <span className="font-semibold text-zinc-300">{profileName}</span>
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 lg:gap-3">
-              {/* Hide on mobile to save space */}
-              <button className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300">
+            <div className="flex flex-wrap items-center gap-3">
+              <button className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300">
                 <Crown size={13} className="text-[#E50914]" />
-                <span className="text-[13px] font-bold uppercase tracking-wider text-[#E50914]">
+                <span className="text-[15px] font-bold uppercase tracking-wider text-[#E50914]">
                   Professional
                 </span>
               </button>
 
               <button
                 onClick={() => router.push("/dashboard/investor/settings")}
-                className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300"
+                className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300"
               >
                 <Settings size={13} className="text-[#E50914]"/>
-                <span className="text-[13px] font-bold uppercase tracking-wider text-[#E50914]">
+                <span className="text-[15px] font-bold uppercase tracking-wider text-[#E50914]">
                   Settings
                 </span>
               </button>
 
               <button
                 onClick={handleLogout}
-                className="text-xs font-semibold text-zinc-400 hover:text-white transition duration-300 uppercase px-2"
+                className="text-s font-semibold text-zinc-400 hover:text-white transition duration-300 uppercase px-2"
               >
                 LOGOUT
               </button>
 
-              <div className="flex items-center gap-1.5 rounded-full bg-[#18C964] px-2.5 py-1.5 shadow-[0_0_12px_rgba(24,201,100,0.3)]">
+              <div className="flex items-center gap-1.5 rounded-full bg-[#18C964] px-3 py-1.5 shadow-[0_0_12px_rgba(24,201,100,0.3)]">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white hidden xs:inline">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white">
                   Live
                 </span>
               </div>
@@ -321,26 +309,26 @@ export default function InvestorDashboard() {
       }
     >
 
-      <div className="p-4 space-y-6 bg-[#0B0B0B] lg:p-8 lg:space-y-8">
+      <div className="p-8 space-y-8 bg-[#0B0B0B]">
         {/* Subheader */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-[18px] font-bold text-white tracking-wide lg:text-[20px]">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[20px] font-bold text-white tracking-wide">
             Investment Overview
           </h2>
-          <div className="flex items-center gap-2 lg:gap-4">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/dashboard/investor/analytics")}
-              className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-3 py-1.5 text-[13px] hover:bg-[#E50914]/10 transition-all duration-300 text-[#E50914] lg:px-4 lg:text-[16px]"
+              className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 text-[16px] hover:bg-[#E50914]/10 transition-all duration-300 text-[#E50914]"
             >
-              <BarChart2 size={14} />
-              <span className="hidden xs:inline">View </span>Analytics
+              <BarChart2 size={15} />
+              View Analytics
             </button>
             <button
               onClick={() => router.push("/dashboard/investor/browse")}
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-4 py-2 text-[13px] font-bold uppercase tracking-wider text-white shadow-[0_0_18px_rgba(229,9,20,0.45)] hover:brightness-110 transition-all duration-300 lg:px-5 lg:py-2.5 lg:gap-2 lg:text-[16px]"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] px-5 py-2.5 text-[16px] font-bold uppercase tracking-wider text-white shadow-[0_0_18px_rgba(229,9,20,0.45)] hover:brightness-110 transition-all duration-300"
             >
-              <Search size={14} />
-              <span className="hidden xs:inline">Find </span>Projects
+              <Search size={15} />
+              Find Projects
             </button>
           </div>
         </div>
