@@ -9,16 +9,13 @@ import DashboardLayout from "../DashboardLayout";
 
 export default function InvestorLayout({ children }) {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      setUser({ full_name: "Mervin Consultant" });
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : { full_name: "Mervin Consultant" };
     }
-  }, []);
+    return { full_name: "Mervin Consultant" };
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -36,7 +33,7 @@ export default function InvestorLayout({ children }) {
     <DashboardLayout
       role="INVESTOR"
       header={
-        <header className="w-full border-b border-[#262626] bg-[#0E0E0E]">
+        <header className="w-full border-b border-[#2A2A2A] bg-[#0E0E0E]">
           <div className="flex items-center justify-between px-6 py-4 gap-2">
             {/* Left */}
             <div className="flex items-center gap-3">
@@ -48,7 +45,7 @@ export default function InvestorLayout({ children }) {
                 className="rounded-lg object-contain"
               />
               <div>
-                <h1 className="text-[18px] font-bold leading-none text-white tracking-tight">
+                <h1 className="text-xl font-bold leading-none text-white tracking-tight">
                   Investor Dashboard
                 </h1>
                 <p className="mt-1.5 text-xs text-zinc-400">
@@ -62,38 +59,32 @@ export default function InvestorLayout({ children }) {
 
             {/* Right */}
             <div className="flex flex-wrap items-center gap-3">
-              <button className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300">
-                <Crown size={13} className="text-[#E50914]" />
-                <span className="text-[15px] font-bold uppercase tracking-wider text-[#E50914]">
-                  Professional
-                </span>
+              <button className="flex items-center gap-2 rounded-full border border-[#2A2A2A] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors">
+                <Crown size={14} className="text-red-500" />
+                <span>Professional</span>
               </button>
 
               <button
                 onClick={() => router.push("/dashboard/investor/settings")}
-                className="flex items-center gap-1.5 rounded-full border border-[#E50914]/50 px-4 py-1.5 hover:bg-[#E50914]/10 transition-all duration-300"
+                className="flex items-center gap-2 rounded-full border border-[#2A2A2A] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors"
               >
-                <Settings size={13} className="text-[#E50914]" />
-                <span className="text-[15px] font-bold uppercase tracking-wider text-[#E50914]">
-                  Settings
-                </span>
+                <Settings size={14} className="text-red-500" />
+                <span>Settings</span>
               </button>
 
               <button
                 onClick={handleLogout}
-                className="text-s font-semibold text-zinc-400 hover:text-white transition duration-300 uppercase px-2"
+                className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors px-2"
               >
-                LOGOUT
+                Logout
               </button>
 
-              <div className="flex items-center gap-1.5 rounded-full bg-[#E50914] px-3 py-1.5">
+              <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#18C964]/10 text-[#18C964]">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#18C964] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#18C964]"></span>
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white">
-                  Offline
-                </span>
+                <span>Live</span>
               </div>
             </div>
           </div>
@@ -104,3 +95,4 @@ export default function InvestorLayout({ children }) {
     </DashboardLayout>
   );
 }
+

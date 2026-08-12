@@ -154,56 +154,60 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
   const displayOpportunities = rawList.filter((opp) => !appliedProjectIds.includes(opp.id));
   const recentApps = (applications || []).slice(0, 5);
   return (
-    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8">
+    <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10 space-y-6 md:space-y-8 bg-[#0B0B0B]">
       {/* ── Section title + Find Opportunities ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
-          Dashboard Overview
-        </h2>
-        <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-xs font-black px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-200 shadow-[0_0_16px_rgba(220,38,38,0.4)] hover:shadow-[0_0_24px_rgba(220,38,38,0.6)] w-full sm:w-auto justify-center">
-          <Search size={14} />
-          FIND OPPORTUNITIES
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Dashboard Overview
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">Manage your auditions, applications, and profile performance.</p>
+        </div>
+        <button className="flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors shadow-[0_0_15px_rgba(229,9,20,0.4)] w-full sm:w-auto">
+          <Search size={16} />
+          <span>Find Opportunities</span>
         </button>
       </div>
 
       {/* ── Free Plan Warning Banner ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-[#1a1200] border border-yellow-700/60 rounded-2xl px-4 md:px-6 py-3 md:py-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
         <div className="flex items-start sm:items-center gap-3">
           <AlertTriangle size={18} className="text-yellow-500 flex-shrink-0 mt-0.5 sm:mt-0" />
           <div>
-            <p className="text-sm font-bold text-yellow-400">Free Plan Limits</p>
+            <p className="text-sm font-bold text-white">Free Plan Limits</p>
             <p className="text-xs text-zinc-400 mt-0.5">
-              You can apply to 5 projects per month. 3 applications remaining
-              this month.
+              You can apply to 5 projects per month. 3 applications remaining this month.
             </p>
           </div>
         </div>
         <button
           onClick={() => onNavChange("subscription")}
-          className="flex-shrink-0 w-full sm:w-auto sm:ml-4 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-xs font-black px-4 md:px-6 py-2 md:py-2.5 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)] text-center"
+          className="flex-shrink-0 w-full sm:w-auto rounded-full bg-red-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors text-center"
         >
-          UPGRADE NOW
+          Upgrade Now
         </button>
       </div>
 
       {/* ── Stats Grid ── */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {STATS.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <div
               key={i}
-              className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-5 flex flex-col gap-3"
+              className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-5 flex flex-col justify-between hover:border-red-600/50 transition-all"
             >
               <div className="flex items-start justify-between">
-                <p className="text-xs text-zinc-400 font-semibold leading-tight whitespace-pre-line">
+                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider leading-tight whitespace-pre-line">
                   {stat.label}
                 </p>
-                <Icon size={14} className="text-zinc-600 flex-shrink-0 mt-0.5" />
+                <div className="p-2 rounded-full bg-[#1E1E1E]">
+                  <Icon size={14} className="text-zinc-400" />
+                </div>
               </div>
-              <div>
-                <p className="text-3xl font-black text-white">{stat.value}</p>
-                <p className={`text-[11px] font-semibold mt-1 ${stat.subColor}`}>
+              <div className="mt-3">
+                <p className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{stat.value}</p>
+                <p className={`text-xs font-bold mt-1 tracking-wider ${stat.subColor}`}>
                   {stat.sub}
                 </p>
               </div>
@@ -213,34 +217,34 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
       </div>
 
       {/* ── Subscription Card ── */}
-      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl px-4 md:px-6 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-red-950/40 border border-red-800/50 flex items-center justify-center flex-shrink-0">
-            <Crown size={18} className="text-red-500" />
+      <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-red-600/40 transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#1E1E1E] flex items-center justify-center flex-shrink-0">
+            <Crown size={22} className="text-red-500" />
           </div>
           <div>
-            <p className="text-sm font-bold text-white">Free Plan</p>
+            <p className="text-base font-bold text-white">Free Plan</p>
             <p className="text-xs text-zinc-400 mt-0.5">Renews 1/1/2025</p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 w-full sm:w-auto">
-          <p className="text-xl md:text-2xl font-black text-white">
-            $0<span className="text-sm font-normal text-zinc-400">/monthly</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+          <p className="text-2xl font-bold text-white tracking-tight">
+            $0<span className="text-xs font-normal text-zinc-400">/monthly</span>
           </p>
-          <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
               onClick={() => onNavChange("subscription")}
-              className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[10px] md:text-[11px] font-black px-4 md:px-5 py-2 rounded-full transition-colors uppercase tracking-wider text-center"
+              className="rounded-full border border-[#2A2A2A] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors text-center"
             >
-              MANAGE SUBSCRIPTION
+              Manage Subscription
             </button>
             <button
               onClick={() => onNavChange("subscription")}
-              className="flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] md:text-[11px] font-black px-4 md:px-5 py-2 rounded-full transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.35)] uppercase tracking-wider"
+              className="flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-red-700 transition-colors shadow-[0_0_15px_rgba(229,9,20,0.4)]"
             >
-              <Crown size={11} />
-              UPGRADE NOW
+              <Crown size={14} />
+              <span>Upgrade Now</span>
             </button>
           </div>
         </div>
@@ -248,12 +252,12 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
 
       {/* ── Hot Opportunities ── */}
       <div>
-        <h3 className="text-lg md:text-xl font-black text-white mb-4 md:mb-5">Hot Opportunities</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+        <h3 className="text-lg font-bold text-white mb-6">Hot Opportunities</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {displayOpportunities.map((opp) => (
             <div
               key={opp.id}
-              className="bg-[#141414] border border-zinc-800/70 rounded-2xl overflow-hidden group transition-all duration-300 hover:border-zinc-700"
+              className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] overflow-hidden group transition-all duration-300 hover:border-red-600/40 flex flex-col justify-between"
             >
               {/* Image */}
               <div className="relative aspect-[16/9] overflow-hidden">
@@ -264,57 +268,57 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
                 <span
-                  className={`absolute top-3 left-3 ${opp.priorityColor} text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide`}
+                  className="absolute top-4 left-4 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-600 text-white"
                 >
                   {opp.priority}
                 </span>
               </div>
 
               {/* Body */}
-              <div className="p-5 space-y-3">
+              <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <h4 className="text-base font-black text-white">{opp.role}</h4>
-                  <p className="text-xs text-zinc-400 mt-0.5">{opp.project}</p>
+                  <h4 className="text-base font-bold text-white tracking-tight">{opp.role}</h4>
+                  <p className="text-xs text-zinc-400 mt-1">{opp.project}</p>
                   <p className="text-xs text-zinc-500">by {opp.director}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                <div className="grid grid-cols-2 gap-4 text-xs border-t border-[#2A2A2A] pt-3">
                   <div>
-                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-bold">
+                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-medium">
                       Budget
                     </p>
-                    <p className="text-red-400 font-bold">{opp.budget}</p>
+                    <p className="text-red-500 font-bold text-sm mt-0.5">{opp.budget}</p>
                   </div>
                   <div>
-                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-bold">
+                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-medium">
                       Duration
                     </p>
-                    <p className="text-white font-bold">{opp.duration}</p>
+                    <p className="text-white font-bold text-sm mt-0.5">{opp.duration}</p>
                   </div>
                   <div className="col-span-2">
-                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-bold">
+                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider font-medium">
                       Location
                     </p>
-                    <p className="text-white font-bold flex items-center gap-1">
-                      <MapPin size={11} className="text-zinc-400" />
+                    <p className="text-white font-medium text-xs flex items-center gap-1 mt-0.5">
+                      <MapPin size={12} className="text-zinc-400" />
                       {opp.location}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-zinc-500 pt-1 border-t border-zinc-800/60">
+                <div className="flex items-center justify-between text-xs text-zinc-400 pt-2 border-t border-[#2A2A2A]">
                   <span>{opp.applications} applications</span>
                   <span className="flex items-center gap-1">
-                    <Calendar size={11} />
+                    <Calendar size={12} />
                     Deadline: {opp.deadline}
                   </span>
                 </div>
 
                 <button
                   onClick={() => onApplyClick(opp)}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white text-[11px] font-black py-2.5 rounded-full uppercase tracking-wider transition-all duration-200 shadow-[0_0_12px_rgba(220,38,38,0.3)] hover:shadow-[0_0_20px_rgba(220,38,38,0.5)]"
+                  className="w-full rounded-full bg-red-600 hover:bg-red-700 text-xs font-bold uppercase tracking-wider py-2.5 text-white transition-colors"
                 >
-                  APPLY NOW
+                  Apply Now
                 </button>
               </div>
             </div>
@@ -323,21 +327,21 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
       </div>
 
       {/* ── Recent Applications ── */}
-      <div className="pb-4 md:pb-8">
-        <h3 className="text-lg md:text-xl font-black text-white mb-4 md:mb-5">
+      <div className="pb-8">
+        <h3 className="text-lg font-bold text-white mb-6">
           Recent Applications
         </h3>
-        <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl overflow-hidden divide-y divide-zinc-800/60">
+        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6 divide-y divide-[#2A2A2A]">
           {recentApps.map((app) => (
             <div
               key={app.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-4 md:px-6 py-3 md:py-4 hover:bg-zinc-800/20 transition-colors"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 first:pt-0 last:pb-0 transition-colors"
             >
               {/* Thumbnail */}
               <img
                 src={app.image}
                 alt={app.role}
-                className="w-full sm:w-14 sm:h-14 h-32 rounded-xl object-cover flex-shrink-0"
+                className="w-full sm:w-16 sm:h-16 h-32 rounded-xl object-cover flex-shrink-0"
               />
 
               {/* Info */}
@@ -352,15 +356,15 @@ function OverviewPage({ onNavChange, applications = [], onApplyClick, onViewApp,
               {/* Status + View */}
               <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                 <span
-                  className={`${app.statusColor} text-white text-[9px] md:text-[10px] font-black px-2.5 md:px-3 py-1 rounded-full uppercase tracking-wide`}
+                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500"
                 >
                   {app.status}
                 </span>
                 <button
                   onClick={() => onViewApp && onViewApp(app.id)}
-                  className="border border-red-700 text-red-500 hover:bg-red-950/30 text-[9px] md:text-[10px] font-black px-3 md:px-4 py-1.5 rounded-full transition-colors uppercase tracking-wider cursor-pointer"
+                  className="rounded-full border border-[#2A2A2A] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#1E1E1E] transition-colors"
                 >
-                  VIEW
+                  View
                 </button>
               </div>
             </div>
@@ -959,7 +963,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    loadDashboardData();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        loadDashboardData();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLogout = () => {
