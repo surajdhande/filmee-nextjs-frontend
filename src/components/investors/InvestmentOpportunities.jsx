@@ -43,9 +43,9 @@ export default function InvestmentOpportunities() {
           </p>
         ) : (
           <div className="grid gap-15 md:grid-cols-2">
-            {opportunities.map((opportunity) => (
+            {opportunities?.map((opportunity) => (
               <InvestmentOpportunityCard
-                key={opportunity.id}
+                key={opportunity?.id}
                 opportunity={opportunity}
               />
             ))}

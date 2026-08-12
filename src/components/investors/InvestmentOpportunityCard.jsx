@@ -16,7 +16,7 @@ const phaseColorMap = {
   orange: "bg-orange-500",
 };
 
-export default function InvestmentOpportunityCard({ opportunity }) {
+export default function InvestmentOpportunityCard({ opportunity,key }) {
   const {
     title,
     genre,
@@ -48,7 +48,7 @@ export default function InvestmentOpportunityCard({ opportunity }) {
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-zinc-600">
+    <div key={key} className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-zinc-600">
       {/* Image with badges */}
       <div className="relative h-52 overflow-hidden sm:h-56">
         <img
