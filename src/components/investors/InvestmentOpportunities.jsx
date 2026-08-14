@@ -13,6 +13,7 @@ export default function InvestmentOpportunities() {
       try {
         const data = await getInvestmentOpportunities();
         setOpportunities(data);
+console.log("Investment opportunities:", data);
       } catch (error) {
         console.error("Error fetching investment opportunities:", error);
       } finally {

@@ -38,6 +38,12 @@ export default function InvestmentOpportunityCard({ opportunity }) {
     rating,
   } = opportunity;
 
+  console.log("Investment opportunity funding:", {
+  title,
+  fundingRaised,
+  fundingTarget,
+});
+
   const fundingPercentage =
     fundingTarget > 0 ? Math.round((fundingRaised / fundingTarget) * 100) : 0;
 
