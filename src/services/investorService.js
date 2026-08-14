@@ -12,7 +12,13 @@ function getAuthHeaders() {
  */
 export const getInvestmentOpportunities = async () => {
   const response = await axios.get(`${API_BASE_URL}/projects/`);
-  return response.data.projects;
+
+  return response.data.projects.map((project) => ({
+    ...project,
+    id: project.project_id,
+    fundingRaised: Number(project.funding_raised),
+    fundingTarget: Number(project.funding_target),
+  }));
 };
 
 /**
