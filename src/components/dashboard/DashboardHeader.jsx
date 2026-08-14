@@ -13,14 +13,35 @@ import {
 } from "lucide-react";
 
 const DashboardHeader = ({
-  username = "John Director",
-  showOverviewTitle = true,
-  showAnalyticsButton = false,
-  showCreateButton = false,
-  overviewTitle = "Dashboard Overview",
+  username,
+  dashboardTitle = "Filmmaker Dashboard",
+  settingsPath = "/dashboard/filmmaker/settings",
+  onLogout,
+  statusText = "Offline",
+  statusColor = "#E50914",
 }) => {
   const router = useRouter();
   const [isOnline, setIsOnline] = useState(true);
+  const [displayUsername, setDisplayUsername] = useState(username || "User");
+
+  useEffect(() => {
+    if (username && username !== "John Director") {
+      setDisplayUsername(username);
+    } else {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          const name = `${userData.first_name || ""} ${userData.last_name || ""}`.trim();
+          setDisplayUsername(name || "User");
+        } catch (e) {
+          setDisplayUsername("User");
+        }
+      } else {
+        setDisplayUsername("User");
+      }
+    }
+  }, [username]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -44,7 +65,7 @@ const DashboardHeader = ({
       {/* Top Row */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 gap-2">
 
-        {/* Left — Title without logo */}
+        {/* Left — Logo + Title */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
@@ -72,7 +93,7 @@ const DashboardHeader = ({
             <p className="mt-1 sm:mt-1.5 text-[10px] sm:text-xs text-zinc-400">
               Welcome back,{" "}
               <span className="font-semibold text-zinc-300">
-                {username}
+                {displayUsername}
               </span>
             </p>
           </div>
@@ -113,14 +134,13 @@ const DashboardHeader = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white hidden xs:inline">
+            {/* <span className="text-[10px] font-bold uppercase tracking-wider text-white hidden xs:inline">
               Live
-            </span>
+            </span> */}
           </div>
 
         </div>
-
-      </div>
+        </div>
     </header>
   );
 }

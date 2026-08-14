@@ -900,7 +900,7 @@ export default function Dashboard() {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const userData = JSON.parse(storedUser);
-        setUserName(userData.first_name || "User");
+        setUserName(`${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "User");
       }
 
       // 1. Fetch live user data & applications

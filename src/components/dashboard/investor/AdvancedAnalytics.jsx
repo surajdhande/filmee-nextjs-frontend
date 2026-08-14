@@ -195,7 +195,7 @@ export default function AdvancedAnalytics() {
           }`}
         >
           <Radio size={16} />
-          <span>Live Mode</span>
+          {/* <span>Live Mode</span> */}
         </button>
 
         <select className="flex-1 sm:flex-none rounded-full border border-[#2A2A2A] bg-[#141414] px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white outline-none cursor-pointer hover:bg-[#1E1E1E] transition-colors">

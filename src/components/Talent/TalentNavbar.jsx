@@ -3,7 +3,28 @@
 import React from "react";
 import { Crown, Settings, LogOut, Menu } from "lucide-react";
 
-export default function TalentNavbar({ onLogout, onSubscriptionClick, onSettingsClick, onMenuToggle, username = "Mervin Personal" }) {
+export default function TalentNavbar({ onLogout, onSubscriptionClick, onSettingsClick, onMenuToggle, username }) {
+  const [displayUsername, setDisplayUsername] = React.useState(username || "User");
+
+  React.useEffect(() => {
+    if (username && username !== "Mervin Personal") {
+      setDisplayUsername(username);
+    } else {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          const name = `${userData.first_name || ""} ${userData.last_name || ""}`.trim();
+          setDisplayUsername(name || "User");
+        } catch (e) {
+          setDisplayUsername("User");
+        }
+      } else {
+        setDisplayUsername("User");
+      }
+    }
+  }, [username]);
+
   return (
     <header className="h-16 bg-[#111111] border-b border-zinc-800/60 flex items-center justify-between px-4 sm:px-6 lg:px-8 flex-shrink-0 sticky top-0 z-10">
       <div className="flex items-center gap-3">
@@ -19,7 +40,7 @@ export default function TalentNavbar({ onLogout, onSubscriptionClick, onSettings
             Talent Dashboard
           </h1>
           <p className="text-xs text-zinc-400 -mt-0.5 hidden sm:block">
-            Welcome back, {username}
+            Welcome back, {displayUsername}
           </p>
         </div>
       </div>

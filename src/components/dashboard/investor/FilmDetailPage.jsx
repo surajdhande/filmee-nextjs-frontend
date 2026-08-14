@@ -661,7 +661,9 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
     router.push("/login");
   };
 
-  const profileName = user?.full_name || user?.name || "Investor";
+  const profileName = user
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.full_name || user.name || "Investor"
+    : "Investor";
 
   if (loading || !film) {
     return (

@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Crown,
-  Settings,
   BarChart2,
   Search,
   DollarSign,
@@ -13,6 +13,7 @@ import {
   Eye,
   Users,
   ArrowUpRight,
+  Settings,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -25,8 +26,8 @@ import {
   Bar,
 } from "recharts";
 
-import Image from "next/image";
 import DashboardLayout from "./DashboardLayout";
+import DashboardHeader from "./DashboardHeader";
 import { getProjects } from "@/services/projectService";
 import { getMyInvestments } from "@/services/investorService";
 
@@ -222,7 +223,9 @@ export default function InvestorDashboard() {
     );
   }
 
-  const profileName = user?.full_name || user?.name || "Investor";
+  const profileName = user
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.full_name || user.name || "Investor"
+    : "Investor";
 
   return (
     <DashboardLayout
@@ -269,13 +272,13 @@ export default function InvestorDashboard() {
                 Logout
               </button>
 
-              <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#18C964]/10 text-[#18C964]">
+              {/* <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#18C964]/10 text-[#18C964]">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#18C964] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#18C964]"></span>
                 </span>
                 <span>Live</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </header>

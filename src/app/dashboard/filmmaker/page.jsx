@@ -56,8 +56,7 @@ export default function DashboardPage() {
       <DashboardHeader
         username={
           profile?.full_name ||
-          user?.full_name ||
-          user?.name ||
+          (user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "") ||
           "User"
         }
         showOverviewTitle={false}

@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Crown, Settings } from "lucide-react";
 
-import Image from "next/image";
 import DashboardLayout from "../DashboardLayout";
+import DashboardHeader from "../DashboardHeader";
 
 export default function InvestorLayout({ children }) {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function InvestorLayout({ children }) {
   };
 
   const profileName = user 
-    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Investor"
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.full_name || "Investor"
     : "Investor";
 
   return (
