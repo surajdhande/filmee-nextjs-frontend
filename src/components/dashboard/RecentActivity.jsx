@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap } from "lucide-react";
+
 
 const activities = [
   {
@@ -40,15 +40,7 @@ const RecentActivity = () => {
           Recent Activity
         </h2>
 
-        <div className="flex items-center gap-1 rounded-full bg-green-600 px-3 py-1">
 
-          <Zap size={14} className="text-white" />
-
-          <span className="text-xs font-semibold text-white">
-            Live
-          </span>
-
-        </div>
 
       </div>
 
