@@ -24,9 +24,9 @@ export default function Hero() {
 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 ml-24 max-w-4xl pt-24">
+      <div className="relative z-10 ml-0 w-full max-w-4xl px-6 pt-24 sm:ml-12 sm:px-0 lg:ml-24">
 
-        <h1 className="max-w-3xl text-5xl font-bold leading-tight text-white lg:text-6xl">
+        <h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
           Where Film Dreams
           <br />
           <span className="text-red-600">
@@ -40,7 +40,7 @@ export default function Hero() {
           Discover opportunities. Create cinematic magic.
         </p>
 
-        <div className="mt-10 flex gap-6">
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
           <AuthButton>
             START CREATING
           </AuthButton>
@@ -52,7 +52,7 @@ export default function Hero() {
 
         {/* Stats */}
 
-        <div className="mt-14 flex gap-20">
+        <div className="mt-14 grid grid-cols-2 gap-6 sm:flex sm:gap-12 lg:gap-20">
 
           <div>
             <span className="text-4xl font-bold">

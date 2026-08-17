@@ -71,8 +71,12 @@ export default function ChoosePath() {
 
           {paths.map((item) => (
             <div
-            key={item.role}
-              className="group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600">
+  key={item.role}
+  onClick={() => item.cardHref && router.push(item.cardHref)}
+  className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 transition-all duration-300 hover:border-red-600 ${
+    item.cardHref ? "cursor-pointer" : ""
+  }`}
+>
 
               <img
                 src={item.image}

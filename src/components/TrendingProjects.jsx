@@ -55,7 +55,7 @@ const TrendingProjects = ({
     <section className="bg-black px-6 py-20">
       <div className="mx-auto max-w-7xl">
 
-        <div className="mb-12 flex items-start justify-between">
+        <div className="mb-12 flex items-start justify-between gap-4">
 
           <div>
 
@@ -72,9 +72,9 @@ const TrendingProjects = ({
           {showViewAll && (
             <Link
               href="/project-overview"
-              className="text-sm font-semibold uppercase tracking-wider text-zinc-400 transition hover:text-white"
+              className="shrink-0 whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-zinc-400 transition hover:text-white sm:text-sm"
             >
-              View All
+              <span>VIEW ALL</span>
             </Link>
           )}
 

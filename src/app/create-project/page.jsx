@@ -1,11 +1,40 @@
-import CreateProjectOverviewPage from "@/components/CreateProjectOverview/CreateProjectOverviewPage";
+"use client";
 
-export const metadata = {
-  title: "Create Your Film Project | FilmConnect",
-  description:
-    "Turn your vision into reality. Connect with investors, find talented crew members, and bring your story to the world.",
-};
+import { useState } from "react";
+import CreateProjectLayout from "@/components/create-project/CreateProjectLayout";
 
-export default function CreateProjectOverviewRoute() {
-  return <CreateProjectOverviewPage />;
+export default function CreateProjectPage() {
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const [projectData, setProjectData] = useState({
+    title: "",
+    genre: "",
+    funding_target: "",
+    logline: "",
+    synopsis: "",
+
+    production_timeline: "",
+    primary_location: "",
+    target_audience: "",
+    castRequirements: [],
+    crewRequirements: [],
+
+    funding_goals_breakdown: "",
+    expected_roi_percentage: "",
+    distribution_strategy: "",
+
+    pitchDeck: null,
+    trailer: null,
+    storyboard: null,
+    lookbook: null,
+  });
+
+  return (
+    <CreateProjectLayout
+      currentStep={currentStep}
+      setCurrentStep={setCurrentStep}
+      projectData={projectData}
+      setProjectData={setProjectData}
+    />
+  );
 }
