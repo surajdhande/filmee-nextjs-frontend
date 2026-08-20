@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/authService";
+import Toast from "@/components/ui/Toast";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -14,6 +15,7 @@ const LoginPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type }
 
   const handleChange = (e) => {
     setFormData({
@@ -45,25 +47,28 @@ const LoginPage = () => {
         localStorage.setItem(`${role.toLowerCase()}_user`, JSON.stringify(response.user));
       }
 
-      alert(response.message || "Login successful");
+      setToast({ message: response.message || "Login successful", type: "success" });
 
-      if (role === "FILMMAKER") {
-        router.push("/dashboard/filmmaker");
-      } else if (role === "INVESTOR") {
-        router.push("/dashboard/investor");
-      } else if (role === "TALENT") {
-        router.push("/dashboard/talent");
-      } else {
-        router.push("/");
-      }
+      // Navigate after a short delay so the user sees the toast
+      setTimeout(() => {
+        if (role === "FILMMAKER") {
+          router.push("/dashboard/filmmaker");
+        } else if (role === "INVESTOR") {
+          router.push("/dashboard/investor");
+        } else if (role === "TALENT") {
+          router.push("/dashboard/talent");
+        } else {
+          router.push("/");
+        }
+      }, 1000);
 
     } catch (error) {
       console.error(error);
 
-      alert(
-        error?.response?.data?.message ||
-        "Login failed"
-      );
+      setToast({
+        message: error?.response?.data?.message || "Login failed",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -81,6 +86,15 @@ const LoginPage = () => {
 >
   {/* Dark Overlay */}
   <div className="absolute inset-0 bg-black/80" />
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/90 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
@@ -152,4 +166,4 @@ const LoginPage = () => {
   );
 }
 
-export default LoginPage;
+export default LoginPage;
