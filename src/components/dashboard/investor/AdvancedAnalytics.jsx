@@ -8,7 +8,6 @@ import {
   DollarSign,
   Users,
   Film,
-  Radio,
   TrendingUp,
   Clock,
   Filter,
@@ -109,21 +108,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const LiveBadge = ({ offline = false }) => (
-  <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
-    offline
-      ? "bg-zinc-800 text-zinc-400"
-      : "bg-[#18C964]/10 text-[#18C964]"
-  }`}>
-    <span className="relative flex h-2 w-2">
-      {!offline && (
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#18C964] opacity-75" />
-      )}
-      <span className={`relative inline-flex rounded-full h-2 w-2 ${offline ? "bg-zinc-500" : "bg-[#18C964]"}`} />
-    </span>
-    {offline ? "Offline" : "Live"}
-  </div>
-);
+
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 export default function AdvancedAnalytics() {
@@ -139,22 +124,14 @@ export default function AdvancedAnalytics() {
   const [engagementRate]                = useState(STATIC_ENGAGEMENT_RATE);
   const [activeUsers]                   = useState(STATIC_ACTIVE_USERS);
   const [activityFeed]                  = useState(STATIC_ACTIVITY_FEED);
-  const [liveMode, setLiveMode]         = useState(false);
-  const liveIntervalRef                 = useRef(null);
+
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
     setUser(stored ? JSON.parse(stored) : { full_name: "Investor" });
   }, []);
 
-  useEffect(() => {
-    if (liveMode) {
-      liveIntervalRef.current = setInterval(() => {}, 5000);
-    } else {
-      clearInterval(liveIntervalRef.current);
-    }
-    return () => clearInterval(liveIntervalRef.current);
-  }, [liveMode]);
+
 
   if (!user) {
     return (
@@ -179,24 +156,13 @@ export default function AdvancedAnalytics() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Advanced Analytics</h1>
-            <LiveBadge offline={!liveMode} />
           </div>
           <p className="mt-1 text-xs sm:text-sm text-zinc-400">Real-time insights and performance metrics.</p>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <button
-          onClick={() => setLiveMode((v) => !v)}
-          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-colors ${
-            liveMode
-              ? "bg-red-600 text-white hover:bg-red-700 shadow-[0_0_15px_rgba(229,9,20,0.4)]"
-              : "border border-[#2A2A2A] text-white hover:bg-[#1E1E1E]"
-          }`}
-        >
-          <Radio size={16} />
-          {/* <span>Live Mode</span> */}
-        </button>
+
 
         <select className="flex-1 sm:flex-none rounded-full border border-[#2A2A2A] bg-[#141414] px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white outline-none cursor-pointer hover:bg-[#1E1E1E] transition-colors">
           <option className="bg-[#141414] text-white">Last 30 days</option>
@@ -287,7 +253,6 @@ export default function AdvancedAnalytics() {
               <p className="text-xs text-zinc-400 mt-1">Views per Minute</p>
             </div>
             <div className="flex items-center gap-2">
-              <LiveBadge offline={!liveMode} />
               <Eye size={16} className="text-zinc-500" />
             </div>
           </div>
@@ -318,7 +283,6 @@ export default function AdvancedAnalytics() {
               <p className="text-xs text-zinc-400 mt-1">Investment Flow</p>
             </div>
             <div className="flex items-center gap-2">
-              <LiveBadge offline={!liveMode} />
               <DollarSign size={16} className="text-zinc-500" />
             </div>
           </div>
@@ -345,7 +309,6 @@ export default function AdvancedAnalytics() {
               <p className="text-xs text-zinc-400 mt-1">Engagement Rate (%)</p>
             </div>
             <div className="flex items-center gap-2">
-              <LiveBadge offline={!liveMode} />
               <TrendingUp size={16} className="text-zinc-500" />
             </div>
           </div>
@@ -376,7 +339,6 @@ export default function AdvancedAnalytics() {
               <p className="text-xs text-zinc-400 mt-1">Active Users</p>
             </div>
             <div className="flex items-center gap-2">
-              <LiveBadge offline={!liveMode} />
               <Users size={16} className="text-zinc-500" />
             </div>
           </div>
