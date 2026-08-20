@@ -319,15 +319,18 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 "
       onClick={handleBackdrop}
     >
-      <div className="relative w-full max-w-[480px] max-h-[700px] bg-[#111] border border-[#2a2a2a] rounded-3xl p-7 shadow-2xl animate-fadeIn">
+      <div className="relative w-full max-w-[480px] max-h-[90vh] bg-[#111] border border-[#2a2a2a] rounded-3xl shadow-2xl animate-fadeIn flex flex-col">
 
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+          className="absolute top-4 right-4 z-10 text-zinc-500 hover:text-white transition-colors"
         >
           <X size={18} />
         </button>
+
+        {/* Scrollable content area */}
+        <div className="overflow-y-auto p-7 flex-1 min-h-0">
 
         {submitted ? (
           /* ── Success state ── */
@@ -475,6 +478,7 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
             </form>
           </>
         )}
+        </div>{/* end scrollable content */}
       </div>
     </div>
   );

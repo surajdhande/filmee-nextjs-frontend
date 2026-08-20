@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import FilmmakerLayout from "./FilmmakerLayout";
 import { ArrowLeft, ArrowUpRight, CheckCircle2, Crown, Download, CreditCard, Plus, Trash2 } from "lucide-react";
 
 export default function FilmmakerSubscription() {
@@ -360,16 +361,18 @@ export default function FilmmakerSubscription() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
-      {renderHeader()}
-      {renderTabs()}
-      
-      <div className="mt-4">
-        {activeTab === "Overview" && renderOverview()}
-        {activeTab === "Billing History" && renderBillingHistory()}
-        {activeTab === "Payment Methods" && renderPaymentMethods()}
-        {activeTab === "Change Plan" && renderChangePlan()}
+    <FilmmakerLayout>
+      <div className="bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
+        {renderHeader()}
+        {renderTabs()}
+        
+        <div className="mt-4">
+          {activeTab === "Overview" && renderOverview()}
+          {activeTab === "Billing History" && renderBillingHistory()}
+          {activeTab === "Payment Methods" && renderPaymentMethods()}
+          {activeTab === "Change Plan" && renderChangePlan()}
+        </div>
       </div>
-    </div>
+    </FilmmakerLayout>
   );
 }

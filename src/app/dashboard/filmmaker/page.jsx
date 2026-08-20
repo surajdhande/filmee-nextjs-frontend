@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart2, Plus } from "lucide-react";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import FilmmakerLayout from "@/components/dashboard/filmmaker/FilmmakerLayout";
 import StatsCardsSection from "@/components/dashboard/StatsCardsSection";
 import ChartsSection from "@/components/dashboard/ChartsSection";
 import SubscriptionCard from "@/components/dashboard/SubscriptionCard";
@@ -14,7 +13,6 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -26,21 +24,7 @@ export default function DashboardPage() {
     }
 
     setUser(JSON.parse(storedUser));
-    loadProfile();
   }, [router]);
-
-  async function loadProfile() {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/v1/profile/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setProfile(data.profile);
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   if (!user) {
     return (
@@ -51,18 +35,7 @@ export default function DashboardPage() {
   }
 
   return (
-  <DashboardLayout
-    header={
-      <DashboardHeader
-        username={
-          profile?.full_name ||
-          (user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "") ||
-          "User"
-        }
-        showOverviewTitle={false}
-      />
-    }
-  >
+  <FilmmakerLayout>
     <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6">
 
   {/* =========================================================
@@ -96,6 +69,6 @@ export default function DashboardPage() {
   <RecentActivity />
 
 </div>
-  </DashboardLayout>
+  </FilmmakerLayout>
 );
 }

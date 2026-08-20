@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import FilmmakerLayout from "./FilmmakerLayout";
 import { 
   ArrowLeft, Download, Filter, TrendingUp, 
   Eye, Clock, DollarSign, Activity, ChevronRight, Crown 
@@ -339,13 +340,15 @@ export default function FilmmakerAnalytics() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
-      {renderHeader()}
-      {renderStatCards()}
-      {renderFirstRow()}
-      {renderSecondRow()}
-      {renderTable()}
-      {renderTimeline()}
-    </div>
+    <FilmmakerLayout>
+      <div className="bg-[#0B0B0B] text-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
+        {renderHeader()}
+        {renderStatCards()}
+        {renderFirstRow()}
+        {renderSecondRow()}
+        {renderTable()}
+        {renderTimeline()}
+      </div>
+    </FilmmakerLayout>
   );
 }

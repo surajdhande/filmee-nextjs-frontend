@@ -8,6 +8,7 @@ import {
 } from "@/services/socketService";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import FilmmakerLayout from "./FilmmakerLayout";
 import {
   getConversation,
   getConversations,
@@ -395,7 +396,8 @@ export default function FilmmakerMessages() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0B0B0B] text-white overflow-hidden">
+    <FilmmakerLayout>
+      <div className="flex flex-col h-full bg-[#0B0B0B] text-white overflow-hidden">
 
       {/* ── Top nav bar ── */}
       <header className="shrink-0 w-full border-b border-[#1A1A1A] bg-[#0B0B0B]">
@@ -754,5 +756,6 @@ export default function FilmmakerMessages() {
         </div>
       )}
     </div>
+    </FilmmakerLayout>
   );
 }
