@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { getProjectDetail } from "@/services/projectService";
 import { createInvestment } from "@/services/investorService";
 import { sendMessage } from "@/services/messageService";
+import EscrowPaymentFlow from "./EscrowPaymentFlow";
+
 import {
   ArrowLeft,
   Share2,
@@ -278,37 +280,33 @@ function MediaTab({ film }) {
 function ApplyToInvestModal({ film, onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
   const maxAmount = film.remaining;
   const charLimit = 500;
 
   const [investing, setInvesting] = useState(false);
   const [investError, setInvestError] = useState("");
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setInvesting(true);
-    setInvestError("");
-    try {
-      await createInvestment(film.id, parseFloat(amount));
-      setSubmitted(true);
-      // Call success callback after short delay to show success message
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess();
-        }
-      }, 1500);
-    } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        "Failed to submit investment. Please try again.";
-      setInvestError(msg);
-    } finally {
-      setInvesting(false);
-    }
-  }
+ async function handleSubmit(e) {
+  e.preventDefault();
+  setInvesting(true);
+  setInvestError("");
 
+  try {
+    await createInvestment(film.id, parseFloat(amount));
+
+    if (onSuccess) {
+      onSuccess(parseFloat(amount));
+    }
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      "Failed to submit investment. Please try again.";
+
+    setInvestError(msg);
+  } finally {
+    setInvesting(false);
+  }
+}
   // Trap click on backdrop
   function handleBackdrop(e) {
     if (e.target === e.currentTarget) onClose();
@@ -329,31 +327,7 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
           <X size={18} />
         </button>
 
-        {submitted ? (
-          /* ── Success state ── */
-          <div className="flex flex-col items-center text-center py-6 gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#E50914]/10 flex items-center justify-center">
-              <ShieldCheck size={28} className="text-[#E50914]" />
-            </div>
-            <h2 className="text-xl font-bold text-white">Application Submitted!</h2>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Your investment application for <span className="text-white font-semibold">"{film.title}"</span> has been
-              sent. The filmmaker will review it and get back to you soon.
-            </p>
-            <button
-              onClick={() => {
-                if (onSuccess) {
-                  onSuccess();
-                } else {
-                  onClose();
-                }
-              }}
-              className="mt-2 w-full bg-gradient-to-r from-[#E50914] to-[#B3070F] text-white font-bold uppercase tracking-wider text-sm py-3 rounded-2xl hover:brightness-110 transition-all duration-200"
-            >
-              Done
-            </button>
-          </div>
-        ) : (
+        
           <>
             {/* Header */}
             <h2 className="text-xl font-bold text-white mb-1">Apply to Invest</h2>
@@ -455,7 +429,7 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
                 <p className="text-red-400 text-xs text-center -mt-2">{investError}</p>
               )}
 
-              {/* Actions */}
+                            {/* Actions */}
               <div className="flex gap-3 pt-1">
                 <button
                   type="button"
@@ -464,6 +438,7 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={investing}
@@ -474,16 +449,17 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
               </div>
             </form>
           </>
-        )}
       </div>
     </div>
   );
 }
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
-function InvestmentPanel({ film, hasApplied, onApplicationSubmitted }) {
+function InvestmentPanel({ film, hasApplied }) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
+  const [escrowOpen, setEscrowOpen] = useState(false);
+  const [investmentAmount, setInvestmentAmount] = useState("");
 
   function handleContactFilmaker() {
     const params = new URLSearchParams({
@@ -499,11 +475,10 @@ function InvestmentPanel({ film, hasApplied, onApplicationSubmitted }) {
     setModalOpen(false);
   }
 
-  function handleInvestmentSuccess() {
+  function handleInvestmentSuccess(amount) {
+    setInvestmentAmount(amount);
     setModalOpen(false);
-    if (onApplicationSubmitted) {
-      onApplicationSubmitted();
-    }
+    setEscrowOpen(true);
   }
 
   return (
@@ -576,6 +551,13 @@ function InvestmentPanel({ film, hasApplied, onApplicationSubmitted }) {
           onSuccess={handleInvestmentSuccess}
         />
       )}
+      {escrowOpen && (
+      <EscrowPaymentFlow
+        film={film}
+        investmentAmount={investmentAmount}
+        onClose={() => setEscrowOpen(false)}
+      />
+    )}
     </>
   );
 }
@@ -765,7 +747,7 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
                             heroIdx === idx ? "border-[#E50914]" : "border-transparent opacity-60"
                           }`}
                         >
-                          <img src={img} alt="" className="w-[full] h-full object-cover" />
+                          <img src={img} alt="" className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -777,10 +759,6 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
                   <InvestmentPanel
                     film={film}
                     hasApplied={hasApplied}
-                    onApplicationSubmitted={() => {
-                      setHasApplied(true);
-                      // Optionally reload film data
-                    }}
                   />
                 </div>
               </div>
@@ -841,9 +819,6 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
             <InvestmentPanel
               film={film}
               hasApplied={hasApplied}
-              onApplicationSubmitted={() => {
-                setHasApplied(true);
-              }}
             />
           </div>
 
