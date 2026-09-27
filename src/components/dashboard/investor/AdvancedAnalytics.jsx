@@ -31,63 +31,11 @@ import {
   ComposedChart,
 } from "recharts";
 
-// ─── API ENDPOINT PLACEHOLDERS ───────────────────────────────────────────────
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { getInvestorAnalytics } from "@/services/dashboardService";
 
-// ─── STATIC DATA ─────────────────────────────────────────────────────────────
-const STATIC_SUMMARY = {
-  totalViews:     { value: "24,660", delta: "+2.9%", label: "Project page views", positive: true },
-  revenue:        { value: "$89,250", delta: "+4.7%", label: "Total revenue generated", positive: true },
-  activeUsers:    { value: "367", delta: "+7.5%", label: "Currently active users", positive: true },
-  projects:       { value: "28", delta: "+7.1%", label: "Active projects on platform", positive: true },
-  engagementRate: { value: "85%", delta: "+3.7%", label: "User engagement rate", positive: true },
-  avgSession:     { value: "8m 24s", delta: "+1.5%", label: "Average user session time", positive: true },
-};
+const TABS = ["Performance", "Projects"];
 
-const STATIC_PERFORMANCE_DATA = [
-  { month: "Jan", views: 4000, engagement: 85 },
-  { month: "Feb", views: 3000, engagement: 70 },
-  { month: "Mar", views: 2000, engagement: 60 },
-  { month: "Apr", views: 2800, engagement: 75 },
-  { month: "May", views: 1900, engagement: 55 },
-  { month: "Jun", views: 2400, engagement: 68 },
-  { month: "Jul", views: 3800, engagement: 92 },
-];
-
-const STATIC_INVESTMENT_FLOW_DATA = [
-  { time: "5m ago", value: 8 },
-  { time: "4m ago", value: 12 },
-  { time: "3m ago", value: 16 },
-  { time: "2m ago", value: 20 },
-  { time: "1m ago", value: 22 },
-  { time: "Now",    value: 26 },
-];
-
-const STATIC_ENGAGEMENT_RATE = [
-  { time: "5m ago", value: 60 },
-  { time: "4m ago", value: 65 },
-  { time: "3m ago", value: 70 },
-  { time: "2m ago", value: 75 },
-  { time: "1m ago", value: 72 },
-  { time: "Now",    value: 80 },
-];
-
-const STATIC_ACTIVE_USERS = [
-  { time: "6m ago", users: 280 },
-  { time: "5m ago", users: 310 },
-  { time: "4m ago", users: 295 },
-  { time: "3m ago", users: 330 },
-  { time: "2m ago", users: 345 },
-  { time: "1m ago", users: 360 },
-  { time: "Now",    users: 367 },
-];
-
-const STATIC_ACTIVITY_FEED = [
-  { id: 1, type: "investment", message: "New investment of $33,400 received", time: "2:10:41 PM" },
-  { id: 2, type: "milestone",  message: "Project reached milestone: 1000+ views this hour", time: "2:10:13 PM" },
-];
-
-const TABS = ["Performance", "Projects", "Audience", "Revenue"];
+const POLL_MS = 15000;
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -116,20 +64,52 @@ export default function AdvancedAnalytics() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "Performance";
 
-  const [activeTab, setActiveTab]       = useState(TABS.includes(initialTab) ? initialTab : "Performance");
-  const [user, setUser]                 = useState(null);
-  const [summary]                       = useState(STATIC_SUMMARY);
-  const [performanceData]               = useState(STATIC_PERFORMANCE_DATA);
-  const [investmentFlow]                = useState(STATIC_INVESTMENT_FLOW_DATA);
-  const [engagementRate]                = useState(STATIC_ENGAGEMENT_RATE);
-  const [activeUsers]                   = useState(STATIC_ACTIVE_USERS);
-  const [activityFeed]                  = useState(STATIC_ACTIVITY_FEED);
+  const [activeTab, setActiveTab] = useState(
+    TABS.includes(initialTab) ? initialTab : "Performance"
+  );
+  const [user, setUser] = useState(null);
+  const [summary, setSummary] = useState({});
+  const [performanceData, setPerformanceData] = useState([]);
+  const [projectRows, setProjectRows] = useState([]);
+  const [activityFeed, setActivityFeed] = useState([]);
 
+  const loadAnalytics = React.useCallback(() => {
+    return getInvestorAnalytics()
+      .then((data) => {
+        setSummary(data.summary || {});
+        setPerformanceData(
+          (data.performance_data || []).map((row) => ({
+            month: row.month,
+            invested: row.invested,
+            views: row.invested,
+          }))
+        );
+        setProjectRows(data.project_rows || []);
+        setActivityFeed(data.activity_feed || []);
+      })
+      .catch(() => {
+        setSummary({});
+        setPerformanceData([]);
+        setProjectRows([]);
+        setActivityFeed([]);
+      });
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
     setUser(stored ? JSON.parse(stored) : { full_name: "Investor" });
-  }, []);
+    loadAnalytics();
+  }, [loadAnalytics]);
+
+  useEffect(() => {
+    const interval = setInterval(loadAnalytics, POLL_MS);
+    const onFocus = () => loadAnalytics();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [loadAnalytics]);
 
 
 
@@ -186,13 +166,13 @@ export default function AdvancedAnalytics() {
   // ── SUMMARY CARDS ───────────────────────────────────────────────────────────
   const renderSummaryCards = () => {
     const cards = [
-      { key: "totalViews", icon: Eye, label: "Total Views", data: summary.totalViews, color: "text-blue-500", bg: "bg-blue-500/10", tab: "Performance" },
-      { key: "revenue", icon: DollarSign, label: "Revenue", data: summary.revenue, color: "text-[#18C964]", bg: "bg-[#18C964]/10", tab: "Revenue" },
-      { key: "activeUsers", icon: Users, label: "Active Users", data: summary.activeUsers, color: "text-purple-500", bg: "bg-purple-500/10", tab: "Audience" },
-      { key: "projects", icon: Film, label: "Projects", data: summary.projects, color: "text-red-500", bg: "bg-red-500/10", tab: "Projects" },
-      { key: "engagementRate", icon: TrendingUp, label: "Engagement Rate", data: summary.engagementRate, color: "text-[#F5A524]", bg: "bg-[#F5A524]/10", tab: "Audience" },
-      { key: "avgSession", icon: Clock, label: "Avg Session", data: summary.avgSession, color: "text-pink-500", bg: "bg-pink-500/10", tab: "Audience" },
-    ];
+      { key: "total_invested", icon: DollarSign, label: "Total Invested", data: summary.total_invested, color: "text-[#18C964]", bg: "bg-[#18C964]/10", tab: "Performance" },
+      { key: "portfolio_views", icon: Eye, label: "Portfolio Views", data: summary.portfolio_views, color: "text-blue-500", bg: "bg-blue-500/10", tab: "Performance" },
+      { key: "active_projects", icon: Film, label: "Active Projects", data: summary.active_projects, color: "text-red-500", bg: "bg-red-500/10", tab: "Projects" },
+      { key: "pending_offers", icon: Users, label: "Pending Offers", data: summary.pending_offers, color: "text-purple-500", bg: "bg-purple-500/10", tab: "Projects" },
+      { key: "average_roi", icon: TrendingUp, label: "Avg ROI", data: summary.average_roi, color: "text-[#F5A524]", bg: "bg-[#F5A524]/10", tab: "Performance" },
+      { key: "engagement_rate", icon: Clock, label: "Engagement", data: summary.engagement_rate, color: "text-pink-500", bg: "bg-pink-500/10", tab: "Performance" },
+    ].filter((c) => c.data && c.data.value !== undefined);
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
@@ -214,17 +194,20 @@ export default function AdvancedAnalytics() {
                 <p className="text-2xl font-bold text-white mb-1.5 tracking-tight group-hover:text-red-500 transition-colors">
                   {c.data.value}
                 </p>
-                <div className="flex items-center gap-1.5">
-                  {c.data.positive ? (
-                    <TrendingUp size={14} className="text-[#18C964]" />
-                  ) : (
-                    <ArrowDownRight size={14} className="text-red-500" />
-                  )}
-                  <span className={`text-xs font-bold tracking-wider ${c.data.positive ? "text-[#18C964]" : "text-red-500"}`}>
-                    {c.data.delta}
-                  </span>
-                  <span className="text-xs text-zinc-500 ml-1">vs last month</span>
-                </div>
+                {c.data.delta ? (
+                  <div className="flex items-center gap-1.5">
+                    {c.data.positive ? (
+                      <TrendingUp size={14} className="text-[#18C964]" />
+                    ) : (
+                      <ArrowDownRight size={14} className="text-red-500" />
+                    )}
+                    <span className={`text-xs font-bold tracking-wider ${c.data.positive ? "text-[#18C964]" : "text-red-500"}`}>
+                      {c.data.delta}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-500">{c.data.label}</p>
+                )}
               </div>
             </button>
           );
@@ -233,130 +216,7 @@ export default function AdvancedAnalytics() {
     );
   };
 
-  // ── LIVE DATA STREAMS ───────────────────────────────────────────────────────
-  const renderLiveDataStreams = () => (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Activity size={18} className="text-red-500" />
-        <h3 className="text-lg font-bold text-white tracking-tight">Live Data Streams</h3>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#18C964] bg-[#18C964]/10">
-          Real-time
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {/* Views per Minute */}
-        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-white">Live Views</h3>
-              <p className="text-xs text-zinc-400 mt-1">Views per Minute</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Eye size={16} className="text-zinc-500" />
-            </div>
-          </div>
-          <div className="h-[180px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={investmentFlow}>
-                <defs>
-                  <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E50914" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" name="Views" stroke="#E50914" strokeWidth={3} fill="url(#viewsGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Investment Flow */}
-        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-white">Live Investments</h3>
-              <p className="text-xs text-zinc-400 mt-1">Investment Flow</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <DollarSign size={16} className="text-zinc-500" />
-            </div>
-          </div>
-          <div className="h-[180px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={investmentFlow}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="value" name="Amount" stroke="#18C964" strokeWidth={3} dot={{ fill: '#18C964', r: 4 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Live Engagement Rate */}
-        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-white">Live Engagement</h3>
-              <p className="text-xs text-zinc-400 mt-1">Engagement Rate (%)</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp size={16} className="text-zinc-500" />
-            </div>
-          </div>
-          <div className="h-[180px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={engagementRate}>
-                <defs>
-                  <linearGradient id="engagGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" name="Engagement" stroke="#3B82F6" strokeWidth={3} fill="url(#engagGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Active Users */}
-        <div className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-white">Live Users</h3>
-              <p className="text-xs text-zinc-400 mt-1">Active Users</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-zinc-500" />
-            </div>
-          </div>
-          <div className="h-[180px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={activeUsers}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="users" name="Users" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const renderLiveDataStreams = () => null;
 
   // ── TABBED CHARTS ───────────────────────────────────────────────────────────
   const renderTabbedCharts = () => (
@@ -383,23 +243,29 @@ export default function AdvancedAnalytics() {
           <div className="flex items-center gap-2 mb-4">
             <Activity size={16} className="text-red-500" />
             <h3 className="text-lg font-bold text-white">
-              {activeTab === "Performance" && "Multi Metric Performance"}
-              {activeTab === "Projects" && "Project Activity"}
-              {activeTab === "Audience" && "Engagement Rate"}
-              {activeTab === "Revenue" && "Revenue Trend"}
+              {activeTab === "Performance" && "Accepted investments (6 mo)"}
+              {activeTab === "Projects" && "Funding progress"}
             </h3>
           </div>
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
+              {activeTab === "Performance" ? (
               <ComposedChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
                 <XAxis dataKey="month" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="right" orientation="right" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar yAxisId="left" dataKey="views" name="Views" fill="#E50914" radius={[6, 6, 0, 0]} barSize={32} />
-                <Line yAxisId="right" dataKey="engagement" name="Engagement" type="monotone" stroke="#3B82F6" strokeWidth={3} dot={{ fill: '#3B82F6', r: 4 }} />
+                <Bar dataKey="invested" name="Invested ($)" fill="#E50914" radius={[6, 6, 0, 0]} barSize={32} />
               </ComposedChart>
+              ) : (
+              <BarChart data={projectRows}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="title" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 10 }} axisLine={false} tickLine={false} interval={0} angle={-20} textAnchor="end" height={60} />
+                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="progress" name="Funding %" fill="#18C964" radius={[6, 6, 0, 0]} barSize={28} />
+              </BarChart>
+              )}
             </ResponsiveContainer>
           </div>
         </div>
@@ -407,32 +273,33 @@ export default function AdvancedAnalytics() {
         {/* Right Chart */}
         <div>
           <h3 className="text-lg font-bold text-white mb-4">
-            {activeTab === "Performance" && "Investment Flow Analysis"}
-            {activeTab === "Projects" && "Projects by Stage"}
-            {activeTab === "Audience" && "Active Users"}
-            {activeTab === "Revenue" && "Revenue Distribution"}
+            {activeTab === "Performance" ? "Portfolio projects" : "Investment amounts"}
           </h3>
-          <div className="h-[260px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[
-                { time: "Jan", value: 8 }, { time: "Feb", value: 12 },
-                { time: "Mar", value: 16 }, { time: "Apr", value: 20 },
-                { time: "May", value: 22 }, { time: "Jun", value: 26 },
-                { time: "Jul", value: 32 },
-              ]}>
-                <defs>
-                  <linearGradient id="flowGrad2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E50914" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#E50914" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="time" stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis stroke="#52525B" tick={{ fill: '#A1A1AA', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" name="Flow" stroke="#E50914" strokeWidth={3} fill="url(#flowGrad2)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="h-[260px] w-full overflow-auto">
+            {projectRows.length > 0 ? (
+              <table className="w-full text-left text-sm text-zinc-300">
+                <thead>
+                  <tr className="text-zinc-500 border-b border-[#2A2A2A]">
+                    <th className="pb-2">Project</th>
+                    <th className="pb-2">Invested</th>
+                    <th className="pb-2">Views</th>
+                    <th className="pb-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {projectRows.map((row) => (
+                    <tr key={row.title} className="border-b border-[#2A2A2A]/50">
+                      <td className="py-2 font-medium text-white">{row.title}</td>
+                      <td className="py-2">${Number(row.invested).toLocaleString()}</td>
+                      <td className="py-2">{row.views}</td>
+                      <td className="py-2">{row.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-zinc-500 text-sm pt-4">No accepted investments yet.</p>
+            )}
           </div>
         </div>
       </div>

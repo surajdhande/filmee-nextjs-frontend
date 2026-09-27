@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   getOpportunities,
   getTalentData,
@@ -647,7 +647,10 @@ function MyApplicationsPage({ applications, onWithdraw, onNavChange, onViewAppli
                     VIEW APPLICATION
                   </button>
                   <button 
-                    onClick={() => onMessageFilmmaker && onMessageFilmmaker(app.filmakerId)}
+                    onClick={() =>
+                      onMessageFilmmaker &&
+                      onMessageFilmmaker(app.filmakerId, app.projectId, app.director)
+                    }
                     className="border border-zinc-800 hover:bg-zinc-800/40 text-red-500 text-[10px] md:text-[11px] font-black py-2 md:py-2.5 px-4 md:px-6 rounded-xl uppercase tracking-wider transition-all duration-200 text-center"
                   >
                     MESSAGE
@@ -777,27 +780,47 @@ function ApplyModal({ opportunity, onClose, onSubmit }) {
   );
 }
 
-// ─── Placeholder pages for other nav items ────────────────────────────────────
-function PlaceholderPage({ title }) {
+function PortfolioPage({ profile, onNavChange }) {
+  const website = profile?.website_portfolio_url;
   return (
-    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
-      <h2 className="text-xl md:text-2xl font-black text-white tracking-tight mb-4">
-        {title}
+    <main className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 space-y-6">
+      <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
+        Portfolio
       </h2>
-      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-8 md:p-12 flex flex-col items-center justify-center text-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-zinc-800/60 flex items-center justify-center">
-          <span className="text-3xl">🎬</span>
-        </div>
-        <p className="text-zinc-400 text-sm font-semibold">
-          {title} — Coming Soon
+      <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-8 space-y-4">
+        <p className="text-sm text-zinc-400">
+          Your public portfolio link and profile summary from your Filmee account.
         </p>
-        <p className="text-zinc-600 text-xs max-w-xs">
-          This section is under construction. Check back soon for updates.
-        </p>
+        {website ? (
+          <a
+            href={website.startsWith("http") ? website : `https://${website}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-red-500 font-bold text-sm hover:text-red-400"
+          >
+            View portfolio site
+          </a>
+        ) : (
+          <p className="text-zinc-500 text-sm">No portfolio URL on file yet.</p>
+        )}
+        <button
+          type="button"
+          onClick={() => onNavChange("settings")}
+          className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white"
+        >
+          Update in profile settings →
+        </button>
       </div>
     </main>
   );
 }
+
+const VALID_TABS = new Set([
+  "overview",
+  "find-roles",
+  "applications",
+  "portfolio",
+]);
 
 // ─── Page router ──────────────────────────────────────────────────────────────
 function renderPage(activeNav, onNavChange, pageProps) {
@@ -833,7 +856,12 @@ function renderPage(activeNav, onNavChange, pageProps) {
         />
       );
     case "portfolio":
-      return <PlaceholderPage title="Portfolio" />;
+      return (
+        <PortfolioPage
+          profile={pageProps.talentProfile}
+          onNavChange={onNavChange}
+        />
+      );
     default:
       return (
         <OverviewPage
@@ -871,9 +899,15 @@ function formatOpenRoles(rawRoles) {
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
+const TALENT_POLL_MS = 20000;
+
 export default function Dashboard() {
   const router = useRouter();
-  const [activeNav, setActiveNav] = useState("overview");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialNav =
+    tabParam && VALID_TABS.has(tabParam) ? tabParam : "overview";
+  const [activeNav, setActiveNav] = useState(initialNav);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ── Toast notification state ────────────────────────────────────────────────
@@ -893,8 +927,9 @@ export default function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [dbOpportunities, setDbOpportunities] = useState([]);
   const [userName, setUserName] = useState("User");
+  const [talentProfile, setTalentProfile] = useState(null);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       // Load user info from localStorage
       const storedUser = localStorage.getItem("user");
@@ -905,6 +940,9 @@ export default function Dashboard() {
 
       // 1. Fetch live user data & applications
       const talentData = await getTalentData();
+      if (talentData?.user) {
+        setTalentProfile(talentData.user);
+      }
       if (talentData && Array.isArray(talentData.applications)) {
         const mappedApps = talentData.applications.map((a) => {
           let statusText = "Under Review";
@@ -960,19 +998,24 @@ export default function Dashboard() {
       console.error("Failed to load talent dashboard data:", err);
       showToast("Failed to load dashboard data. Please try refreshing.", "error");
     }
-  };
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    Promise.resolve().then(() => {
-      if (isMounted) {
-        loadDashboardData();
-      }
-    });
+    if (tabParam && VALID_TABS.has(tabParam)) {
+      setActiveNav(tabParam);
+    }
+  }, [tabParam]);
+
+  useEffect(() => {
+    loadDashboardData();
+    const interval = setInterval(loadDashboardData, TALENT_POLL_MS);
+    const onFocus = () => loadDashboardData();
+    window.addEventListener("focus", onFocus);
     return () => {
-      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
     };
-  }, []);
+  }, [loadDashboardData]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -985,6 +1028,11 @@ export default function Dashboard() {
       router.push("/dashboard/talent/subscription");
     } else if (id === "messages") {
       router.push("/dashboard/talent/messages");
+    } else if (id === "settings") {
+      router.push("/dashboard/talent/settings");
+    } else if (VALID_TABS.has(id)) {
+      setActiveNav(id);
+      router.replace(`/dashboard/talent?tab=${id}`, { scroll: false });
     } else {
       setActiveNav(id);
     }
@@ -1049,16 +1097,24 @@ export default function Dashboard() {
   };
 
   const handleViewProjectDetails = (projectId) => {
-    router.push(`/dashboard/talent/application/${projectId}`);
+    router.push(`/dashboard/talent/application/${projectId}?view=project`);
   };
 
-  const handleMessageFilmmaker = (filmakerId) => {
-    // Navigate to messages page with the correct parameters
-    if (filmakerId) {
-      router.push(`/dashboard/talent/messages?receiverId=${filmakerId}`);
-    } else {
-      router.push(`/dashboard/talent/messages`);
+  const handleMessageFilmmaker = (filmmakerId, projectId, filmmakerName) => {
+    if (!filmmakerId) {
+      router.push("/dashboard/talent/messages");
+      return;
     }
+    const params = new URLSearchParams({
+      receiverId: String(filmmakerId),
+    });
+    if (filmmakerName) {
+      params.set("receiverName", filmmakerName);
+    }
+    if (projectId) {
+      params.set("projectId", String(projectId));
+    }
+    router.push(`/dashboard/talent/messages?${params.toString()}`);
   };
 
   // Create a Set of project IDs that the user has already applied to
@@ -1074,6 +1130,7 @@ export default function Dashboard() {
     onViewDetails: handleViewProjectDetails,
     onViewApplication: handleViewApp,
     onMessageFilmmaker: handleMessageFilmmaker,
+    talentProfile,
   };
 
   // Overview page also needs applications for the Recent Applications section

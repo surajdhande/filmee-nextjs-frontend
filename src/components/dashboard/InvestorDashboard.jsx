@@ -29,7 +29,9 @@ import {
 import DashboardLayout from "./DashboardLayout";
 import DashboardHeader from "./DashboardHeader";
 import { getProjects } from "@/services/projectService";
-import { getMyInvestments } from "@/services/investorService";
+import { getInvestorOverview } from "@/services/dashboardService";
+
+const OVERVIEW_POLL_MS = 15000;
 
 // Custom Tooltip for recharts
 const CustomTooltip = ({ active, payload }) => {
@@ -47,13 +49,7 @@ const CustomTooltip = ({ active, payload }) => {
 
 export default function InvestorDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : { full_name: "Investor", email: "" };
-    }
-    return { full_name: "Investor", email: "" };
-  });
+  const [user, setUser] = useState(null);
   const [authError, setAuthError] = useState(false);
 
   const [stats, setStats] = useState({
@@ -80,7 +76,55 @@ export default function InvestorDashboard() {
   const [recentInvestments, setRecentInvestments] = useState([]);
   const [investmentsLoading, setInvestmentsLoading] = useState(true);
 
+  const loadOverview = React.useCallback(() => {
+    return getInvestorOverview()
+      .then((overview) => {
+        if (!overview) return;
+        const s = overview.stats || {};
+        setStats({
+          totalInvested: Math.round(s.total_invested || 0),
+          portfolioValue: s.portfolio_value || 0,
+          averageRoi: s.average_roi || 0,
+          activeProjects: s.active_projects || 0,
+          completedProjects: s.completed_projects || 0,
+        });
+        setPortfolioHistory(overview.portfolio_history || []);
+        setDistributionData(overview.genre_distribution || []);
+        const mapped = (overview.recent_investments || []).map((inv) => ({
+          id: inv.project_id,
+          title: inv.title,
+          phase: inv.phase || "N/A",
+          invested: `$${Number(inv.invested).toLocaleString()}`,
+          imageUrl:
+            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=300&q=80",
+        }));
+        setRecentInvestments(mapped);
+      })
+      .catch((err) => {
+        const status = err?.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuthError(true);
+          router.push("/login");
+        } else {
+          setRecentInvestments([]);
+        }
+      })
+      .finally(() => setInvestmentsLoading(false));
+  }, [router]);
+
   useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!storedUser || !token) {
+      router.push("/login");
+      return;
+    }
+
+    setUser(JSON.parse(storedUser));
+
     getProjects()
       .then((data) => {
         if (!data) return;
@@ -107,107 +151,20 @@ export default function InvestorDashboard() {
       .catch(() => setHotProjects([]))
       .finally(() => setProjectsLoading(false));
 
-    getMyInvestments()
-      .then((data) => {
-        if (!data || data.length === 0) {
-          setRecentInvestments([]);
-          setStats({
-            totalInvested: 0,
-            portfolioValue: 0,
-            averageRoi: 0,
-            activeProjects: 0,
-            completedProjects: 0,
-          });
-          setDistributionData([]);
-          setPortfolioHistory([]);
-          return;
-        }
+    loadOverview();
+  }, [router, loadOverview]);
 
-        const mapped = data.slice(0, 5).map((inv) => ({
-          id: inv.project_id,
-          title: inv.title,
-          phase: inv.project_status?.replace(/_/g, " ") ?? "N/A",
-          invested: `$${Number(inv.investment_amount).toLocaleString()}`,
-          imageUrl:
-            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=300&q=80",
-        }));
-        setRecentInvestments(mapped);
+  useEffect(() => {
+    if (!user) return undefined;
 
-        const totalInvested = data.reduce(
-          (sum, inv) => sum + parseFloat(inv.investment_amount || 0),
-          0
-        );
-
-        const averageRoi = 18.5;
-        const portfolioValue = Math.round(totalInvested * (1 + averageRoi / 100));
-
-        const activeProjects = data.filter(
-          (inv) => inv.project_status !== "COMPLETED"
-        ).length;
-        const completedProjects = data.filter(
-          (inv) => inv.project_status === "COMPLETED"
-        ).length;
-
-        setStats({
-          totalInvested: Math.round(totalInvested),
-          portfolioValue,
-          averageRoi,
-          activeProjects,
-          completedProjects,
-        });
-
-        const genreMap = {};
-        data.forEach((inv) => {
-          const g = inv.genre || "Other";
-          const val = parseFloat(inv.investment_amount || 0);
-          genreMap[g] = (genreMap[g] || 0) + val;
-        });
-
-        const distChart = Object.keys(genreMap).map((key) => ({
-          genre: key,
-          value: genreMap[key],
-        }));
-        setDistributionData(distChart);
-
-        const monthlySum = {};
-        const months = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"];
-        months.forEach((m) => {
-          monthlySum[m] = 0;
-        });
-
-        data.forEach((inv) => {
-          const date = new Date(inv.created_at || Date.now());
-          const m = date.toLocaleString("default", { month: "short" });
-          if (monthlySum[m] !== undefined) {
-            monthlySum[m] += parseFloat(inv.investment_amount || 0);
-          } else {
-            monthlySum[m] = parseFloat(inv.investment_amount || 0);
-          }
-        });
-
-        let cumulative = 0;
-        const historyChart = Object.keys(monthlySum).map((m) => {
-          cumulative += monthlySum[m];
-          return {
-            month: m,
-            value: cumulative,
-          };
-        });
-        setPortfolioHistory(historyChart);
-      })
-      .catch((err) => {
-        const status = err?.response?.status;
-        if (status === 401 || status === 403) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          setAuthError(true);
-          router.push("/login");
-        } else {
-          setRecentInvestments([]);
-        }
-      })
-      .finally(() => setInvestmentsLoading(false));
-  }, [router]);
+    const interval = setInterval(loadOverview, OVERVIEW_POLL_MS);
+    const onFocus = () => loadOverview();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [user, loadOverview]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");

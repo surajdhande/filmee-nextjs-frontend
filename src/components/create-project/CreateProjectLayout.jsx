@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { createProject } from "@/services/projectService";
+import {
+  createProject,
+  uploadProjectPitchDeck,
+  uploadProjectLookbook,
+} from "@/services/projectService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 import CreateProjectHeader from "./CreateProjectHeader";
 import { useRouter } from "next/navigation";
 import StepOne from "./StepOne";
@@ -110,6 +115,18 @@ export default function CreateProjectLayout({
   setCurrentStep(currentStep + 1);
 } else {
   try {
+    let pitch_deck_url = null;
+    let lookbook_url = null;
+
+    if (projectData.pitchDeck) {
+      const uploaded = await uploadProjectPitchDeck(projectData.pitchDeck);
+      pitch_deck_url = uploaded.url;
+    }
+    if (projectData.lookbook) {
+      const uploaded = await uploadProjectLookbook(projectData.lookbook);
+      lookbook_url = uploaded.url;
+    }
+
     const payload = {
       title: projectData.title,
       genre: projectData.genre,
@@ -130,14 +147,17 @@ export default function CreateProjectLayout({
         : ["General Role"],
     };
 
-    const response = await createProject(payload);
+    if (pitch_deck_url) payload.pitch_deck_url = pitch_deck_url;
+    if (lookbook_url) payload.lookbook_url = lookbook_url;
+
+    await createProject(payload);
 
     alert("Project created successfully!");
 
     router.push("/dashboard/filmmaker/projects");
 
   } catch (error) {
-    alert(error.response?.data?.message || error.message);
+    alert(getApiErrorMessage(error));
   }}
   };
 

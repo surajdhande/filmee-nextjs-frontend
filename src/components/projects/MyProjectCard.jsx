@@ -17,9 +17,11 @@ export default function MyProjectCard({ project, onUpdated }) {
       : 0;
   const projectStatusMap = {
     DEVELOPMENT: "Development",
+    FUNDING: "Funding",
     PRE_PRODUCTION: "Pre-Production",
     PRODUCTION: "Production",
     POST_PRODUCTION: "Post-Production",
+    COMPLETED: "Completed",
     RELEASED: "Released",
   };
   return (
@@ -79,7 +81,7 @@ export default function MyProjectCard({ project, onUpdated }) {
 
           {/* Stats */}
 
-          <div className="mt-5 grid grid-cols-4 gap-8">
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
 
             <div>
               <p className="text-sm text-gray-400">
@@ -118,6 +120,16 @@ export default function MyProjectCard({ project, onUpdated }) {
 
               <p className="text-xl font-bold text-white">
                 {project.applications ?? 0}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-400">
+                Views
+              </p>
+
+              <p className="text-xl font-bold text-white">
+                {Number(project.view_count ?? 0).toLocaleString()}
               </p>
             </div>
 

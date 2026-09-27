@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getProjectDetail } from "@/services/projectService";
-import { createInvestment } from "@/services/investorService";
+import { getProjectDetail, recordProjectView } from "@/services/projectService";
+import { createInvestment, getMyInvestments } from "@/services/investorService";
 import { sendMessage } from "@/services/messageService";
 import EscrowPaymentFlow from "./EscrowPaymentFlow";
 
@@ -27,6 +27,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
+import { shareProject } from "@/lib/shareProject";
+import { useSavedProject } from "@/hooks/useSavedProject";
 
 // ─────────────────────────────────────────────
 // Helper: map raw API project → UI film shape
@@ -71,7 +73,7 @@ function mapProjectToFilm(p) {
     raised,
     goal: target,
     investors: p.investor_count ?? 0,
-    views: 0,
+    views: Number(p.view_count) || 0,
     targetRoi: p.expected_roi_percentage ? `${p.expected_roi_percentage}%` : "N/A",
     remaining,
 
@@ -128,6 +130,11 @@ const TABS = ["Overview", "Financials", "Team", "Media"];
 
 // ── Tab components ────────────────────────────────────────────────────────────
 
+function openDocumentUrl(url) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 function OverviewTab({ film }) {
   return (
     <div className="space-y-6 ">
@@ -158,7 +165,14 @@ function OverviewTab({ film }) {
           {film.documents.map((doc, i) => (
             <button
               key={i}
-              className="w-full flex items-center gap-3 border border-[#E50914]/30 rounded-xl px-4 py-3 text-[13px] font-bold uppercase tracking-wider text-[#E50914] hover:bg-[#E50914]/10 transition-all duration-200"
+              type="button"
+              disabled={!doc.url}
+              onClick={() => openDocumentUrl(doc.url)}
+              className={`w-full flex items-center gap-3 border rounded-xl px-4 py-3 text-[13px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                doc.url
+                  ? "border-[#E50914]/30 text-[#E50914] hover:bg-[#E50914]/10 cursor-pointer"
+                  : "border-[#2A2A2A] text-zinc-500 cursor-not-allowed"
+              }`}
             >
               {doc.type === "play" ? <Play size={14} /> : <Download size={14} />}
               {doc.label}
@@ -292,10 +306,10 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
   setInvestError("");
 
   try {
-    await createInvestment(film.id, parseFloat(amount));
+    const result = await createInvestment(film.id, parseFloat(amount));
 
     if (onSuccess) {
-      onSuccess(parseFloat(amount));
+      onSuccess(parseFloat(amount), result);
     }
   } catch (err) {
     const msg =
@@ -455,11 +469,12 @@ function ApplyToInvestModal({ film, onClose, onSuccess }) {
 }
 
 // ── Investment Panel (right column) ──────────────────────────────────────────
-function InvestmentPanel({ film, hasApplied }) {
+function InvestmentPanel({ film, hasApplied, investmentStatus, onInvestmentSubmitted }) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [escrowOpen, setEscrowOpen] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState("");
+  const [escrowInfo, setEscrowInfo] = useState(null);
 
   function handleContactFilmaker() {
     const params = new URLSearchParams({
@@ -475,11 +490,29 @@ function InvestmentPanel({ film, hasApplied }) {
     setModalOpen(false);
   }
 
-  function handleInvestmentSuccess(amount) {
+  function handleInvestmentSuccess(amount, result) {
     setInvestmentAmount(amount);
+    setEscrowInfo(result?.escrow || null);
     setModalOpen(false);
     setEscrowOpen(true);
+    if (onInvestmentSubmitted) {
+      onInvestmentSubmitted("PENDING");
+    }
   }
+
+  const statusUpper = (investmentStatus || "").toUpperCase();
+  const appliedLabel =
+    statusUpper === "ACCEPTED"
+      ? "Investment Accepted"
+      : statusUpper === "DECLINED"
+      ? "Application Declined"
+      : "Application Submitted";
+  const appliedClass =
+    statusUpper === "ACCEPTED"
+      ? "bg-emerald-900/40 text-emerald-400"
+      : statusUpper === "DECLINED"
+      ? "bg-red-900/30 text-red-400"
+      : "bg-zinc-800 text-zinc-400";
 
   return (
     <>
@@ -530,9 +563,9 @@ function InvestmentPanel({ film, hasApplied }) {
             Apply to Invest
           </button>
         ) : (
-          <div className="w-full flex items-center justify-center gap-2 bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider text-sm py-3.5 rounded-full cursor-not-allowed">
+          <div className={`w-full flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-sm py-3.5 rounded-full cursor-not-allowed ${appliedClass}`}>
             <ShieldCheck size={16} />
-            Application Submitted
+            {appliedLabel}
           </div>
         )}
         <button
@@ -555,6 +588,7 @@ function InvestmentPanel({ film, hasApplied }) {
       <EscrowPaymentFlow
         film={film}
         investmentAmount={investmentAmount}
+        escrowInfo={escrowInfo}
         onClose={() => setEscrowOpen(false)}
       />
     )}
@@ -582,6 +616,11 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
   const [heroIdx, setHeroIdx] = useState(0);
   const [user, setUser] = useState(null);
   const [hasApplied, setHasApplied] = useState(false);
+  const [investmentStatus, setInvestmentStatus] = useState(null);
+  const [shareNotice, setShareNotice] = useState("");
+  const projectIdForSave = film?.id ?? filmId;
+  const { saved: isSaved, toggle: toggleSaved, loading: saveLoading } =
+    useSavedProject(projectIdForSave, "investor");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -596,8 +635,22 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
       try {
         const raw = await getProjectDetail(filmId);
         setFilm(mapProjectToFilm(raw));
-        
-        // Check if user already applied to this project
+
+        const sessionKey = `filmee_viewed_${filmId}`;
+        if (typeof window !== "undefined" && !sessionStorage.getItem(sessionKey)) {
+          try {
+            const viewResult = await recordProjectView(filmId);
+            sessionStorage.setItem(sessionKey, "1");
+            if (viewResult?.view_count != null) {
+              setFilm((prev) =>
+                prev ? { ...prev, views: Number(viewResult.view_count) } : prev
+              );
+            }
+          } catch (viewErr) {
+            console.warn("Could not record project view:", viewErr);
+          }
+        }
+
         await checkIfUserApplied();
       } catch (err) {
         console.error("Failed to load film:", err);
@@ -610,28 +663,27 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
   }, [filmId, initialFilm]);
 
   // Check if the current user has already applied to this project
+  async function refreshFilmFromApi() {
+    try {
+      const raw = await getProjectDetail(filmId);
+      setFilm(mapProjectToFilm(raw));
+    } catch (err) {
+      console.error("Failed to refresh film:", err);
+    }
+  }
+
   async function checkIfUserApplied() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/v1/investments/my-investments",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+
+      const userInvestments = await getMyInvestments();
+      const match = (userInvestments || []).find(
+        (inv) => String(inv.project_id) === String(filmId)
       );
-      
-      if (response.ok) {
-        const data = await response.json();
-        const userInvestments = data.projects || [];
-        const applied = userInvestments.some(
-          (inv) => String(inv.project_id) === String(filmId)
-        );
-        setHasApplied(applied);
-      }
+      const status = match?.investment_status?.toUpperCase() || null;
+      setInvestmentStatus(status);
+      setHasApplied(Boolean(match && status !== "DECLINED"));
     } catch (err) {
       console.error("Failed to check application status:", err);
     }
@@ -713,11 +765,42 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
               Back to Dashboard
             </button>
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 border border-zinc-700 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:bg-zinc-800 transition duration-200">
+              {shareNotice ? (
+                <span className="text-xs text-emerald-400">{shareNotice}</span>
+              ) : null}
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!film) return;
+                  try {
+                    const result = await shareProject({
+                      title: film.title,
+                      projectId: film.id,
+                      role: "investor",
+                    });
+                    setShareNotice(
+                      result === "copied" ? "Link copied" : "Shared"
+                    );
+                    setTimeout(() => setShareNotice(""), 2500);
+                  } catch {
+                    setShareNotice("Could not share");
+                  }
+                }}
+                className="flex items-center gap-2 border border-zinc-700 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:bg-zinc-800 transition duration-200"
+              >
                 <Share2 size={13} /> Share
               </button>
-              <button className="flex items-center gap-2 border border-zinc-700 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:bg-zinc-800 transition duration-200">
-                <Bookmark size={13} /> Save
+              <button
+                type="button"
+                disabled={saveLoading || !film}
+                onClick={() => toggleSaved()}
+                className={`flex items-center gap-2 border rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition duration-200 ${
+                  isSaved
+                    ? "border-red-600 text-red-400 bg-red-950/30"
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                <Bookmark size={13} /> {isSaved ? "Saved" : "Save"}
               </button>
             </div>
           </div>
@@ -759,6 +842,12 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
                   <InvestmentPanel
                     film={film}
                     hasApplied={hasApplied}
+                    investmentStatus={investmentStatus}
+                    onInvestmentSubmitted={(status) => {
+                      setInvestmentStatus(status);
+                      setHasApplied(true);
+                      refreshFilmFromApi();
+                    }}
                   />
                 </div>
               </div>
@@ -819,6 +908,12 @@ export default function FilmDetailPage({ filmId, film: initialFilm }) {
             <InvestmentPanel
               film={film}
               hasApplied={hasApplied}
+              investmentStatus={investmentStatus}
+              onInvestmentSubmitted={(status) => {
+                setInvestmentStatus(status);
+                setHasApplied(true);
+                refreshFilmFromApi();
+              }}
             />
           </div>
 

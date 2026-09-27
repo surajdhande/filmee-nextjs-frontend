@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,8 +12,6 @@ import {
   BarChart3,
   User,
   Crown,
-  Briefcase,
-  Bookmark,
   Star,
   Folder,
   Settings,
@@ -22,6 +20,7 @@ import {
   ArrowLeftRight,
   DollarSign,
 } from "lucide-react";
+import { getMyInvestments } from "@/services/investorService";
 
 const MENU_CONFIG = {
   FILMMAKER: [
@@ -36,7 +35,7 @@ const MENU_CONFIG = {
       href: "/dashboard/filmmaker/projects",
     },
     {
-      name: "Investor Applications",
+      name: "Applications",
       icon: Users,
       href: "/dashboard/filmmaker/applications",
     },
@@ -69,7 +68,7 @@ const MENU_CONFIG = {
   INVESTOR: [
     { name: "Overview", icon: BarChart3, href: "/dashboard/investor" },
     { name: "Browse Projects", icon: Search, href: "/dashboard/investor/browse" },
-    { name: "My Offers", icon: ArrowLeftRight, href: "/dashboard/investor/offers", badgeCount: 1 },
+    { name: "My Offers", icon: ArrowLeftRight, href: "/dashboard/investor/offers", badgeKey: "pendingOffers" },
     { name: "My Portfolio", icon: DollarSign, href: "/dashboard/investor/portfolio" },
     { name: "Messages", icon: MessageSquare, href: "/dashboard/investor/messages" },
     { name: "Analytics", icon: Film, href: "/dashboard/investor/analytics" },
@@ -88,6 +87,22 @@ const MENU_CONFIG = {
 const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
   const pathname = usePathname();
   const menuItems = MENU_CONFIG[role] || [];
+  const [pendingOffers, setPendingOffers] = useState(0);
+
+  useEffect(() => {
+    if (role !== "INVESTOR") return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    getMyInvestments()
+      .then((list) => {
+        const count = (list || []).filter(
+          (inv) => (inv.investment_status || "").toUpperCase() === "PENDING"
+        ).length;
+        setPendingOffers(count);
+      })
+      .catch(() => setPendingOffers(0));
+  }, [role, pathname]);
 
   return (
     <div className="flex h-full w-[240px] flex-col px-6 pt-4">
@@ -95,6 +110,10 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
         <div className="flex w-full flex-col space-y-2 rounded-[24px] border border-[#2A2A2A] bg-[#141414] pt-5 pb-6">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
+            const badgeCount =
+              item.badgeKey === "pendingOffers" && pendingOffers > 0
+                ? pendingOffers
+                : undefined;
 
             return (
               <Link
@@ -119,9 +138,9 @@ const Sidebar = ({ role = "FILMMAKER", userName = "User" }) => {
                   </span>
                 </div>
 
-                {item.badgeCount !== undefined && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E50914] text-[11px] font-bold text-white">
-                    {item.badgeCount}
+                {badgeCount !== undefined && badgeCount > 0 && (
+                  <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[#E50914] px-1 text-[11px] font-bold text-white">
+                    {badgeCount}
                   </span>
                 )}
               </Link>

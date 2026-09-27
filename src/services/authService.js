@@ -1,7 +1,4 @@
-import axios from "axios";
-
-const API_BASE_URL = "http://127.0.0.1:5000/api/v1/auth";
-
+import { apiClient } from "@/lib/apiClient";
 
 export const signupUser = async (userData) => {
   const payload = {
@@ -13,19 +10,13 @@ export const signupUser = async (userData) => {
     user_role: userData.user_role,
   };
 
-  const response = await axios.post(
-    `${API_BASE_URL}/signup`,
-    payload
-  );
+  const response = await apiClient.post("/auth/signup", payload);
 
   return response.data;
 };
 
 export const loginUser = async (userData) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/login`,
-    userData
-  );
+  const response = await apiClient.post("/auth/login", userData);
 
   return response.data;
 };

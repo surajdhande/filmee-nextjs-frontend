@@ -377,7 +377,7 @@ function SettingsTab({ notifications, onChange }) {
 /* ─────────────────────────────────────────
    TAB: PRIVACY
    ───────────────────────────────────────── */
-function PrivacyTab({ privacy, onChange }) {
+function PrivacyTab({ privacy, onChange, onDownloadData, onDeleteAccount }) {
   const items = [
     {
       key: "profile_visibility",
@@ -425,20 +425,16 @@ function PrivacyTab({ privacy, onChange }) {
         <div className="flex gap-3">
           <button
             id="download-data-btn"
-            onClick={() => {
-              /* TODO: POST /api/v1/investors/data/download */
-              console.log("Download data requested");
-            }}
+            type="button"
+            onClick={() => onDownloadData?.()}
             className="rounded-full border border-[#E50914] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#E50914] hover:bg-[#E50914]/10 transition-all duration-200"
           >
             Download My Data
           </button>
           <button
             id="delete-account-btn"
-            onClick={() => {
-              /* TODO: DELETE /api/v1/investors/account */
-              console.log("Delete account requested");
-            }}
+            type="button"
+            onClick={() => onDeleteAccount?.()}
             className="rounded-full border border-[#E50914] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#E50914] hover:bg-[#E50914]/10 transition-all duration-200"
           >
             Delete Account
@@ -450,6 +446,10 @@ function PrivacyTab({ privacy, onChange }) {
 }
 
 import { getMyProfile, updateMyProfile, uploadProfileImage, getMyInvestments } from "@/services/investorService";
+import {
+  downloadProfileData,
+  requestAccountDeletion,
+} from "@/lib/profileDataActions";
 
 /* ─────────────────────────────────────────
    EDIT PROFILE MODAL
@@ -758,9 +758,9 @@ export default function InvestorProfileSettings() {
           phone: prof.phone_number || "+1 (555) 123-4567",
           website: prof.website_portfolio_url || "www.example.com",
           bio: prof.bio || "Experienced film investor focused on independent cinema and emerging talent.",
-          skills: prof.skills && prof.skills.length > 0 ? prof.skills : ["Film Analysis", "Market Research", "Risk Assessment"],
+          skills: prof.skills || [],
           avatar: prof.profile_image_url || null,
-          achievements: prof.achievements && prof.achievements.length > 0 ? prof.achievements : []
+          achievements: prof.achievements || [],
         });
       }
 
@@ -919,7 +919,24 @@ export default function InvestorProfileSettings() {
                 />
               )}
               {activeTab === "Privacy" && (
-                <PrivacyTab privacy={privacy} onChange={handlePrivacyChange} />
+                <PrivacyTab
+                  privacy={privacy}
+                  onChange={handlePrivacyChange}
+                  onDownloadData={async () => {
+                    try {
+                      await downloadProfileData();
+                    } catch (e) {
+                      alert(e?.response?.data?.message || "Export failed");
+                    }
+                  }}
+                  onDeleteAccount={() =>
+                    requestAccountDeletion({
+                      onSuccess: () => router.push("/login"),
+                      onError: (e) =>
+                        alert(e?.response?.data?.message || "Delete failed"),
+                    })
+                  }
+                />
               )}
             </>
           )}

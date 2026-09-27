@@ -19,7 +19,11 @@ export default function ViewProjectPage({
   return (
     <div className="min-h-screen bg-black text-white">
 
-      <ViewProjectHeader onEditClick={() => setIsEditOpen(true)} />
+      <ViewProjectHeader
+        onEditClick={() => setIsEditOpen(true)}
+        projectId={project.project_id}
+        projectTitle={project.title}
+      />
 
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 md:px-8 py-6 md:py-8">
 

@@ -6,6 +6,11 @@ import {
   FileText,
 } from "lucide-react";
 
+function openDocument(url) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 export default function ProjectDocuments({
   project,
 }) {
@@ -33,10 +38,12 @@ export default function ProjectDocuments({
 
           <button
             key={document.title}
+            type="button"
             disabled={!document.url}
+            onClick={() => openDocument(document.url)}
             className={`group flex w-full flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border px-4 sm:px-6 py-4 sm:py-5 transition-all duration-300 gap-4 sm:gap-0 ${
               document.url
-                ? "border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white"
+                ? "border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white cursor-pointer"
                 : "cursor-not-allowed border-[#2A2A2A] bg-[#1F1F1F] text-gray-500"
             }`}
           >

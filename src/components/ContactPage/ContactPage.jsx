@@ -13,6 +13,8 @@ import {
   Clock, 
   ChevronDown 
 } from "lucide-react";
+import { submitContactForm } from "@/services/platformService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 
 export default function ContactPage() {
   const router = useRouter();
@@ -23,6 +25,8 @@ export default function ContactPage() {
     subject: "",
     message: ""
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -31,16 +35,31 @@ export default function ContactPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Message sent! We'll get back to you as soon as possible.");
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      subject: "",
-      message: ""
-    });
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await submitContactForm({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      });
+      alert("Message sent! We'll get back to you as soon as possible.");
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (err) {
+      setSubmitError(getApiErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const contactMethods = [
@@ -267,8 +286,13 @@ export default function ContactPage() {
               />
             </div>
 
+            {submitError && (
+              <p className="text-red-400 text-sm">{submitError}</p>
+            )}
+
             <button 
-              type="submit" 
+              type="submit"
+              disabled={submitting} 
               className="mt-2 w-full flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-red-700 via-red-600 to-red-500 px-8 py-3.5 text-xs sm:text-sm font-bold text-white transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(220,38,38,0.45)] uppercase tracking-wider active:scale-[0.99]"
             >
               <MessageCircle size={16} />

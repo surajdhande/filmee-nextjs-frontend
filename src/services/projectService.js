@@ -1,88 +1,74 @@
-import axios from "axios";
+import { apiClient } from "@/lib/apiClient";
+import { getStoredAuthToken } from "@/lib/apiConfig";
 
-const API_BASE_URL = "http://127.0.0.1:5000/api/v1/projects/";
+const projectsBase = "/projects";
+
 export const getProjects = async () => {
-  const response = await axios.get(API_BASE_URL);
+  const response = await apiClient.get(`${projectsBase}/`);
 
   return response.data.projects;
 };
-export const createProject = async (projectData) => {
-  const token = localStorage.getItem("token");
 
-  const response = await axios.post(
-    API_BASE_URL,
-    projectData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export const createProject = async (projectData) => {
+  const response = await apiClient.post(`${projectsBase}/`, projectData);
 
   return response.data;
 };
-export const getMyProjects = async () => {
-  const token = localStorage.getItem("token");
 
-  const response = await axios.get(
-    `${API_BASE_URL}myprojects`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export const getMyProjects = async () => {
+  const token = getStoredAuthToken();
+  if (!token) {
+    throw new Error("Authorization token missing");
+  }
+
+  const response = await apiClient.get(`${projectsBase}/myprojects`);
 
   return response.data.projects;
 };
 
 export const getProjectById = async (projectId) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.get(
-    `${API_BASE_URL}${projectId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await apiClient.get(`${projectsBase}/${projectId}`);
 
   return response.data.project;
 };
 
 /**
  * Fetch full project detail for an investor (no filmmaker restriction).
- * Uses the new /api/v1/projects/<id>/detail endpoint.
- * @param {number|string} projectId
  */
 export const getProjectDetail = async (projectId) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.get(
-    `${API_BASE_URL}${projectId}/detail`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await apiClient.get(`${projectsBase}/${projectId}/detail`);
 
   return response.data.project;
 };
 
 export const updateProject = async (projectId, projectData) => {
-  const token = localStorage.getItem("token");
-
-  const response = await axios.put(
-    `${API_BASE_URL}${projectId}`,
-    projectData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await apiClient.put(`${projectsBase}/${projectId}`, projectData);
 
   return response.data;
-};
+};
+
+/**
+ * Record a project page view (once per browser session per project on the client).
+ */
+export const recordProjectView = async (projectId) => {
+  const response = await apiClient.post(`${projectsBase}/${projectId}/view`);
+  return response.data;
+};
+
+export async function uploadProjectPitchDeck(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiClient.post(`${projectsBase}/upload/pitch-deck`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}
+
+export async function uploadProjectLookbook(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiClient.post(`${projectsBase}/upload/lookbook`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}

@@ -4,7 +4,9 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Crown, Zap } from "lucide-react";
 
-const SubscriptionCard = () => {
+const SubscriptionCard = ({
+  subscriptionPath = "/dashboard/talent/subscription",
+}) => {
   const router = useRouter();
   return (
     <section className="rounded-[24px] border border-[#2A2A2A] bg-[#141414] p-6">
@@ -27,7 +29,7 @@ const SubscriptionCard = () => {
             </p>
 
             <button
-              onClick={() => router.push("/dashboard/talent/subscription")}
+              onClick={() => router.push(subscriptionPath)}
               className="mt-4 sm:mt-6 w-full sm:w-auto text-center rounded-full border border-red-600 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600/10"
             >
               Manage Subscription

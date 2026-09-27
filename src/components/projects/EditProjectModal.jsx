@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
-import { updateProject } from "@/services/projectService";
+import {
+  updateProject,
+  uploadProjectPitchDeck,
+  uploadProjectLookbook,
+} from "@/services/projectService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 
 const genres = [
   "Action",
@@ -22,14 +27,17 @@ const genres = [
 
 const statuses = [
   { value: "DEVELOPMENT", label: "Development" },
+  { value: "FUNDING", label: "Funding" },
   { value: "PRE_PRODUCTION", label: "Pre-Production" },
   { value: "PRODUCTION", label: "Production" },
   { value: "POST_PRODUCTION", label: "Post-Production" },
-  { value: "COMPLETED", label: "Completed" },
+  { value: "COMPLETED", label: "Completed / Released" },
 ];
 
 export default function EditProjectModal({ isOpen, onClose, project, onUpdated }) {
   const [loading, setLoading] = useState(false);
+  const [pitchDeckFile, setPitchDeckFile] = useState(null);
+  const [lookbookFile, setLookbookFile] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     genre: "Drama",
@@ -61,7 +69,10 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
         funding_goals_breakdown: project.funding_goals_breakdown || "",
         expected_roi_percentage: project.expected_roi_percentage || "",
         distribution_strategy: project.distribution_strategy || "",
-        project_status: project.project_status || "DEVELOPMENT",
+        project_status:
+          project.project_status === "RELEASED"
+            ? "COMPLETED"
+            : project.project_status || "DEVELOPMENT",
         pitch_deck_url: project.pitch_deck_url || "",
         lookbook_url: project.lookbook_url || "",
       });
@@ -80,12 +91,23 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
     setLoading(true);
 
     try {
-      await updateProject(project.project_id, formData);
+      const payload = { ...formData };
+      if (pitchDeckFile) {
+        const uploaded = await uploadProjectPitchDeck(pitchDeckFile);
+        payload.pitch_deck_url = uploaded.url;
+      }
+      if (lookbookFile) {
+        const uploaded = await uploadProjectLookbook(lookbookFile);
+        payload.lookbook_url = uploaded.url;
+      }
+      await updateProject(project.project_id, payload);
       alert("Project updated successfully!");
+      setPitchDeckFile(null);
+      setLookbookFile(null);
       if (onUpdated) onUpdated();
       onClose();
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to update project");
+      alert(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -268,6 +290,12 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
                   onChange={handleChange}
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-white outline-none focus:border-red-500"
                 />
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="mt-2 w-full text-xs text-zinc-400 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-800 file:px-4 file:py-2 file:text-zinc-200"
+                  onChange={(e) => setPitchDeckFile(e.target.files?.[0] || null)}
+                />
               </div>
             </div>
 
@@ -281,6 +309,12 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
                   value={formData.lookbook_url}
                   onChange={handleChange}
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-white outline-none focus:border-red-500"
+                />
+                <input
+                  type="file"
+                  accept=".pdf,image/*"
+                  className="mt-2 w-full text-xs text-zinc-400 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-800 file:px-4 file:py-2 file:text-zinc-200"
+                  onChange={(e) => setLookbookFile(e.target.files?.[0] || null)}
                 />
               </div>
 

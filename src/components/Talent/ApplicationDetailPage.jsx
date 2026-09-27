@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ApplicationDetailNavbar from "./ApplicationDetail/ApplicationDetailNavbar";
 import {
   Users,
@@ -13,6 +13,9 @@ import {
   MessageSquare,
   ArrowLeft,
 } from "lucide-react";
+import { getProjectDetails } from "@/services/talentService";
+import { getApplicationDetail } from "@/services/applicationService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 
 const TABS = ["Overview", "Financials", "Team", "Media", "Open Roles"];
 
@@ -20,32 +23,52 @@ function fmt(n) {
   return "$" + Number(n).toLocaleString();
 }
 
+function parseOpenRoles(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export default function ApplicationDetailPage({ id }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewAsProject = searchParams.get("view") === "project";
   const [activeTab, setActiveTab] = useState("Overview");
   const [project, setProject] = useState(null);
+  const [applicationStatus, setApplicationStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchProject() {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(
-          `http://127.0.0.1:5000/api/v1/projects/${id}/details`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error("Project not found");
-        const json = await res.json();
-        setProject(json.project);
+        if (viewAsProject) {
+          const data = await getProjectDetails(id);
+          setProject(data);
+          setApplicationStatus(data.user_application?.status || null);
+        } else {
+          const data = await getApplicationDetail(id);
+          setApplicationStatus(data.application_status);
+          setProject({
+            ...data,
+            project_status: data.project_status,
+          });
+        }
       } catch (e) {
-        setError(e.message);
+        setError(getApiErrorMessage(e) || "Project not found");
       } finally {
         setLoading(false);
       }
     }
     if (id) fetchProject();
-  }, [id]);
+  }, [id, viewAsProject]);
 
   if (loading) {
     return (
@@ -74,9 +97,7 @@ export default function ApplicationDetailPage({ id }) {
     ? `${project.filmmaker_first_name} ${project.filmmaker_last_name}`
     : "Filmmaker";
 
-  const openRoles = Array.isArray(project.open_talent_roles)
-    ? project.open_talent_roles
-    : [];
+  const openRoles = parseOpenRoles(project.open_talent_roles);
 
   const fundingTarget = Number(project.funding_target) || 0;
   const fundingRaised = Number(project.funding_raised) || 0;
@@ -120,6 +141,11 @@ export default function ApplicationDetailPage({ id }) {
               <span className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wide">
                 {project.project_status || "Active"}
               </span>
+              {applicationStatus && (
+                <span className="bg-zinc-800 text-zinc-200 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wide">
+                  Application: {applicationStatus}
+                </span>
+              )}
             </div>
 
             <p className="text-zinc-400 text-sm leading-relaxed">
@@ -323,14 +349,34 @@ export default function ApplicationDetailPage({ id }) {
             </div>
           )}
 
-          {/* ── Media placeholder ── */}
           {activeTab === "Media" && (
-            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-14 flex flex-col items-center justify-center text-center gap-3">
-              <span className="text-4xl">🎬</span>
-              <p className="text-zinc-400 text-sm font-semibold">Media — Coming Soon</p>
-              <p className="text-zinc-600 text-xs max-w-xs">
-                This section will be available once the project team provides additional information.
-              </p>
+            <div className="bg-[#141414] border border-zinc-800/70 rounded-2xl p-6 space-y-4">
+              <h3 className="text-sm font-black text-white">Project media</h3>
+              {project.lookbook_url ? (
+                <a
+                  href={project.lookbook_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 border border-zinc-800 hover:border-red-700/50 text-red-500 text-[10px] font-black px-4 py-3 rounded-xl uppercase tracking-widest"
+                >
+                  <Play size={12} className="fill-red-500" /> Open lookbook
+                </a>
+              ) : null}
+              {project.pitch_deck_url ? (
+                <a
+                  href={project.pitch_deck_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 border border-zinc-800 hover:border-red-700/50 text-red-500 text-[10px] font-black px-4 py-3 rounded-xl uppercase tracking-widest"
+                >
+                  <Download size={12} /> Open pitch deck
+                </a>
+              ) : null}
+              {!project.lookbook_url && !project.pitch_deck_url && (
+                <p className="text-zinc-500 text-sm text-center py-8">
+                  No lookbook or pitch deck uploaded for this project yet.
+                </p>
+              )}
             </div>
           )}
         </div>

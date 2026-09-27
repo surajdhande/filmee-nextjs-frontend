@@ -1,8 +1,6 @@
 
 "use client";
 
-import { useState } from "react";
-
 const statuses = [
   "All",
   "Pending",
@@ -11,8 +9,23 @@ const statuses = [
   "Declined",
 ];
 
-export default function ApplicationsFilters() {
-  const [activeStatus, setActiveStatus] = useState("All");
+const STATUS_TO_API = {
+  Pending: "PENDING",
+  Negotiating: "UNDER_REVIEW",
+  Agreed: "ACCEPTED",
+  Declined: "DECLINED",
+};
+
+export { statuses, STATUS_TO_API };
+
+export default function ApplicationsFilters({
+  activeStatus,
+  onStatusChange,
+  statusCounts,
+  projectOptions,
+  selectedProjectId,
+  onProjectChange,
+}) {
   return (
     <div className="rounded-3xl border border-[#2A2A2A] bg-[#171717] p-5">
 
@@ -26,18 +39,19 @@ export default function ApplicationsFilters() {
 
           <div className="flex rounded-full bg-[#202020] p-1">
 
-            {statuses.map((status, index) => (
+            {statuses.map((status) => (
 
               <button
             key={status}
-            onClick={() => setActiveStatus(status)}
+            type="button"
+            onClick={() => onStatusChange(status)}
             className={`flex-1 rounded-full px-5 py-3 text-sm font-semibold transition ${
                 activeStatus === status
                 ? "bg-[#111111] text-white"
                 : "text-white hover:bg-[#2A2A2A]"
             }`}
             >
-            {status} (0)
+            {status} ({statusCounts[status] ?? 0})
             </button>
 
             ))}
@@ -52,10 +66,17 @@ export default function ApplicationsFilters() {
             Filter by Project
           </p>
 
-          <select className="h-12 w-full rounded-2xl border border-[#303030] bg-[#1A1A1D] px-3.5 text-white outline-none">
-
-            <option>All Projects</option>
-
+          <select
+            className="h-12 w-full rounded-2xl border border-[#303030] bg-[#1A1A1D] px-3.5 text-white outline-none"
+            value={selectedProjectId}
+            onChange={(e) => onProjectChange(e.target.value)}
+          >
+            <option value="all">All Projects</option>
+            {projectOptions.map((p) => (
+              <option key={p.id} value={String(p.id)}>
+                {p.title}
+              </option>
+            ))}
           </select>
 
         </div>

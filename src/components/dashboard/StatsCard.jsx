@@ -29,19 +29,21 @@ const StatsCard = ({
       </div>
 
       {/* Bottom */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1">
-          <ArrowUpRight size={14} className="text-emerald-400" />
+      {trend ? (
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1">
+            <ArrowUpRight size={14} className="text-emerald-400" />
 
-          <span className="text-xs font-semibold text-emerald-400">
-            {trend}
+            <span className="text-xs font-semibold text-emerald-400">
+              {trend}
+            </span>
+          </div>
+
+          <span className="text-xs text-zinc-500">
+            {trendLabel}
           </span>
         </div>
-
-        <span className="text-xs text-zinc-500">
-          {trendLabel}
-        </span>
-      </div>
+      ) : null}
     </div>
   );
 };

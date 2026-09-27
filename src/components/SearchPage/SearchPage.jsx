@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { searchProjects } from "@/services/platformService";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -17,6 +18,24 @@ import Navbar from "@/components/Navbar";
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setResults([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      setSearching(true);
+      searchProjects(q)
+        .then((data) => setResults(data.results || []))
+        .catch(() => setResults([]))
+        .finally(() => setSearching(false));
+    }, 350);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const handlePillClick = (query) => {
     setSearchQuery(query);
@@ -84,6 +103,35 @@ export default function SearchPage() {
             className="w-full bg-[#0d0d0e]/80 border border-zinc-800 rounded-full py-4 pl-14 pr-6 text-white placeholder-zinc-500 focus:outline-none focus:border-red-600/80 transition-colors shadow-[0_4px_30px_rgba(0,0,0,0.5)] text-[15px]"
           />
         </div>
+
+        {(searching || results.length > 0) && searchQuery.trim().length >= 2 && (
+          <div className="max-w-4xl mb-12 space-y-3">
+            <h2 className="text-lg font-bold text-white">
+              {searching ? "Searching…" : `Projects (${results.length})`}
+            </h2>
+            {results.map((p) => (
+              <button
+                key={p.project_id}
+                type="button"
+                onClick={() =>
+                  router.push(`/dashboard/investor/film/${p.project_id}`)
+                }
+                className="w-full text-left rounded-xl border border-zinc-800 bg-[#0b0c10]/60 px-5 py-4 hover:border-red-600/40 transition"
+              >
+                <p className="font-bold text-white">{p.title}</p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  {p.genre || "—"} ·{" "}
+                  {[p.filmmaker_first_name, p.filmmaker_last_name]
+                    .filter(Boolean)
+                    .join(" ") || "Filmmaker"}
+                </p>
+              </button>
+            ))}
+            {!searching && results.length === 0 && (
+              <p className="text-zinc-500 text-sm">No projects found.</p>
+            )}
+          </div>
+        )}
 
         {/* 4 Cards Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5 max-w-4xl mb-16">

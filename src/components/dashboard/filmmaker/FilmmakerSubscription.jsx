@@ -343,6 +343,20 @@ export default function FilmmakerSubscription() {
               </ul>
               
               <button
+                type="button"
+                disabled={plan.isCurrent}
+                onClick={() => {
+                  if (plan.isCurrent) return;
+                  if (plan.name === "Enterprise") {
+                    window.location.href =
+                      "mailto:sales@filmee.com?subject=Filmee%20Enterprise%20Plan";
+                    return;
+                  }
+                  window.location.href =
+                    "mailto:hello@filmee.com?subject=Filmee%20Plan%20Waitlist&body=Please%20add%20me%20to%20the%20waitlist%20for%20the%20" +
+                    encodeURIComponent(plan.name) +
+                    "%20plan.";
+                }}
                 className={`mt-auto w-full rounded-full py-2.5 text-sm font-bold uppercase tracking-widest transition-all ${
                   plan.isCurrent
                     ? "bg-red-600 text-white hover:bg-red-700"
@@ -351,7 +365,7 @@ export default function FilmmakerSubscription() {
                     : "border border-[#2A2A2A] text-white hover:bg-[#1E1E1E]"
                 }`}
               >
-                {plan.isCurrent ? "Current Plan" : plan.name === "Enterprise" ? "Contact Sales" : "Choose Plan"}
+                {plan.isCurrent ? "Current Plan" : plan.name === "Enterprise" ? "Contact Sales" : "Join Waitlist"}
               </button>
             </div>
           ))}

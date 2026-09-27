@@ -11,6 +11,8 @@ import {
   Award,
   X
 } from "lucide-react";
+import { getMyProfile, updateMyProfile } from "@/services/profileService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 
 export default function FilmmakerProfilePage() {
   const router = useRouter();
@@ -74,20 +76,9 @@ export default function FilmmakerProfilePage() {
 
   async function loadProfile() {
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        "http://localhost:5000/api/v1/profile/me",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-      setProfile(data.profile);
-      setFormData(data.profile);
+      const data = await getMyProfile();
+      setProfile(data);
+      setFormData(data);
     } catch (error) {
       console.log(error);
     }
@@ -101,41 +92,22 @@ export default function FilmmakerProfilePage() {
   };
   const handleSave = async () => {
   try {
-    const token = localStorage.getItem("token");
-
     const names = (formData.full_name || "").trim().split(/\s+/);
 
     const first_name = names[0] || "";
     const last_name = names.slice(1).join(" ") || "";
 
-    const response = await fetch(
-      "http://localhost:5000/api/v1/profile/me",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          first_name,
-          last_name,
-          phone_number: formData.phone_number,
-          bio: formData.bio,
-          location: formData.location,
-          website_portfolio_url: formData.website_portfolio_url,
-          years_of_experience: formData.years_of_experience,
-          skills: formData.skills || [],
-          achievements: formData.achievements || [],
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.message || "Failed to update profile");
-      return;
-    }
+    await updateMyProfile({
+      first_name,
+      last_name,
+      phone_number: formData.phone_number,
+      bio: formData.bio,
+      location: formData.location,
+      website_portfolio_url: formData.website_portfolio_url,
+      years_of_experience: formData.years_of_experience,
+      skills: formData.skills || [],
+      achievements: formData.achievements || [],
+    });
 
     await loadProfile();
 
@@ -145,7 +117,7 @@ export default function FilmmakerProfilePage() {
 
   } catch (error) {
     console.error(error);
-    alert("Something went wrong.");
+    alert(getApiErrorMessage(error));
   }
 };
 

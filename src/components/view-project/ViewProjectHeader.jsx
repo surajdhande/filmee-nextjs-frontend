@@ -3,10 +3,18 @@
 import { ArrowLeft, SquarePen, Share2 } from "lucide-react";
 import AnimatedOutlineButton from "@/components/ui/AnimatedOutlineButton";
 import AnimatedPrimaryButton from "@/components/ui/AnimatedPrimaryButton";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { shareProject } from "@/lib/shareProject";
 
-export default function ViewProjectHeader() {
+export default function ViewProjectHeader({
+  onEditClick,
+  showEdit = true,
+  projectId,
+  projectTitle,
+}) {
   const router = useRouter();
+  const [shareNotice, setShareNotice] = useState("");
 
   return (
     <header className="border-b border-[#2A2A2A] bg-[#111111]">
@@ -35,21 +43,41 @@ export default function ViewProjectHeader() {
 
           {/* Share */}
 
+          {shareNotice ? (
+            <span className="text-xs text-emerald-400 mr-2">{shareNotice}</span>
+          ) : null}
           <AnimatedOutlineButton
             icon={<Share2 size={18} />}
             className="flex-1 sm:flex-none justify-center"
+            onClick={async () => {
+              if (!projectId) return;
+              try {
+                const result = await shareProject({
+                  title: projectTitle,
+                  projectId,
+                  role: "filmmaker",
+                });
+                setShareNotice(result === "copied" ? "Link copied" : "Shared");
+                setTimeout(() => setShareNotice(""), 2500);
+              } catch {
+                setShareNotice("Could not share");
+              }
+            }}
           >
             Share
           </AnimatedOutlineButton>
 
           {/* Edit */}
 
-          <AnimatedPrimaryButton
-            icon={<SquarePen size={18} />}
-            className="flex-1 sm:flex-none justify-center"
-          >
-            Edit Project
-          </AnimatedPrimaryButton>
+          {showEdit && (
+            <AnimatedPrimaryButton
+              icon={<SquarePen size={18} />}
+              className="flex-1 sm:flex-none justify-center"
+              onClick={onEditClick}
+            >
+              Edit Project
+            </AnimatedPrimaryButton>
+          )}
 
         </div>
 

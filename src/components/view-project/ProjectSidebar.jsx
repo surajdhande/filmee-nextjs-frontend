@@ -1,9 +1,11 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 import AnimatedOutlineButton from "@/components/ui/AnimatedOutlineButton";
 import AnimatedCard from "@/components/ui/AnimatedCard";
 
 export default function ProjectSidebar({ project }) {
+  const router = useRouter();
   const progress =
     project.funding_target > 0
       ? (project.funding_raised / project.funding_target) * 100
@@ -101,6 +103,18 @@ export default function ProjectSidebar({ project }) {
 
         </div>
 
+        <div className="rounded-2xl bg-[#1F1F1F] p-4 col-span-2">
+
+          <p className="text-xs uppercase text-gray-400">
+            Views
+          </p>
+
+          <p className="mt-2 text-xl font-bold text-white">
+            {Number(project.view_count ?? 0).toLocaleString()}
+          </p>
+
+        </div>
+
       </div>
 
       {/* <button className="mt-8 w-full rounded-full bg-gradient-to-r from-[#E50914] to-[#FF2E2E] py-3 font-semibold text-white transition hover:brightness-110">
@@ -112,6 +126,11 @@ export default function ProjectSidebar({ project }) {
     <AnimatedOutlineButton
         className="w-full py-3"
         icon={<Eye size={18} />}
+        onClick={() =>
+          router.push(
+            `/dashboard/filmmaker/analytics?projectId=${project.project_id}`
+          )
+        }
     >
         <span className="font-semibold uppercase tracking-wide">
         View Analytics

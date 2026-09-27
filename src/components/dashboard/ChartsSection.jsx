@@ -12,23 +12,18 @@ import {
   Bar,
 } from "recharts";
 
-const weeklyViewsData = [
-  { day: "Mon", views: 220 },
-  { day: "Tue", views: 280 },
-  { day: "Wed", views: 360 },
-  { day: "Thu", views: 310 },
-  { day: "Fri", views: 460 },
-  { day: "Sat", views: 520 },
-  { day: "Sun", views: 430 },
+const defaultWeekly = [
+  { day: "Mon", views: 0 },
+  { day: "Tue", views: 0 },
+  { day: "Wed", views: 0 },
+  { day: "Thu", views: 0 },
+  { day: "Fri", views: 0 },
+  { day: "Sat", views: 0 },
+  { day: "Sun", views: 0 },
 ];
 
-const investmentData = [
-  { month: "Jan", amount: 15 },
-  { month: "Feb", amount: 28 },
-  { month: "Mar", amount: 40 },
-  { month: "Apr", amount: 33 },
-  { month: "May", amount: 48 },
-  { month: "Jun", amount: 58 },
+const defaultFunding = [
+  { month: "—", amount: 0 },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -45,11 +40,16 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const ChartsSection = () => {
+const ChartsSection = ({ weeklyViews, monthlyFunding, loading }) => {
+  const weeklyViewsData =
+    weeklyViews && weeklyViews.length > 0 ? weeklyViews : defaultWeekly;
+  const investmentData =
+    monthlyFunding && monthlyFunding.length > 0
+      ? monthlyFunding
+      : defaultFunding;
+
   return (
     <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-
-      {/* Weekly Views */}
 
       <div className="rounded-3xl border border-[#262626] bg-[#171717] p-6">
 
@@ -63,7 +63,7 @@ const ChartsSection = () => {
           </p>
         </div>
 
-        <div className="h-[280px]">
+        <div className={`h-[280px] ${loading ? "opacity-50" : ""}`}>
 
           <ResponsiveContainer width="100%" height="100%">
 
@@ -130,8 +130,6 @@ const ChartsSection = () => {
 
       </div>
 
-      {/* Investment Flow */}
-
       <div className="rounded-3xl border border-[#262626] bg-[#171717] p-6">
 
         <div className="mb-6">
@@ -140,11 +138,11 @@ const ChartsSection = () => {
           </h3>
 
           <p className="mt-1 text-sm text-zinc-500">
-            Last 6 months
+            Last 6 months (accepted)
           </p>
         </div>
 
-        <div className="h-[280px]">
+        <div className={`h-[280px] ${loading ? "opacity-50" : ""}`}>
 
           <ResponsiveContainer width="100%" height="100%">
 

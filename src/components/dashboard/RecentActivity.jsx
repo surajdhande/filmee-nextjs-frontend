@@ -1,38 +1,10 @@
 import React from "react";
 
+const RecentActivity = ({ activities, loading }) => {
+  const list = activities || [];
 
-const activities = [
-  {
-    title: "New investment of $41,380 received",
-    time: "4:55:21 PM",
-  },
-  {
-    title: "New talent application received",
-    time: "4:55:20 PM",
-  },
-  {
-    title: "Project reached milestone: 1000+ views this hour",
-    time: "4:55:19 PM",
-  },
-  {
-    title: "Sarah Chen invested $25,000 in The Last Frame",
-    time: "2 hours ago",
-  },
-  {
-    title: "New cinematographer application for Urban Shadows",
-    time: "4 hours ago",
-  },
-  {
-    title: "Message from investor Michael Rodriguez",
-    time: "1 day ago",
-  },
-];
-
-const RecentActivity = () => {
   return (
     <section className="mt-10 rounded-3xl border border-[#2A2A2A] bg-[#171717] p-7">
-
-      {/* Header */}
 
       <div className="mb-8 flex items-center gap-3">
 
@@ -40,15 +12,23 @@ const RecentActivity = () => {
           Recent Activity
         </h2>
 
-
-
       </div>
 
-      {/* Activity List */}
+      {loading && list.length === 0 ? (
+        <div className="space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-[#1E1E1E]" />
+          ))}
+        </div>
+      ) : null}
+
+      {!loading && list.length === 0 ? (
+        <p className="text-zinc-500">No recent activity yet.</p>
+      ) : null}
 
       <div className="space-y-8">
 
-        {activities.map((activity, index) => (
+        {list.map((activity, index) => (
           <div key={index} className="flex gap-5">
 
             <div className="mt-2 h-3 w-3 rounded-full bg-red-600" />

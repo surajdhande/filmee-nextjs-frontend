@@ -1,22 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  getFilmmakerInvestments,
+  updateInvestmentStatus,
+} from "@/services/investmentService";
+import { getApiErrorMessage } from "@/lib/apiClient";
 
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
-import ApplicationsFilters from "./ApplicationsFilters";
+import ApplicationsFilters, { statuses, STATUS_TO_API } from "./ApplicationsFilters";
 import EmptyApplications from "./EmptyApplications";
+import FilmmakerTalentApplications from "./FilmmakerTalentApplications";
+
+function normalizeStatus(status) {
+  return (status || "PENDING").toUpperCase();
+}
 
 export default function ApplicationsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "talent" ? "talent" : "investors";
+  const [applicationTab, setApplicationTab] = useState(initialTab);
 
   const [user, setUser] = useState(null);
-  const [applications, setApplications] = useState([]);
+  const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeStatus, setActiveStatus] = useState("All");
+  const [selectedProjectId, setSelectedProjectId] = useState("all");
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  const loadInvestments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getFilmmakerInvestments();
+      setInvestments(data.investments || []);
+    } catch (err) {
+      console.error("Error fetching investments:", err);
+      setError(getApiErrorMessage(err));
+      setInvestments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") === "talent" ? "talent" : "investors";
+    setApplicationTab(tab);
+  }, [searchParams]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -28,34 +63,65 @@ export default function ApplicationsPage() {
     }
 
     setUser(JSON.parse(storedUser));
-    
-    // Fetch applications
-    fetchApplications(token);
-  }, [router]);
+    if (applicationTab === "investors") {
+      loadInvestments();
+    }
+  }, [router, loadInvestments, applicationTab]);
 
-  async function fetchApplications(token) {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        "http://127.0.0.1:5000/api/v1/application/filmmaker/applications",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const switchTab = (tab) => {
+    setApplicationTab(tab);
+    const query = tab === "talent" ? "?tab=talent" : "";
+    router.replace(`/dashboard/filmmaker/applications${query}`, { scroll: false });
+  };
 
-      if (response.data.success) {
-        // Use investor applications specifically
-        setApplications(response.data.investor_applications || []);
-      } else {
-        setError("Failed to load applications");
+  const projectOptions = useMemo(() => {
+    const map = new Map();
+    investments.forEach((inv) => {
+      if (!map.has(inv.project_id)) {
+        map.set(inv.project_id, inv.project_title);
       }
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [investments]);
+
+  const statusCounts = useMemo(() => {
+    const counts = {
+      All: investments.length,
+      Pending: 0,
+      Negotiating: 0,
+      Agreed: 0,
+      Declined: 0,
+    };
+    investments.forEach((inv) => {
+      const s = normalizeStatus(inv.investment_status);
+      if (s === "PENDING") counts.Pending += 1;
+      else if (s === "UNDER_REVIEW") counts.Negotiating += 1;
+      else if (s === "ACCEPTED") counts.Agreed += 1;
+      else if (s === "DECLINED") counts.Declined += 1;
+    });
+    return counts;
+  }, [investments]);
+
+  const filtered = useMemo(() => {
+    return investments.filter((inv) => {
+      if (selectedProjectId !== "all" && String(inv.project_id) !== selectedProjectId) {
+        return false;
+      }
+      if (activeStatus === "All") return true;
+      const apiStatus = STATUS_TO_API[activeStatus];
+      return normalizeStatus(inv.investment_status) === apiStatus;
+    });
+  }, [investments, activeStatus, selectedProjectId]);
+
+  async function handleStatusUpdate(investmentId, status) {
+    try {
+      setActionLoadingId(investmentId);
+      await updateInvestmentStatus(investmentId, status);
+      await loadInvestments();
     } catch (err) {
-      console.error("Error fetching applications:", err);
-      setError(err.response?.data?.message || "Failed to load applications");
+      alert(getApiErrorMessage(err));
     } finally {
-      setLoading(false);
+      setActionLoadingId(null);
     }
   }
 
@@ -85,22 +151,60 @@ export default function ApplicationsPage() {
           <div>
 
             <h1 className="text-[28px] font-bold text-white">
-              Investor Applications
+              Applications
             </h1>
 
             <p className="mt-2 text-gray-400">
-              Review offers, negotiate terms, and reach agreements
+              Review investor offers and talent role applications
             </p>
 
           </div>
 
-          <div className="rounded-full border border-[#E50914] px-4 py-1 text-sm font-semibold text-[#E50914]">
-            {applications.length} total
-          </div>
+          {applicationTab === "investors" && (
+            <div className="rounded-full border border-[#E50914] px-4 py-1 text-sm font-semibold text-[#E50914]">
+              {investments.length} total
+            </div>
+          )}
 
         </div>
 
-        <ApplicationsFilters />
+        <div className="mb-8 flex gap-2 rounded-full border border-[#2A2A2A] bg-[#141414] p-1 w-fit">
+          <button
+            type="button"
+            onClick={() => switchTab("investors")}
+            className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider ${
+              applicationTab === "investors"
+                ? "bg-[#E50914] text-white"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Investors
+          </button>
+          <button
+            type="button"
+            onClick={() => switchTab("talent")}
+            className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider ${
+              applicationTab === "talent"
+                ? "bg-[#E50914] text-white"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Talent
+          </button>
+        </div>
+
+        {applicationTab === "talent" ? (
+          <FilmmakerTalentApplications />
+        ) : (
+          <>
+        <ApplicationsFilters
+          activeStatus={activeStatus}
+          onStatusChange={setActiveStatus}
+          statusCounts={statusCounts}
+          projectOptions={projectOptions}
+          selectedProjectId={selectedProjectId}
+          onProjectChange={setSelectedProjectId}
+        />
 
         <div className="mt-8">
           {loading && (
@@ -115,70 +219,80 @@ export default function ApplicationsPage() {
             </div>
           )}
 
-          {!loading && !error && applications.length === 0 && <EmptyApplications />}
+          {!loading && !error && filtered.length === 0 && <EmptyApplications />}
 
-          {!loading && !error && applications.length > 0 && (
+          {!loading && !error && filtered.length > 0 && (
             <div className="space-y-4">
-              {applications.map((app) => (
+              {filtered.map((inv) => {
+                const status = normalizeStatus(inv.investment_status);
+                return (
                 <div
-                  key={app.application_id}
+                  key={inv.investment_id}
                   className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-white mb-1">
-                        {app.first_name} {app.last_name}
+                        {inv.first_name} {inv.last_name}
                       </h3>
-                      <p className="text-sm text-gray-400 mb-2">{app.email}</p>
+                      <p className="text-sm text-gray-400 mb-2">{inv.email}</p>
                       <p className="text-sm text-gray-400 mb-2">
-                        Project: <span className="text-white font-semibold">{app.project_title}</span>
+                        Project: <span className="text-white font-semibold">{inv.project_title}</span>
                       </p>
-                      {app.proposed_funding_amount && (
+                      {inv.investment_amount != null && (
                         <p className="text-lg font-bold text-[#E50914] mb-2">
-                          Investment: ${Number(app.proposed_funding_amount).toLocaleString()}
-                        </p>
-                      )}
-                      {app.cover_letter_notes && (
-                        <p className="text-sm text-gray-400 mt-3 leading-relaxed">
-                          {app.cover_letter_notes}
+                          Investment: ${Number(inv.investment_amount).toLocaleString()}
                         </p>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                          app.status === "PENDING"
+                          status === "PENDING"
                             ? "bg-yellow-500/10 text-yellow-500"
-                            : app.status === "ACCEPTED"
+                            : status === "ACCEPTED"
                             ? "bg-green-500/10 text-green-500"
-                            : app.status === "DECLINED"
+                            : status === "DECLINED"
                             ? "bg-red-500/10 text-red-500"
                             : "bg-blue-500/10 text-blue-500"
                         }`}
                       >
-                        {app.status}
+                        {status}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {new Date(app.created_at).toLocaleDateString()}
+                        {new Date(inv.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                   
-                  {app.status === "PENDING" && (
+                  {status === "PENDING" && (
                     <div className="flex gap-3 mt-4 pt-4 border-t border-[#2A2A2A]">
-                      <button className="flex-1 bg-[#E50914] text-white font-bold py-2 rounded-lg hover:bg-[#B3070F] transition">
+                      <button
+                        type="button"
+                        disabled={actionLoadingId === inv.investment_id}
+                        onClick={() => handleStatusUpdate(inv.investment_id, "ACCEPTED")}
+                        className="flex-1 bg-[#E50914] text-white font-bold py-2 rounded-lg hover:bg-[#B3070F] transition disabled:opacity-50"
+                      >
                         Accept
                       </button>
-                      <button className="flex-1 border border-gray-600 text-gray-300 font-bold py-2 rounded-lg hover:bg-gray-800 transition">
+                      <button
+                        type="button"
+                        disabled={actionLoadingId === inv.investment_id}
+                        onClick={() => handleStatusUpdate(inv.investment_id, "DECLINED")}
+                        className="flex-1 border border-gray-600 text-gray-300 font-bold py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                      >
                         Decline
                       </button>
                     </div>
                   )}
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>
+          </>
+        )}
 
       </div>
     </DashboardLayout>

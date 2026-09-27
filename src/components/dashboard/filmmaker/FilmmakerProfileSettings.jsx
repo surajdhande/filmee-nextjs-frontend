@@ -20,6 +20,10 @@ import {
   updateMyProfile,
   uploadProfileImage,
 } from "@/services/investorService";
+import {
+  downloadProfileData,
+  requestAccountDeletion,
+} from "@/lib/profileDataActions";
 
 /* ─────────────────────────────────────────
    MOCK DATA FOR FILMMAKER
@@ -509,7 +513,7 @@ function SettingsTab({ notifications, onChange }) {
 /* ─────────────────────────────────────────
    TAB: PRIVACY
    ───────────────────────────────────────── */
-function PrivacyTab({ privacy, onChange }) {
+function PrivacyTab({ privacy, onChange, onDownloadData, onDeleteAccount }) {
   const items = [
     {
       key: "profile_visibility",
@@ -556,17 +560,15 @@ function PrivacyTab({ privacy, onChange }) {
         <p className="text-sm font-semibold text-white mb-4">Data Management</p>
         <div className="flex gap-3">
           <button
-            onClick={() => {
-              console.log("Download data requested");
-            }}
+            type="button"
+            onClick={() => onDownloadData?.()}
             className="rounded-full border border-[#E50914] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#E50914] hover:bg-[#E50914]/10 transition-all duration-200 cursor-pointer"
           >
             Download My Data
           </button>
           <button
-            onClick={() => {
-              console.log("Delete account requested");
-            }}
+            type="button"
+            onClick={() => onDeleteAccount?.()}
             className="rounded-full border border-[#E50914] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#E50914] hover:bg-[#E50914]/10 transition-all duration-200 cursor-pointer"
           >
             Delete Account
@@ -655,19 +657,9 @@ export default function FilmmakerProfileSettings() {
           bio:
             prof.bio ||
             "Award-winning filmmaker specializing in independent cinema and documentary storytelling.",
-          skills:
-            prof.skills && prof.skills.length > 0
-              ? prof.skills
-              : ["Directing", "Screenwriting", "Film Production"],
+          skills: prof.skills || [],
           avatar: prof.profile_image_url || null,
-          achievements:
-            prof.achievements && prof.achievements.length > 0
-              ? prof.achievements
-              : [
-                  "Sundance Film Festival Winner 2023",
-                  "Best Director - Independent Film Awards",
-                  "Over $10M in successful film projects",
-                ],
+          achievements: prof.achievements || [],
         });
       } else {
         setProfile(MOCK_PROFILE);
@@ -978,7 +970,24 @@ export default function FilmmakerProfileSettings() {
                 />
               )}
               {activeTab === "Privacy" && (
-                <PrivacyTab privacy={privacy} onChange={handlePrivacyChange} />
+                <PrivacyTab
+                  privacy={privacy}
+                  onChange={handlePrivacyChange}
+                  onDownloadData={async () => {
+                    try {
+                      await downloadProfileData();
+                    } catch (e) {
+                      alert(e?.response?.data?.message || "Export failed");
+                    }
+                  }}
+                  onDeleteAccount={() =>
+                    requestAccountDeletion({
+                      onSuccess: () => router.push("/login"),
+                      onError: (e) =>
+                        alert(e?.response?.data?.message || "Delete failed"),
+                    })
+                  }
+                />
               )}
             </>
           )}

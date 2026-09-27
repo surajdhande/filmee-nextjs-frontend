@@ -5,6 +5,7 @@ import { Search, Loader2, FolderOpen } from "lucide-react";
 import InvestorLayout from "./InvestorLayout";
 import BrowseProjectCard from "./BrowseProjectCard";
 import { getProjects } from "@/services/projectService";
+import { getMyInvestments } from "@/services/investorService";
 
 export default function BrowseProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -22,28 +23,14 @@ export default function BrowseProjectsPage() {
         const projectData = await getProjects();
         setProjects(projectData || []);
         
-        // Fetch user's investments
-        const token = localStorage.getItem("token");
-        if (token) {
-          try {
-            const response = await fetch(
-              "http://127.0.0.1:5000/api/v1/investments/my-investments",
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-            if (response.ok) {
-              const data = await response.json();
-              const investedProjectIds = (data.projects || []).map(
-                (inv) => inv.project_id
-              );
-              setUserInvestments(investedProjectIds);
-            }
-          } catch (err) {
-            console.error("Failed to load user investments:", err);
-          }
+        try {
+          const investments = await getMyInvestments();
+          const investedProjectIds = (investments || []).map(
+            (inv) => inv.project_id
+          );
+          setUserInvestments(investedProjectIds);
+        } catch (err) {
+          console.error("Failed to load user investments:", err);
         }
       } catch (err) {
         console.error("Failed to load projects:", err);

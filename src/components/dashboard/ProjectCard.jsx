@@ -14,8 +14,10 @@ const ProjectCard = ({
   investors,
   applications,
   views,
+  onView,
+  onEdit,
 }) => {
-  const progress = (raised / target) * 100;
+  const progress = target > 0 ? (raised / target) * 100 : 0;
 
   return (
     <div className="overflow-hidden rounded-3xl border border-[#2A2A2A] bg-[#171717] transition-all duration-300 hover:border-red-600/40">
@@ -120,7 +122,11 @@ const ProjectCard = ({
 
         <div className="grid grid-cols-2 gap-4">
 
-          <button className="flex items-center justify-center gap-2 rounded-full border border-red-600 py-3 font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600 hover:text-white">
+          <button
+            type="button"
+            onClick={onView}
+            className="flex items-center justify-center gap-2 rounded-full border border-red-600 py-3 font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600 hover:text-white"
+          >
 
             <Eye size={18} />
 
@@ -128,7 +134,11 @@ const ProjectCard = ({
 
           </button>
 
-          <button className="flex items-center justify-center gap-2 rounded-full border border-red-600 py-3 font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600 hover:text-white">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="flex items-center justify-center gap-2 rounded-full border border-red-600 py-3 font-semibold uppercase tracking-wide text-red-500 transition hover:bg-red-600 hover:text-white"
+          >
 
             <SquarePen size={18} />
 
