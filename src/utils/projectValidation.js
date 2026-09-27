@@ -56,6 +56,10 @@ export function validateStepTwo(projectData) {
     errors.primary_location = "Primary location is required.";
   }
 
+  if (!projectData.target_audience?.trim()) {
+    errors.target_audience = "Target audience is required.";
+  }
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors,

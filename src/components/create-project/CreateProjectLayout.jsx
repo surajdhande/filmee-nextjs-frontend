@@ -14,6 +14,7 @@ import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
 import NavigationButtons from "./NavigationButtons";
+import Toast from "@/components/ui/Toast";
 
 import {
   validateStepOne,
@@ -29,7 +30,39 @@ export default function CreateProjectLayout({
   setProjectData,
 }) {
   const [errors, setErrors] = useState({});
+  const [toast, setToast] = useState(null);
   const router = useRouter();
+
+  const logCreateProjectFields = (payload, raw) => {
+    const fieldEntries = {
+      title: payload.title,
+      genre: payload.genre,
+      funding_target: payload.funding_target,
+      logline: payload.logline,
+      synopsis: payload.synopsis,
+      production_timeline: payload.production_timeline,
+      primary_location: payload.primary_location,
+      target_audience: payload.target_audience,
+      funding_goals_breakdown: payload.funding_goals_breakdown,
+      expected_roi_percentage: payload.expected_roi_percentage,
+      distribution_strategy: payload.distribution_strategy,
+      open_talent_roles: payload.open_talent_roles,
+      pitch_deck_url: payload.pitch_deck_url,
+      lookbook_url: payload.lookbook_url,
+    };
+    console.group("[CreateProject] form submit");
+    Object.entries(fieldEntries).forEach(([key, value]) => {
+      const isEmpty =
+        value === undefined ||
+        value === null ||
+        (typeof value === "string" && !value.trim()) ||
+        (Array.isArray(value) && value.length === 0);
+      console.log(`${key}:`, value, isEmpty ? "← EMPTY (required)" : "");
+    });
+    console.log("full API payload:", payload);
+    console.log("raw projectData state:", raw);
+    console.groupEnd();
+  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -103,8 +136,12 @@ export default function CreateProjectLayout({
 
     if (!result.isValid) {
       setErrors(result.errors);
-      const errorMsg = Object.values(result.errors).join("\n• ");
-      alert(`Please fill in all required fields:\n• ${errorMsg}`);
+      const errorMsg = Object.values(result.errors).join(" • ");
+      console.warn("[CreateProject] step validation failed:", result.errors);
+      setToast({
+        message: `Please fill in all required fields: ${errorMsg}`,
+        type: "error",
+      });
       return;
     }
 
@@ -150,14 +187,23 @@ export default function CreateProjectLayout({
     if (pitch_deck_url) payload.pitch_deck_url = pitch_deck_url;
     if (lookbook_url) payload.lookbook_url = lookbook_url;
 
+    logCreateProjectFields(payload, projectData);
+
     await createProject(payload);
 
-    alert("Project created successfully!");
-
-    router.push("/dashboard/filmmaker/projects");
+    setToast({ message: "Project created successfully!", type: "success" });
+    setTimeout(() => {
+      router.push("/dashboard/filmmaker/projects");
+    }, 800);
 
   } catch (error) {
-    alert(getApiErrorMessage(error));
+    console.error("[CreateProject] API error:", error?.response?.data || error);
+    const apiData = error?.response?.data;
+    const detail =
+      apiData?.missing_fields?.length
+        ? `Missing: ${apiData.missing_fields.join(", ")}`
+        : getApiErrorMessage(error);
+    setToast({ message: detail, type: "error" });
   }}
   };
 
@@ -171,6 +217,13 @@ export default function CreateProjectLayout({
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <CreateProjectHeader currentStep={currentStep} />
 
       <main className="mx-auto max-w-[980px] px-6 py-6">

@@ -6,6 +6,7 @@ import DatePicker from "@/components/ui/DatePicker";
 export default function StepTwo({
   projectData,
   setProjectData,
+  errors = {},
 }) {
 
   const calculateTimeline = (selectedDate) => {
@@ -115,8 +116,10 @@ export default function StepTwo({
 
         <FormInput
           label="Target Audience"
+          required
           placeholder="Young Adults, Family, Global Audience"
           value={projectData.target_audience}
+          error={errors.target_audience}
           onChange={(e) =>
             setProjectData({
               ...projectData,

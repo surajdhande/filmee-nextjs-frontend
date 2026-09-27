@@ -8,6 +8,7 @@ import {
   uploadProjectLookbook,
 } from "@/services/projectService";
 import { getApiErrorMessage } from "@/lib/apiClient";
+import Toast from "@/components/ui/Toast";
 
 const genres = [
   "Action",
@@ -36,6 +37,7 @@ const statuses = [
 
 export default function EditProjectModal({ isOpen, onClose, project, onUpdated }) {
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const [pitchDeckFile, setPitchDeckFile] = useState(null);
   const [lookbookFile, setLookbookFile] = useState(null);
   const [formData, setFormData] = useState({
@@ -100,14 +102,25 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
         const uploaded = await uploadProjectLookbook(lookbookFile);
         payload.lookbook_url = uploaded.url;
       }
+      console.group("[EditProject] form submit");
+      Object.entries(payload).forEach(([key, value]) => {
+        const isEmpty =
+          value === undefined ||
+          value === null ||
+          (typeof value === "string" && !value.trim());
+        console.log(`${key}:`, value, isEmpty ? "← EMPTY" : "");
+      });
+      console.groupEnd();
+
       await updateProject(project.project_id, payload);
-      alert("Project updated successfully!");
+      setToast({ message: "Project updated successfully!", type: "success" });
       setPitchDeckFile(null);
       setLookbookFile(null);
       if (onUpdated) onUpdated();
-      onClose();
+      setTimeout(() => onClose(), 600);
     } catch (error) {
-      alert(getApiErrorMessage(error));
+      console.error("[EditProject] API error:", error?.response?.data || error);
+      setToast({ message: getApiErrorMessage(error), type: "error" });
     } finally {
       setLoading(false);
     }
@@ -115,6 +128,13 @@ export default function EditProjectModal({ isOpen, onClose, project, onUpdated }
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-8 shadow-2xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between border-b border-zinc-800 pb-4">

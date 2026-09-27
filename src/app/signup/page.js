@@ -5,13 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signupUser } from "@/services/authService";
-import {
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Clapperboard,
-} from "lucide-react";
+import Toast from "@/components/ui/Toast";
 
 const SignupPageInner = () => {
 const router = useRouter();
@@ -31,6 +25,7 @@ user_role: "",
 });
 
 const [loading, setLoading] = useState(false);
+const [toast, setToast] = useState(null);
 useEffect(() => {
   if (!selectedRole) return;
 
@@ -60,7 +55,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (formData.password !== formData.confirm_password) {
-    alert("Passwords do not match");
+    setToast({ message: "Passwords do not match", type: "error" });
     return;
   }
 
@@ -78,21 +73,26 @@ const handleSubmit = async (e) => {
 
     const response = await signupUser(payload);
 
-    alert(response.message);
+    setToast({
+      message: response.message || "Account created successfully",
+      type: "success",
+    });
 
-    if (formData.user_role === "TALENT") {
-      router.push("/talent/dashboard");
-    } else {
-      router.push("/login");
-    }
+    setTimeout(() => {
+      if (formData.user_role === "TALENT") {
+        router.push("/talent/dashboard");
+      } else {
+        router.push("/login");
+      }
+    }, 1000);
 
   } catch (error) {
     console.error(error);
 
-    alert(
-      error.response?.data?.message ||
-      "Signup failed"
-    );
+    setToast({
+      message: error.response?.data?.message || "Signup failed",
+      type: "error",
+    });
   } finally {
     setLoading(false);
   }
@@ -109,6 +109,14 @@ return ( <div
 >
   {/* Dark Overlay */}
   <div className="absolute inset-0 bg-black/80" />
+
+  {toast && (
+    <Toast
+      message={toast.message}
+      type={toast.type}
+      onClose={() => setToast(null)}
+    />
+  )}
 
   <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-zinc-950/85 p-6 sm:p-10 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
 
